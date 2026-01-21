@@ -1,0 +1,15 @@
+    .operations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 20px 0;
+    }
+
+    .operations-grid button {
+      height: 80px;
+      font-size: 1.1rem;
+    }
+
+    .operations-grid mat-icon {
+      margin-left: 8px;
+    }

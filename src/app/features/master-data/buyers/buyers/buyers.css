@@ -1,0 +1,12 @@
+  .actions-bar {
+      margin-bottom: 20px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .debt-chip {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }

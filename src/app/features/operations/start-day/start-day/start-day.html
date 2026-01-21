@@ -1,0 +1,61 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>بدء واستكمال يوم جديد</mat-card-title>
+      <mat-card-subtitle>ابدأ عمليات اليوم وحدد المركبة</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>جاري التحميل...</p>
+      </div>
+      } @else {
+      <form [formGroup]="startDayForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>تاريخ العملية</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="operation_date" [max]="maxDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (startDayForm.get('operation_date')?.invalid && startDayForm.get('operation_date')?.touched) {
+            <mat-error>التاريخ مطلوب</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المركبة</mat-label>
+            <mat-select formControlName="vehicle_id">
+              <!-- @for (vehicle of vehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                {{ vehicle.name }} - {{ vehicle.plate_number }}
+              </mat-option>
+              } -->
+              <mat-option *ngFor="let vehicle of vehicles()" [value]="vehicle.id">
+                {{ vehicle.name }} - {{ vehicle.plate_number }}
+              </mat-option>
+            </mat-select>
+            @if (startDayForm.get('vehicle_id')?.invalid && startDayForm.get('vehicle_id')?.touched) {
+            <mat-error>المركبة مطلوبة</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="startDayForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            بدء و استكمال اليوم
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+              إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

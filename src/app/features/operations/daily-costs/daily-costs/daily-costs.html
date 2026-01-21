@@ -1,0 +1,49 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تسجيل تكاليف يومية</mat-card-title>
+      <mat-card-subtitle>إضافة مصروفات العمليات اليومية</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="costForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>فئة التكلفة</mat-label>
+            <mat-select formControlName="cost_category_id">
+              <mat-option *ngFor="let cat of categories()" [value]="cat.id">
+                {{ cat.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error>الفئة مطلوبة</mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المبلغ (جنيه)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="amount">
+            <mat-error>المبلغ مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>الوصف</mat-label>
+          <textarea matInput formControlName="description" rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="costForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            تسجيل التكلفة
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

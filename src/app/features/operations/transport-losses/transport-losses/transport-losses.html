@@ -1,0 +1,67 @@
+    <div class="container">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>تسجيل خسائر النقل</mat-card-title>
+          <mat-card-subtitle>تسجيل الدواجن النافقة أثناء النقل</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (loading()) {
+            <div class="loading-spinner">
+              <mat-spinner></mat-spinner>
+            </div>
+          } @else {
+            <form [formGroup]="lossForm" (ngSubmit)="onSubmit()">
+              <div class="form-row">
+                <mat-form-field class="form-field" appearance="outline">
+                  <mat-label>نوع الفراخ</mat-label>
+                  <mat-select formControlName="chicken_type_id">
+                    @for (type of chickenTypes(); track type.id) {
+                      <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-error>نوع الفراخ مطلوب</mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="form-field" appearance="outline">
+                  <mat-label>وزن النافق (كجم)</mat-label>
+                  <input matInput type="number" step="0.01" formControlName="dead_weight">
+                  <mat-error>الوزن مطلوب</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field class="form-field" appearance="outline">
+                  <mat-label>السعر للكيلو (جنيه)</mat-label>
+                  <input matInput type="number" step="0.01" formControlName="price_per_kg">
+                  <mat-error>السعر مطلوب</mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="form-field" appearance="outline">
+                  <mat-label>الموقع</mat-label>
+                  <input matInput formControlName="location">
+                </mat-form-field>
+              </div>
+
+              <div class="calculated-value">
+                <strong>قيمة الخسارة: {{ lossAmount() | number:'1.2-2' }} جنيه</strong>
+              </div>
+
+              <div class="button-group">
+                <button mat-raised-button color="warn" type="submit"
+                        [disabled]="lossForm.invalid || submitting()">
+                  @if (submitting()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    تسجيل الخسارة
+                  }
+                </button>
+                <button mat-button type="button" (click)="cancel()">
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>

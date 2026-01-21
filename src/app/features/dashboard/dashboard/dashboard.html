@@ -1,0 +1,124 @@
+<div class="dashboard-container">
+  <h1 class="page-title">لوحة التحكم</h1>
+
+  <div class="welcome-card">
+    <mat-card>
+      <mat-card-content>
+        <h2>مرحباً، {{ authService.currentUser()?.full_name }}</h2>
+        <p>{{ currentDate() | date:'EEEE، d MMMM yyyy':'':'ar' }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-grid-list cols="3" rowHeight="200px" gutterSize="20">
+    <!-- Start Day -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon start-icon">play_circle</mat-icon>
+          <mat-card-title>بدء واستكمال يوم جديد</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>ابدأ عمليات اليوم وسجل المعاملات</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" routerLink="/operations/start-day">
+            بدء و استكمال اليوم
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <!-- Farms -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon farm-icon">agriculture</mat-icon>
+          <mat-card-title>المزارع</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>إدارة بيانات المزارع والموردين</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/master-data/farms">
+            عرض المزارع
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <!-- Buyers -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon buyer-icon">shopping_cart</mat-icon>
+          <mat-card-title>المشترين</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>إدارة بيانات العملاء والمشترين</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/master-data/buyers">
+            عرض المشترين
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    @if (authService.isAdmin()) {
+    <!-- Reports -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon report-icon">assessment</mat-icon>
+          <mat-card-title>التقارير</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>عرض التقارير المالية والإحصائية</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/reports/daily">
+            التقارير
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <!-- Partners -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon partner-icon">people</mat-icon>
+          <mat-card-title>الشركاء</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>إدارة الشركاء وحصصهم</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/master-data/partners">
+            عرض الشركاء
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <!-- Vehicles -->
+    <mat-grid-tile>
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-icon class="card-icon vehicle-icon">local_shipping</mat-icon>
+          <mat-card-title>المركبات</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>إدارة أسطول المركبات</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/master-data/vehicles">
+            عرض المركبات
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+    }
+  </mat-grid-list>
+</div>

@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>
+  {{ data ? 'تعديل نوع دواجن' : 'إضافة نوع دواجن' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>اسم النوع</mat-label>
+      <input matInput formControlName="name" />
+      <mat-error *ngIf="form.get('name')?.invalid">اسم النوع مطلوب</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>الوصف</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>إلغاء</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="form.invalid"
+    (click)="onSave()"
+  >
+    حفظ
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,148 @@
+  <div class="container">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>تحميل من المزرعة</mat-card-title>
+          <mat-card-subtitle>تسجيل عملية تحميل الدواجن</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (loading()) {
+            <div class="loading-spinner">
+              <mat-spinner></mat-spinner>
+            </div>
+          } @else {
+            <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
+              <!-- Farm & Chicken Type Selection -->
+              <div class="form-section">
+                <h3>بيانات المزرعة</h3>
+                <div class="form-row">
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>المزرعة</mat-label>
+                    <mat-select formControlName="farm_id">
+                      @for (farm of farms(); track farm.id) {
+                        <mat-option [value]="farm.id">
+                          {{ farm.name }}
+                          @if (farm.total_debt > 0) {
+                            <span class="debt-indicator">(دين: {{ farm.total_debt }} ج)</span>
+                          }
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-error>المزرعة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>نوع الفراخ</mat-label>
+                    <mat-select formControlName="chicken_type_id">
+                      @for (type of chickenTypes(); track type.id) {
+                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-error>نوع الفراخ مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Weighing Section -->
+              <div class="form-section">
+                <h3>الوزن</h3>
+                <div class="form-row">
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>وزن العربية فاضية (كجم)</mat-label>
+                    <input matInput
+                           type="number"
+                           step="0.01"
+                           formControlName="empty_vehicle_weight">
+                    <mat-error>الوزن مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>عدد الأقفاص</mat-label>
+                    <input matInput
+                           type="number"
+                           formControlName="cage_count">
+                    <mat-error>عدد الأقفاص مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>وزن القفص الواحد (كجم)</mat-label>
+                    <input matInput
+                           type="number"
+                           step="0.01"
+                           formControlName="cage_weight_per_unit">
+                    <mat-error>وزن القفص مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>وزن العربية مليانة (كجم)</mat-label>
+                    <input matInput
+                           type="number"
+                           step="0.01"
+                           formControlName="loaded_vehicle_weight">
+                    <mat-error>الوزن مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="calculated-value">
+                  <strong>صافي وزن الفراخ: {{ netWeight() | number:'1.2-2' }} كجم</strong>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Pricing Section -->
+              <div class="form-section">
+                <h3>التسعير</h3>
+                <div class="form-row">
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>سعر الكيلو (جنيه)</mat-label>
+                    <input matInput
+                           type="number"
+                           step="0.01"
+                           formControlName="price_per_kg">
+                    <mat-error>السعر مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+                    <input matInput
+                           type="number"
+                           step="0.01"
+                           formControlName="paid_amount">
+                    <mat-error>المبلغ المدفوع مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="calculated-value">
+                  <strong>إجمالي المبلغ: {{ totalAmount() | number:'1.2-2' }} جنيه</strong>
+                </div>
+
+                <div class="calculated-value">
+                  <strong>المتبقي: {{ remainingAmount() | number:'1.2-2' }} جنيه</strong>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="loadingForm.invalid || submitting()">
+                  @if (submitting()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    تسجيل التحميل
+                  }
+                </button>
+                <button mat-button type="button" (click)="cancel()">
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>

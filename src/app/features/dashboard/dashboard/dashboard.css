@@ -1,0 +1,92 @@
+   .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      margin-bottom: 24px;
+      color: #333;
+    }
+
+    .welcome-card {
+      margin-bottom: 32px;
+    }
+
+    .welcome-card mat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .welcome-card h2 {
+      margin: 0 0 8px 0;
+      font-size: 1.8rem;
+    }
+
+    .welcome-card p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    mat-grid-list {
+      margin-top: 20px;
+    }
+
+    .dashboard-card {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .dashboard-card mat-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+
+    .start-icon { color: #4caf50; }
+    .farm-icon { color: #ff9800; }
+    .buyer-icon { color: #2196f3; }
+    .report-icon { color: #9c27b0; }
+    .partner-icon { color: #f44336; }
+    .vehicle-icon { color: #607d8b; }
+
+    mat-card-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    mat-card-content {
+      flex: 1;
+    }
+
+    mat-card-actions {
+      padding: 16px;
+      justify-content: flex-start;
+    }
+
+    @media (max-width: 1200px) {
+      mat-grid-list {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      mat-grid-list {
+        grid-template-columns: 1fr !important;
+      }
+    }

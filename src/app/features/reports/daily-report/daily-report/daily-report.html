@@ -1,0 +1,174 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>التقرير اليومي</mat-card-title>
+      <mat-card-subtitle>عرض تفاصيل العمليات اليومية</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="dateForm" (ngSubmit)="loadReport()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>اختر التاريخ</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">
+            عرض التقرير
+          </button>
+        </div>
+      </form>
+
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else if (report()) {
+      <div class="report-content">
+        <!-- Summary Section -->
+        <div class="summary-section">
+          <h3>الملخص المالي</h3>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <p class="label">إجمالي المشتريات</p>
+              <p class="value">{{ report()!.summary.total_purchases | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card">
+              <p class="label">إجمالي المبيعات</p>
+              <p class="value">{{ report()!.summary.total_sales | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card">
+              <p class="label">التكاليف</p>
+              <p class="value">{{ report()!.summary.total_costs | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card">
+              <p class="label">الخسائر</p>
+              <p class="value">{{ report()!.summary.total_losses | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card profit">
+              <p class="label">صافي الربح</p>
+              <p class="value">{{ report()!.summary.net_profit | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Farm Transactions -->
+        @if (report()!.farm_transactions && report()!.farm_transactions.length > 0) {
+        <div class="section">
+          <h3>معاملات المزارع</h3>
+          <table mat-table [dataSource]="report()!.farm_transactions" class="details-table">
+            <ng-container matColumnDef="farm">
+              <th mat-header-cell *matHeaderCellDef>المزرعة</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.Farm?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.net_chicken_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.total_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="farmColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: farmColumns"></tr>
+          </table>
+        </div>
+        }
+
+        <!-- Sale Transactions -->
+        @if (report()!.sales && report()!.sales.length > 0) {
+        <div class="section">
+          <h3>معاملات المبيعات</h3>
+          <table mat-table [dataSource]="report()!.sales" class="details-table">
+            <ng-container matColumnDef="buyer">
+              <th mat-header-cell *matHeaderCellDef>المشتري</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.Buyer?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.net_chicken_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.total_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="saleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: saleColumns"></tr>
+          </table>
+        </div>
+        }
+
+        <!-- Daily Costs -->
+        @if (report()!.costs && report()!.costs.length > 0) {
+        <div class="section">
+          <h3>التكاليف اليومية</h3>
+          <table mat-table [dataSource]="report()!.costs" class="details-table">
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>الفئة</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.CostCategory?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <ng-container matColumnDef="notes">
+              <th mat-header-cell *matHeaderCellDef>ملاحظات</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.notes || '-' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="costColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: costColumns"></tr>
+          </table>
+        </div>
+        }
+
+        <!-- Transport Losses -->
+        @if (report()!.losses && report()!.losses.length > 0) {
+        <div class="section">
+          <h3>خسائر النقل</h3>
+          <table mat-table [dataSource]="report()!.losses" class="details-table">
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن المفقود</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.dead_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>قيمة الخسارة</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.loss_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="lossColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: lossColumns"></tr>
+          </table>
+        </div>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

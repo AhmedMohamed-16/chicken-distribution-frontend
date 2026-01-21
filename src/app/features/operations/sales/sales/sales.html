@@ -1,0 +1,145 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>بيع للمشتري</mat-card-title>
+      <mat-card-subtitle>تسجيل عملية بيع الدواجن</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
+        <!-- Buyer & Chicken Type -->
+        <div class="form-section">
+          <h3>بيانات المشتري</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المشتري</mat-label>
+              <mat-select formControlName="buyer_id" (selectionChange)="onBuyerChange()">
+                @for (buyer of buyers(); track buyer.id) {
+                <mat-option [value]="buyer.id">
+                  {{ buyer.name }}
+                  @if (buyer.total_debt > 0) {
+                  <span class="debt-indicator">(دين: {{ buyer.total_debt }} ج)</span>
+                  }
+                </mat-option>
+                }
+              </mat-select>
+              <mat-error>المشتري مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>نوع الفراخ</mat-label>
+              <mat-select formControlName="chicken_type_id">
+                @for (type of chickenTypes(); track type.id) {
+                <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>نوع الفراخ مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          @if (selectedBuyerDebt() > 0) {
+          <div class="debt-warning">
+            <strong>⚠️ المشتري لديه دين سابق: {{ selectedBuyerDebt() | number:'1.2-2' }} جنيه</strong>
+          </div>
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Weighing -->
+        <div class="form-section">
+          <h3>الوزن</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن الأقفاص فاضية (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="empty_cages_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>عدد الأقفاص</mat-label>
+              <input matInput type="number" formControlName="cage_count">
+              <mat-error>العدد مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن الأقفاص مليانة (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="loaded_cages_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+
+          </div>
+
+          <div class="calculated-value">
+            <strong>صافي وزن الفراخ: {{ netSaleWeight() | number:'1.2-2' }} كجم</strong>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Pricing & Payment -->
+        <div class="form-section">
+          <h3>التسعير والدفع</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>سعر البيع للكيلو (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+              <mat-error>السعر مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="paid_amount">
+              <mat-error>المبلغ مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          @if (selectedBuyerDebt() > 0) {
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>دفع من الديون القديمة (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="old_debt_paid" [max]="selectedBuyerDebt()">
+              <mat-hint>الحد الأقصى: {{ selectedBuyerDebt() | number:'1.2-2' }} جنيه</mat-hint>
+            </mat-form-field>
+          </div>
+          }
+
+          <div class="calculated-value">
+            <strong>إجمالي البيع: {{ totalSaleAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+
+          <div class="calculated-value">
+            <strong>المتبقي من البيع: {{ remainingSaleAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+
+          @if (selectedBuyerDebt() > 0) {
+          <div class="calculated-value">
+            <strong>إجمالي الدين الجديد: {{ newTotalDebt() | number:'1.2-2' }} جنيه</strong>
+          </div>
+          }
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="saleForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            تسجيل البيع
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

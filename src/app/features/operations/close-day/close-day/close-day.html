@@ -1,0 +1,120 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>إغلاق اليوم وحساب الأرباح</mat-card-title>
+      <mat-card-subtitle>إنهاء العمليات اليومية وتوزيع الأرباح</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      @if (status() === 'CLOSED') {
+      <div class="profit-summary">
+        <h3>ملخص اليوم المالي</h3>
+
+        <div class="summary-grid">
+          <div class="summary-item revenue">
+            <mat-icon>trending_up</mat-icon>
+            <div>
+              <p class="label">إجمالي الإيرادات</p>
+              <p class="value">{{ profitData()!.total_revenue | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+
+          <div class="summary-item expense">
+            <mat-icon>trending_down</mat-icon>
+            <div>
+              <p class="label">إجمالي المشتريات</p>
+              <p class="value">{{ profitData()!.total_purchases | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+
+          <div class="summary-item loss">
+            <mat-icon>warning</mat-icon>
+            <div>
+              <p class="label">الخسائر</p>
+              <p class="value">{{ profitData()!.total_losses | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+
+          <div class="summary-item cost">
+            <mat-icon>receipt</mat-icon>
+            <div>
+              <p class="label">التكاليف</p>
+              <p class="value">{{ profitData()!.total_costs | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="net-profit">
+          <h2>صافي الربح: {{ profitData()!.net_profit | number:'1.2-2' }} جنيه</h2>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <h3>توزيع الأرباح على الشركاء</h3>
+
+        <table mat-table [dataSource]="profitData()!.partner_profits || []">
+          <ng-container matColumnDef="partner">
+            <th mat-header-cell *matHeaderCellDef>الشريك</th>
+            <td mat-cell *matCellDef="let profit">
+              {{ profit.partner?.name }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="base_share">
+            <th mat-header-cell *matHeaderCellDef>الحصة الأساسية</th>
+            <td mat-cell *matCellDef="let profit">
+              {{ profit.base_profit_share | number:'1.2-2' }} ج
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="vehicle_cost">
+            <th mat-header-cell *matHeaderCellDef>تكلفة المركبة</th>
+            <td mat-cell *matCellDef="let profit">
+              {{ profit.vehicle_cost_share | number:'1.2-2' }} ج
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="final_profit">
+            <th mat-header-cell *matHeaderCellDef>الربح النهائي</th>
+            <td mat-cell *matCellDef="let profit" class="final-profit">
+              <strong>{{ profit.final_profit | number:'1.2-2' }} ج</strong>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <div class="button-group">
+        <button mat-raised-button color="primary" (click)="goToDashboard()">
+          العودة للرئيسية
+        </button>
+      </div>
+      } @else {
+      <div class="warning-box">
+        <mat-icon>info</mat-icon>
+        <p>لم يتم إغلاق اليوم بعد. اضغط على الزر أدناه لإغلاق اليوم وحساب الأرباح.</p>
+      </div>
+
+      <div class="button-group">
+        <button mat-raised-button color="warn" (click)="closeDay()">
+          <mat-icon>lock</mat-icon>
+          إغلاق اليوم وحساب الأرباح
+        </button>
+        <button mat-button (click)="cancel()">
+          إلغاء
+        </button>
+      </div>
+      }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

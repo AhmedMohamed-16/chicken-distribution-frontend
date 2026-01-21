@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>{{ data ? 'تعديل مزرعة' : 'إضافة مزرعة' }}</h2>
+    <mat-dialog-content>
+      <form [formGroup]="form">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>اسم المزرعة</mat-label>
+          <input matInput formControlName="name">
+          <mat-error>اسم المزرعة مطلوب</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>اسم المالك</mat-label>
+          <input matInput formControlName="owner_name">
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>رقم الهاتف</mat-label>
+          <input matInput formControlName="phone">
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>الموقع</mat-label>
+          <textarea matInput formControlName="location" rows="3"></textarea>
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>إلغاء</button>
+      <button mat-raised-button color="primary"
+              [disabled]="form.invalid"
+              (click)="onSave()">
+        حفظ
+      </button>
+    </mat-dialog-actions>

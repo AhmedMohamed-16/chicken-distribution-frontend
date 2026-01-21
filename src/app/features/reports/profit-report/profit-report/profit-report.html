@@ -1,0 +1,132 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تقرير الأرباح</mat-card-title>
+      <mat-card-subtitle>عرض توزيع الأرباح على الشركاء</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="dateForm" (ngSubmit)="loadReport()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>من تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerFrom" formControlName="from">
+            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>إلى تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerTo" formControlName="to">
+            <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="dateForm.invalid">
+            عرض التقرير
+          </button>
+        </div>
+      </form>
+
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else if (report()) {
+      <div class="report-content">
+        <!-- Summary Section -->
+        <div class="summary-section">
+          <h3>ملخص الأرباح</h3>
+          <div class="summary-grid">
+            <div class="summary-card profit">
+              <p class="label">إجمالي صافي الربح</p>
+              <p class="value">{{ report()!.totals.net_profit | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card">
+              <p class="label">الفترة</p>
+              <p class="value">
+                {{ report()!.period.from }} - {{ report()!.period.to }}
+              </p>
+            </div>
+            <div class="summary-card">
+              <p class="label">عدد الشركاء</p>
+              <p class="value">{{ report()!.partner_totals.length || 0 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Partner Profits Table -->
+        <!-- Partner Profits Table -->
+        @if (report()!.partner_totals && report()!.partner_totals.length > 0) {
+        <div class="section">
+          <h3>توزيع الأرباح على الشركاء</h3>
+
+          <table mat-table [dataSource]="report()!.partner_totals" class="details-table">
+
+            <!-- Partner Name -->
+            <ng-container matColumnDef="partner_name">
+              <th mat-header-cell *matHeaderCellDef>اسم الشريك</th>
+              <td mat-cell *matCellDef="let p">
+                {{ p.partner_name }}
+              </td>
+            </ng-container>
+
+            <!-- Base Share -->
+            <ng-container matColumnDef="base_share">
+              <th mat-header-cell *matHeaderCellDef>الربح الأساسي</th>
+              <td mat-cell *matCellDef="let p" class="profit-amount">
+                {{ p.total_base_share | number:'1.2-2' }} ج
+              </td>
+            </ng-container>
+
+            <!-- Vehicle Cost Deduction -->
+            <ng-container matColumnDef="vehicle_cost">
+              <th mat-header-cell *matHeaderCellDef>خصم المركبة</th>
+              <td mat-cell *matCellDef="let p" class="profit-amount">
+                {{ p.total_vehicle_cost_share | number:'1.2-2' }} ج
+              </td>
+            </ng-container>
+
+            <!-- Final Profit -->
+            <ng-container matColumnDef="final_profit">
+              <th mat-header-cell *matHeaderCellDef>صافي الربح</th>
+              <td mat-cell *matCellDef="let p" class="profit-amount">
+                {{ p.total_final_profit | number:'1.2-2' }} ج
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="partnerColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: partnerColumns"></tr>
+
+          </table>
+        </div>
+        }
+
+
+        <!-- Daily Profits Table -->
+        @if (report()!.daily_distributions && report()!.daily_distributions.length > 0) {
+        <div class="section">
+          <h3>الأرباح اليومية</h3>
+          <table mat-table [dataSource]="report()!.daily_distributions" class="details-table">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+              <td mat-cell *matCellDef="let daily">{{ daily.daily_operation.operation_date }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="net_profit">
+              <th mat-header-cell *matHeaderCellDef>صافي الربح</th>
+              <td mat-cell *matCellDef="let daily" class="profit-amount" [class.negative]="daily.total_final_profit < 0">
+                {{ daily.net_profit | number:'1.2-2' }} ج
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="dailyColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: dailyColumns"></tr>
+          </table>
+        </div>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

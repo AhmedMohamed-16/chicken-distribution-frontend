@@ -1,0 +1,15 @@
+.actions-bar {
+      margin-bottom: 20px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .success-icon {
+      color: #4caf50;
+    }
+
+    .error-icon {
+      color: #f44336;
+    }

@@ -5,7 +5,12 @@
   "projects": {
     "Checkins-Distribution": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+         "@schematics/angular:component": {
+          "style": "css",
+          "standalone": true
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -26,7 +31,11 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+                        "outputPath": "dist/chicken-distribution",
+            "index": "src/index.html",
+            "scripts": []
+
           },
           "configurations": {
             "production": {
@@ -88,5 +97,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
