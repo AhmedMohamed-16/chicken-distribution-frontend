@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>
+<!-- <h2 mat-dialog-title>
   {{ data ? 'تعديل فئة تكلفة' : 'إضافة فئة تكلفة' }}
 </h2>
 
@@ -30,5 +30,54 @@
     (click)="onSave()"
   >
     حفظ
+  </button>
+</mat-dialog-actions> -->
+<!-- form-dialog.html -->
+<h2 mat-dialog-title>
+  {{ isEditMode ? 'تعديل فئة تكلفة' : 'إضافة فئة تكلفة جديدة' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>اسم الفئة *</mat-label>
+      <input matInput formControlName="name" placeholder="مثال: وقود، صيانة، رسوم" />
+      @if (form.get('name')?.hasError('required')) {
+        <mat-error>اسم الفئة مطلوب</mat-error>
+      }
+      @if (form.get('name')?.hasError('minlength')) {
+        <mat-error>يجب أن يكون الاسم حرفين على الأقل</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>الوصف</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="3"
+        placeholder="وصف اختياري لفئة التكلفة"></textarea>
+    </mat-form-field>
+
+    <div class="checkbox-container">
+      <mat-checkbox formControlName="is_vehicle_cost">
+        <span class="checkbox-label">
+          <strong>تكلفة خاصة بالمركبات</strong>
+          <small>سيتم توزيعها على شركاء المركبة فقط</small>
+        </span>
+      </mat-checkbox>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">إلغاء</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="form.invalid"
+    (click)="onSave()"
+  >
+    {{ isEditMode ? 'حفظ التعديلات' : 'إضافة' }}
   </button>
 </mat-dialog-actions>

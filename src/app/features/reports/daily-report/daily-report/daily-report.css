@@ -1,129 +1,2388 @@
+/* ========================================
+   📱 DAILY REPORT STYLES - MOBILE FIRST
+   ======================================== */
+
+/* ========================================
+   🎯 BASE STYLES (MOBILE DEFAULT)
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
 .container {
-  padding: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 40px;
-}
-
-.report-content {
-  margin-top: 24px;
-}
-
-.summary-section {
-  margin-bottom: 32px;
-}
-
-.summary-section h3 {
-  margin-bottom: 16px;
-  color: #333;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.summary-card {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.summary-card.profit {
-  background: #e8f5e9;
-}
-
-.summary-card .label {
-  margin: 0 0 8px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.summary-card .value {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.summary-card.profit .value {
-  color: #2e7d32;
-}
-
-.section {
-  margin-bottom: 32px;
-}
-
-.section h3 {
-  margin-bottom: 16px;
-  color: #1976d2;
-  font-size: 16px;
-  font-weight: 500;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #1976d2;
-}
-
-.details-table {
+  padding: 16px;
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+/* ========================================
+   📋 MAIN CARD
+   ======================================== */
+
+.main-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.details-table th {
-  background: #f5f5f5;
+.main-card mat-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  margin: -16px -16px 20px -16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.main-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
   font-weight: 600;
-  color: #333;
+  margin: 0;
+  flex-wrap: wrap;
 }
 
-.details-table td,
-.details-table th {
+.main-card mat-card-title mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.main-card mat-card-subtitle {
+  font-size: 13px;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* ========================================
+   📅 DATE FORM (MOBILE)
+   ======================================== */
+
+.date-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.date-form mat-form-field {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.date-form button {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  font-weight: 500;
+  font-size: 15px;
+  border-radius: 6px;
+}
+
+.export-menu-container {
+  position: relative;
+  width: 100%;
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.export-menu button {
+  width: 100%;
+  text-align: right;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  min-height: 48px;
+}
+
+.export-menu button:hover {
+  background-color: #f5f5f5;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ========================================
+   ⏳ LOADING STATE
+   ======================================== */
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  gap: 16px;
+}
+
+.loading-spinner p {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ========================================
+   ℹ️ OPERATION INFO CARD (MOBILE)
+   ======================================== */
+
+.info-card {
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 8px;
+}
+
+.operation-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.info-section h3 mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+}
+
+.info-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.values-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.info-item .value {
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.status-open {
+  background-color: #4caf50 !important;
+  color: white !important;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.status-closed {
+  background-color: #9e9e9e !important;
+  color: white !important;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+/* ========================================
+   🚚 VEHICLES DISPLAY (MOBILE)
+   ======================================== */
+
+.vehicles-display {
+  margin-top: 16px;
+}
+
+.vehicles-display h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px 0;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vehicles-display h4 mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.vehicles-display mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vehicles-display mat-chip {
+  background-color: white;
+  border: 2px solid #667eea;
+  font-size: 12px;
+  padding: 6px 10px;
+  min-height: 36px;
+}
+
+.partners-count {
+  background-color: #667eea;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-right: 6px;
+}
+
+/* ========================================
+   🔍 FILTER CARD (MOBILE)
+   ======================================== */
+
+.filter-card {
+  margin-bottom: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.vehicle-filter {
+  width: 100%;
+}
+
+.vehicle-filter mat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.vehicle-filter mat-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 16px;
+  min-height: 48px;
 }
 
-.details-table tr:hover {
-  background: #f9f9f9;
+/* ========================================
+   💰 FINANCIAL SUMMARY (MOBILE)
+   ======================================== */
+
+.summary-card {
+  margin-bottom: 16px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-    align-items: stretch;
+.summary-card mat-card-header {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 12px 16px;
+  margin: -16px -16px 16px -16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.summary-card mat-card-title {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-card mat-card-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-item:active {
+  transform: scale(0.98);
+}
+
+.summary-item mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-details .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-details .value {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.summary-details .percentage {
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Summary Item Colors */
+.summary-item.purchases {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.summary-item.purchases mat-icon {
+  color: #e65100;
+}
+
+.summary-item.sales {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.summary-item.sales mat-icon {
+  color: #00838f;
+}
+
+.summary-item.vehicle-costs {
+  background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+}
+
+.summary-item.vehicle-costs mat-icon {
+  color: #c62828;
+}
+
+.summary-item.other-costs {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.summary-item.other-costs mat-icon {
+  color: #bf360c;
+}
+
+.summary-item.losses {
+  background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+}
+
+.summary-item.losses mat-icon {
+  color: #d32f2f;
+}
+
+.summary-item.profit {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.summary-item.profit mat-icon {
+  color: #2e7d32;
+}
+
+.summary-item.profit.negative {
+  background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+}
+
+.summary-item.profit.negative mat-icon {
+  color: #d32f2f;
+}
+
+/* ========================================
+   📑 TABS CARD (MOBILE)
+   ======================================== */
+
+.tabs-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.tabs-card ::ng-deep .mat-mdc-tab-labels {
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.tabs-card ::ng-deep .mat-mdc-tab-label {
+  min-width: auto;
+  padding: 0 12px;
+  font-weight: 500;
+  font-size: 13px;
+  min-height: 48px;
+}
+
+::ng-deep .mat-mdc-tab mat-icon {
+  margin-left: 4px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.tab-badge {
+  background-color: #667eea;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.tab-content {
+  padding: 16px;
+  min-height: 300px;
+}
+
+/* ========================================
+   📦 TRANSACTION PANELS (MOBILE)
+   ======================================== */
+
+.transaction-panel {
+  margin-bottom: 12px;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.transaction-panel:active {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.panel-title-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.panel-title-content mat-icon {
+  color: #667eea;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.sequence {
+  background-color: #667eea;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.farm-name,
+.buyer-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+::ng-deep .mat-expansion-panel-header-description {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e7d32;
+  white-space: nowrap;
+}
+
+/* Payment Status Chips */
+.paid-full {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.paid-partial {
+  background-color: #ff9800 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.unpaid {
+  background-color: #f44336 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* ========================================
+   📋 TRANSACTION DETAILS (MOBILE)
+   ======================================== */
+
+.transaction-details {
+  padding: 16px;
+}
+
+.details-section {
+  margin-bottom: 20px;
+}
+
+.details-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.details-section h4 mat-icon {
+  color: #667eea;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Weighing Grid - Mobile Stack */
+.weighing-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weighing-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.weighing-item.highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.weighing-item.highlight .label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.weighing-item.highlight .value {
+  color: white;
+}
+
+.weighing-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.weighing-item .value {
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+/* Pricing Grid - Mobile Stack */
+.pricing-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pricing-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.pricing-item.highlight {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.pricing-item.highlight .label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pricing-item.highlight .value {
+  color: white;
+}
+
+.pricing-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.pricing-item .value {
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+/* Balance Display */
+.balance {
+  font-weight: 700;
+}
+
+.balance.receivable {
+  color: #2e7d32;
+}
+
+.balance.payable {
+  color: #d32f2f;
+}
+
+.balance.settled {
+  color: #666;
+}
+
+/* ========================================
+   💳 DEBT INFO (MOBILE)
+   ======================================== */
+
+.debt-info {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.debt-info mat-chip-set {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.debt-info mat-chip {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.breakdown-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background-color: white;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.breakdown-item.highlight {
+  background: linear-gradient(135deg, #667eea 0%, #dad7df 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.breakdown-item.deduction {
+  background-color: #ffebee;
+}
+
+.breakdown-item.final {
+  background-color: #e8f5e9;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.breakdown-item .label {
+  font-size: 12px;
+  color: #666;
+  flex: 1;
+}
+
+.breakdown-item .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: left;
+}
+
+.interpretation {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  border-right: 3px solid #2196f3;
+}
+
+.interpretation mat-icon {
+  color: #2196f3;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.interpretation p {
+  margin: 0;
+  font-size: 13px;
+  color: #1a1a1a;
+  line-height: 1.5;
+}
+
+.status-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.status-flags mat-chip {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* ========================================
+   💰 COSTS SECTION (MOBILE)
+   ======================================== */
+
+.category-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+
+.category-card mat-card-header {
+  background-color: #f8f9fa;
+  padding: 12px;
+  margin: -16px -16px 12px -16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.category-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 15px;
+}
+
+.category-card mat-card-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.category-card mat-card-subtitle {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.costs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cost-item {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border-right: 3px solid #667eea;
+}
+
+.cost-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.vehicle-chip {
+  background-color: #667eea !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.shared-chip {
+  background-color: #ffc107 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.cost-allocation {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.cost-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cost-description {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+
+.cost-description mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #666;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cost-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cost-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #d32f2f;
+}
+
+.cost-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.cost-time mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* ========================================
+   🚨 LOSS CARD (MOBILE)
+   ======================================== */
+
+.loss-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border-right: 4px solid #f44336;
+}
+
+.loss-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.loss-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.loss-title mat-icon {
+  color: #f44336;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.loss-title span {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.loss-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f44336;
+  align-self: flex-start;
+}
+
+.loss-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.detail-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-item .value {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.responsibility-section {
+  background-color: #fff3e0;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+.responsibility-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.farm-responsible {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.farm-responsible mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.balance-impact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+}
+
+.balance-impact mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #f44336;
+  align-self: flex-start;
+}
+
+.balance-impact p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.balance-impact mat-chip {
+  align-self: flex-start;
+  font-size: 12px;
+}
+
+.general-loss {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+.general-loss mat-icon {
+  color: #2196f3;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.general-loss p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ========================================
+   💸 PAYMENT CARD (MOBILE)
+   ======================================== */
+
+.payment-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.payment-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-title mat-icon {
+  color: #667eea;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.payment-title span {
+  word-break: break-word;
+}
+
+.from-farm {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.to-farm {
+  background-color: #2196f3 !important;
+  color: white !important;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.payment-details {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.amount-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.amount-display .label {
+  font-size: 12px;
+  color: #666;
+}
+
+.amount-display .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.explanation {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background-color: white;
+  border-radius: 6px;
+}
+
+.balance-info .label {
+  font-size: 12px;
+  color: #666;
+}
+
+.balance-info .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.payment-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  background-color: #fff3e0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.payment-notes mat-icon {
+  color: #ff9800;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.payment-notes p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ========================================
+   📊 PROFIT DISTRIBUTION (MOBILE)
+   ======================================== */
+
+.distribution-card {
+  border-radius: 8px;
+}
+
+.distribution-card mat-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  margin: -16px -16px 16px -16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.distribution-card mat-card-title {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.distribution-card mat-card-subtitle {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.totals-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.total-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-right: 3px solid #667eea;
+}
+
+.total-item mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.total-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.total-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.total-item .value {
+  font-size: 16px;
+  color: #1a1a1a;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.total-item.revenue {
+  border-right-color: #4caf50;
+}
+
+.total-item.revenue mat-icon {
+  color: #4caf50;
+}
+
+.total-item.purchases {
+  border-right-color: #ff9800;
+}
+
+.total-item.purchases mat-icon {
+  color: #ff9800;
+}
+
+.total-item.costs {
+  border-right-color: #f44336;
+}
+
+.total-item.costs mat-icon {
+  color: #f44336;
+}
+
+.total-item.losses {
+  border-right-color: #e91e63;
+}
+
+.total-item.losses mat-icon {
+  color: #e91e63;
+}
+
+.total-item.profit {
+  border-right-color: #00bcd4;
+}
+
+.total-item.profit mat-icon {
+  color: #00bcd4;
+}
+
+.partners-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partner-card {
+  border-radius: 6px;
+  border: 2px solid #667eea;
+}
+
+.partner-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.partner-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.partner-header mat-chip {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.profit-breakdown {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.profit-breakdown .breakdown-item {
+  margin-bottom: 8px;
+}
+
+.profit-breakdown .breakdown-item:last-child {
+  margin-bottom: 0;
+}
+
+.percentage {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+/* ========================================
+   🔄 TRANSACTION FOOTER (MOBILE)
+   ======================================== */
+
+.transaction-footer,
+.loss-footer,
+.payment-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.transaction-footer mat-icon,
+.loss-footer mat-icon,
+.payment-footer mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #666;
+}
+
+/* ========================================
+   📭 EMPTY STATE (MOBILE)
+   ======================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  gap: 12px;
+  text-align: center;
+}
+
+.empty-state mat-icon {
+  font-size: 60px;
+  width: 60px;
+  height: 60px;
+  color: #ccc;
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #999;
+  font-size: 13px;
+}
+
+.no-report-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 16px;
+  gap: 12px;
+  text-align: center;
+}
+
+.no-report-state mat-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: #ddd;
+}
+
+.no-report-state h3 {
+  margin: 0;
+  color: #666;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.no-report-state p {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ========================================
+   🎯 RTL SUPPORT (BASE)
+   ======================================== */
+
+[dir="rtl"] .panel-title-content {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .payment-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .loss-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] ::ng-deep .mat-mdc-tab mat-icon {
+  margin-right: 4px;
+  margin-left: 0;
+}
+
+[dir="rtl"] .tab-badge {
+  margin-left: 4px;
+  margin-right: 0;
+}
+
+[dir="rtl"] .partners-count {
+  margin-left: 6px;
+  margin-right: 0;
+}
+
+[dir="rtl"] .interpretation {
+  border-right: none;
+  border-left: 3px solid #2196f3;
+}
+
+[dir="rtl"] .cost-item {
+  border-right: none;
+  border-left: 3px solid #667eea;
+}
+
+[dir="rtl"] .loss-card {
+  border-right: none;
+  border-left: 4px solid #f44336;
+}
+
+[dir="rtl"] .total-item {
+  border-right: none;
+  border-left: 3px solid #667eea;
+}
+
+[dir="rtl"] .total-item.revenue {
+  border-left-color: #4caf50;
+}
+
+[dir="rtl"] .total-item.purchases {
+  border-left-color: #ff9800;
+}
+
+[dir="rtl"] .total-item.costs {
+  border-left-color: #f44336;
+}
+
+[dir="rtl"] .total-item.losses {
+  border-left-color: #e91e63;
+}
+
+[dir="rtl"] .total-item.profit {
+  border-left-color: #00bcd4;
+}
+
+/* ========================================
+   📱 TABLET (≥ 768px)
+   ======================================== */
+
+@media (min-width: 768px) {
+  .container {
+    padding: 20px;
   }
 
+  /* Date Form - Horizontal on Tablet */
+  .date-form {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .date-form mat-form-field {
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .form-actions {
+    flex-direction: row;
+    width: auto;
+    flex-wrap: wrap;
+  }
+
+  .date-form button,
+  .action-btn {
+    width: auto;
+    min-width: 140px;
+  }
+
+  .export-menu-container {
+    width: auto;
+  }
+
+  /* Main Card */
+  .main-card mat-card-title {
+    font-size: 22px;
+  }
+
+  .main-card mat-card-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Info Grid - 2 Columns */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Summary Grid - 2 Columns */
   .summary-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
 
-  .details-table {
+  .summary-details .value {
+    font-size: 19px;
+  }
+
+  /* Weighing & Pricing Grids - 2 Columns */
+  .weighing-grid,
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Breakdown Grid - 2 Columns */
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Loss Details - 3 Columns */
+  .loss-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  /* Loss Header - Horizontal */
+  .loss-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Payment Amount Display - Horizontal */
+  .amount-display {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Balance Impact - Horizontal */
+  .balance-impact {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .balance-impact p {
+    flex: 1;
+  }
+
+  /* Totals Grid - 2 Columns */
+  .totals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Partners Grid - 2 Columns */
+  .partners-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Tab Content */
+  .tab-content {
+    padding: 20px;
+  }
+
+  /* Tabs */
+  .tabs-card ::ng-deep .mat-mdc-tab-label {
+    min-width: 140px;
     font-size: 14px;
   }
 
-  .details-table td,
-  .details-table th {
+  .tab-badge {
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   💻 DESKTOP (≥ 1024px)
+   ======================================== */
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 24px;
+    max-width: 1400px;
+  }
+
+  /* Main Card */
+  .main-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+  }
+
+  .main-card mat-card-header {
+    padding: 20px 24px;
+    margin: -16px -16px 24px -16px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .main-card mat-card-title {
+    font-size: 24px;
+    gap: 12px;
+  }
+
+  .main-card mat-card-title mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .main-card mat-card-subtitle {
+    font-size: 14px;
+  }
+
+  /* Date Form */
+  .date-form button {
+    height: 56px;
+  }
+
+  /* Info Card */
+  .info-card {
+    margin-bottom: 24px;
+  }
+
+  .info-section h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .info-section h3 mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Info Grid - 3 Columns */
+  .info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .info-item {
+    padding: 12px;
+  }
+
+  .info-item .label {
+    font-size: 13px;
+  }
+
+  .info-item .value {
+    font-size: 16px;
+  }
+
+  /* Vehicles Display */
+  .vehicles-display {
+    margin-top: 24px;
+  }
+
+  .vehicles-display h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .vehicles-display mat-chip {
+    font-size: 13px;
+  }
+
+  /* Filter Card */
+  .filter-card {
+    margin-bottom: 24px;
+  }
+
+  .vehicle-filter {
+    max-width: 400px;
+  }
+
+  /* Summary Card */
+  .summary-card {
+    margin-bottom: 24px;
+  }
+
+  .summary-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 20px -16px;
+  }
+
+  .summary-card mat-card-title {
+    font-size: 18px;
+  }
+
+  /* Summary Grid - 3 Columns */
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .summary-item {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .summary-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .summary-item mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .summary-details .label {
+    font-size: 13px;
+  }
+
+  .summary-details .value {
+    font-size: 20px;
+  }
+
+  .summary-details .percentage {
+    font-size: 12px;
+  }
+
+  /* Tabs Card */
+  .tabs-card {
+    margin-bottom: 24px;
+  }
+
+  .tabs-card ::ng-deep .mat-mdc-tab-label {
+    min-width: 160px;
+    font-size: 15px;
+  }
+
+  ::ng-deep .mat-mdc-tab mat-icon {
+    margin-left: 8px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab-badge {
+    font-size: 12px;
+    padding: 2px 8px;
+    margin-right: 8px;
+  }
+
+  .tab-content {
+    padding: 24px;
+    min-height: 400px;
+  }
+
+  /* Transaction Panels */
+  .transaction-panel {
+    margin-bottom: 16px;
+  }
+
+  .panel-title-content {
+    font-size: 14px;
+    gap: 12px;
+  }
+
+  .panel-title-content mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .sequence {
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+
+  .farm-name,
+  .buyer-name {
+    font-size: 16px;
+  }
+
+  .amount {
+    font-size: 18px;
+  }
+
+  /* Transaction Details */
+  .transaction-details {
+    padding: 20px;
+  }
+
+  .details-section {
+    margin-bottom: 24px;
+  }
+
+  .details-section h4 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .details-section h4 mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Weighing Grid - 3 Columns */
+  .weighing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .weighing-item {
+    padding: 12px;
+  }
+
+  .weighing-item .label {
+    font-size: 12px;
+  }
+
+  .weighing-item .value {
+    font-size: 16px;
+  }
+
+  /* Pricing Grid - 3 Columns */
+  .pricing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .pricing-item {
+    padding: 12px;
+  }
+
+  .pricing-item .label {
+    font-size: 12px;
+  }
+
+  .pricing-item .value {
+    font-size: 16px;
+  }
+
+  /* Debt Info */
+  .debt-info {
+    padding: 16px;
+  }
+
+  .debt-info mat-chip {
+    font-size: 12px;
+  }
+
+  /* Breakdown Grid - 2 Columns */
+  .breakdown-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .breakdown-item {
     padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .breakdown-item .label {
+    font-size: 13px;
+  }
+
+  .breakdown-item .value {
+    font-size: 15px;
+  }
+
+  .interpretation {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .interpretation mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .interpretation p {
+    font-size: 14px;
+  }
+
+  /* Category Card */
+  .category-card {
+    margin-bottom: 16px;
+  }
+
+  .category-card mat-card-header {
+    padding: 16px;
+    margin: -16px -16px 16px -16px;
+  }
+
+  .category-card mat-card-title {
+    font-size: 16px;
+  }
+
+  .category-card mat-card-subtitle {
+    font-size: 14px;
+  }
+
+  .costs-list {
+    gap: 12px;
+  }
+
+  .cost-item {
+    padding: 14px;
+  }
+
+  .cost-description {
+    font-size: 14px;
+  }
+
+  .cost-amount {
+    font-size: 16px;
+  }
+
+  .cost-time {
+    font-size: 13px;
+  }
+
+  /* Loss Card */
+  .loss-card {
+    margin-bottom: 16px;
+  }
+
+  .loss-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .loss-title span {
+    font-size: 18px;
+  }
+
+  .loss-amount {
+    font-size: 20px;
+  }
+
+  .loss-details {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .detail-item {
+    padding: 10px 12px;
+  }
+
+  .detail-item .label {
+    font-size: 12px;
+  }
+
+  .detail-item .value {
+    font-size: 14px;
+  }
+
+  .responsibility-section {
+    padding: 16px;
+  }
+
+  .farm-responsible {
+    font-size: 14px;
+  }
+
+  .balance-impact {
+    padding: 12px;
+  }
+
+  .balance-impact p {
+    font-size: 13px;
+  }
+
+  .general-loss {
+    padding: 12px;
+  }
+
+  .general-loss p {
+    font-size: 13px;
+  }
+
+  /* Payment Card */
+  .payment-card {
+    margin-bottom: 16px;
+  }
+
+  .payment-title {
+    font-size: 16px;
+  }
+
+  .payment-details {
+    padding: 16px;
+  }
+
+  .amount-display .value {
+    font-size: 18px;
+  }
+
+  .explanation {
+    font-size: 14px;
+  }
+
+  .balance-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+  }
+
+  .payment-notes {
+    padding: 12px;
+  }
+
+  .payment-notes p {
+    font-size: 13px;
+  }
+
+  /* Profit Distribution */
+  .distribution-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 20px -16px;
+  }
+
+  .distribution-card mat-card-title {
+    font-size: 18px;
+  }
+
+  .distribution-card mat-card-subtitle {
+    font-size: 13px;
+  }
+
+  /* Totals Grid - 3 Columns */
+  .totals-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .total-item {
+    padding: 16px;
+  }
+
+  .total-item mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .total-item .label {
+    font-size: 12px;
+  }
+
+  .total-item .value {
+    font-size: 18px;
+  }
+
+  /* Partners Grid - 2-3 Columns */
+  .partners-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .partner-header h4 {
+    font-size: 18px;
+  }
+
+  .partner-header mat-chip {
+    font-size: 12px;
+  }
+
+  .profit-breakdown {
+    padding: 16px;
+  }
+
+  .percentage {
+    font-size: 12px;
+  }
+
+  /* Transaction Footer */
+  .transaction-footer,
+  .loss-footer,
+  .payment-footer {
+    font-size: 13px;
+  }
+
+  .transaction-footer mat-icon,
+  .loss-footer mat-icon,
+  .payment-footer mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Empty States */
+  .empty-state {
+    padding: 60px 20px;
+    gap: 16px;
+  }
+
+  .empty-state mat-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+  }
+
+  .empty-state h3 {
+    font-size: 20px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .no-report-state {
+    padding: 80px 20px;
+    gap: 16px;
+  }
+
+  .no-report-state mat-icon {
+    font-size: 100px;
+    width: 100px;
+    height: 100px;
+  }
+
+  .no-report-state h3 {
+    font-size: 24px;
+  }
+
+  .no-report-state p {
+    font-size: 16px;
+  }
+}
+
+/* ========================================
+   🖥️ LARGE DESKTOP (≥ 1400px)
+   ======================================== */
+
+@media (min-width: 1400px) {
+  /* Summary Grid - 4 Columns */
+  .summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Weighing & Pricing - 4 Columns */
+  .weighing-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Totals Grid - 5 Columns */
+  .totals-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* Partners Grid - 3 Columns */
+  .partners-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========================================
+   ♿ ACCESSIBILITY ENHANCEMENTS
+   ======================================== */
+
+/* Focus Visible States */
+button:focus-visible,
+.mat-mdc-tab:focus-visible,
+.mat-expansion-panel-header:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Touch Target Sizes (min 44x44px) */
+.mat-mdc-tab,
+.mat-expansion-panel-header,
+button,
+.mat-mdc-chip,
+.mat-mdc-option {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+  .summary-item,
+  .total-item,
+  .partner-card {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .summary-item:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   🎯 RTL ENHANCEMENTS FOR LARGER SCREENS
+   ======================================== */
+
+@media (min-width: 768px) {
+  [dir="rtl"] .date-form {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .form-actions {
+    flex-direction: row-reverse;
+  }
+}
+
+/* ========================================
+   📱 PRINT STYLES
+   ======================================== */
+
+@media print {
+  .container {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .date-form,
+  .form-actions,
+  button,
+  .mat-mdc-tab-labels {
+    display: none !important;
+  }
+
+  .main-card,
+  .summary-card,
+  .category-card,
+  .loss-card,
+  .payment-card,
+  .partner-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .tab-content {
+    display: block !important;
+  }
+
+  .summary-grid,
+  .info-grid,
+  .weighing-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

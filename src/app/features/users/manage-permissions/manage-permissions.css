@@ -1,0 +1,820 @@
+/* ========================================
+   Manage Permissions Dialog Styles (Mobile-First)
+   ======================================== */
+
+:host {
+  display: block;
+  direction: rtl;
+}
+
+/* ========================================
+   DIALOG WRAPPER STYLES
+   ======================================== */
+
+/* ---------- Dialog Content ---------- */
+[mat-dialog-content] {
+  padding: 0 !important;
+  margin: 0;
+  width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+[mat-dialog-content]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ========================================
+   MAIN CONTAINER & LAYOUT
+   ======================================== */
+
+/* ---------- Padding ---------- */
+.p-4 { padding: 16px; }
+.p-6 { padding: 16px; }
+
+.pt-6 { padding-top: 16px; }
+.pb-3 { padding-bottom: 12px; }
+
+/* ---------- Margins ---------- */
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 12px; }
+.mb-6 { margin-bottom: 16px; }
+.mt-1 { margin-top: 4px; }
+.mt-6 { margin-top: 16px; }
+.ml-2 { margin-left: 8px; }
+.ml-8 { margin-left: 20px; }
+.ml-auto { margin-left: auto; }
+
+/* ---------- Flex Utilities ---------- */
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* ---------- Grid ---------- */
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 10px; }
+.gap-4 { gap: 12px; }
+
+/* ---------- Spacing ---------- */
+.space-y-6 > * + * {
+  margin-top: 16px;
+}
+
+.space-y-6 {
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.space-y-6::-webkit-scrollbar {
+  width: 6px;
+}
+
+.space-y-6::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.space-y-6::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.space-y-6::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+.text-xl {
+  font-size: 1.125rem;
+}
+
+.text-lg {
+  font-size: 1rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.font-bold {
+  font-weight: 700;
+  color: #333;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* ---------- Text Colors ---------- */
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-gray-600 {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ========================================
+   HEADER & CLOSE BUTTON
+   ======================================== */
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  color: #666;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.btn-icon:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+.btn-icon:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.btn-icon:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.py-8 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   SUMMARY BOX
+   ======================================== */
+
+.bg-blue-50 {
+  background-color: #e3f2fd;
+}
+
+.rounded {
+  border-radius: 8px;
+}
+
+.bg-blue-50 p {
+  margin: 0;
+  color: #1565c0;
+}
+
+.bg-blue-50 strong {
+  font-weight: 600;
+}
+
+/* ========================================
+   CATEGORY CARDS
+   ======================================== */
+
+.border {
+  border: 1px solid #e0e0e0;
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.border-b {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.border-t {
+  border-top: 1px solid #e0e0e0;
+}
+
+.border.rounded-lg {
+  animation: fadeIn 0.3s ease-out;
+  transition: box-shadow 0.2s;
+}
+
+.border.rounded-lg:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   CHECKBOXES
+   ======================================== */
+
+input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #1976d2;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.w-5 { width: 20px; }
+.h-5 { height: 20px; }
+.w-4 { width: 16px; }
+.h-4 { height: 16px; }
+
+input[type="checkbox"]:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+input[type="checkbox"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Indeterminate state */
+input[type="checkbox"][indeterminate],
+input[type="checkbox"]:indeterminate {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ========================================
+   LABELS
+   ======================================== */
+
+label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* ---------- Category Header Labels ---------- */
+label.font-semibold.text-lg {
+  color: #333;
+  font-size: 1rem;
+}
+
+/* ---------- Permission Item Labels ---------- */
+label.flex.items-start {
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+label.hover\:bg-gray-50:hover {
+  background-color: #f9fafb;
+}
+
+/* ========================================
+   CATEGORY COUNT BADGE
+   ======================================== */
+
+.text-sm.text-gray-500 {
+  background-color: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+/* ========================================
+   CODE TAG
+   ======================================== */
+
+code {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  color: #d32f2f;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========================================
+   TABLET STYLES (≥600px)
+   ======================================== */
+@media (min-width: 600px) {
+  /* Container */
+  .p-6 {
+    padding: 20px;
+  }
+
+  .p-4 {
+    padding: 16px;
+  }
+
+  .pt-6 {
+    padding-top: 20px;
+  }
+
+  /* Margins */
+  .mb-6 {
+    margin-bottom: 20px;
+  }
+
+  .mt-6 {
+    margin-top: 20px;
+  }
+
+  .ml-8 {
+    margin-left: 32px;
+  }
+
+  /* Typography */
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .text-lg {
+    font-size: 1.125rem;
+  }
+
+  /* Spacing */
+  .space-y-6 > * + * {
+    margin-top: 20px;
+  }
+
+  .space-y-6 {
+    max-height: 60vh;
+  }
+
+  .gap-3 {
+    gap: 12px;
+  }
+
+  .gap-4 {
+    gap: 16px;
+  }
+
+  /* Loading */
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+
+  .py-8 {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  /* Close button */
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 2rem;
+  }
+}
+
+/* ========================================
+   DESKTOP STYLES (≥1024px)
+   ======================================== */
+@media (min-width: 1024px) {
+  /* Container */
+  .p-6 {
+    padding: 24px;
+  }
+
+  /* Margins */
+  .mb-6 {
+    margin-bottom: 24px;
+  }
+
+  .mt-6 {
+    margin-top: 24px;
+  }
+
+  /* Spacing */
+  .space-y-6 > * + * {
+    margin-top: 24px;
+  }
+
+  .space-y-6 {
+    max-height: 65vh;
+  }
+
+  /* Buttons */
+  .btn {
+    min-width: 120px;
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* ========================================
+   SMALL MOBILE (<480px)
+   ======================================== */
+@media (max-width: 480px) {
+  /* Close button */
+  .btn-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1.5rem;
+  }
+
+  /* Typography */
+  .text-xl {
+    font-size: 1rem;
+  }
+
+  .text-lg {
+    font-size: 0.95rem;
+  }
+
+  /* Margins */
+  .ml-8 {
+    margin-left: 12px;
+  }
+
+  .ml-auto {
+    margin-left: 0;
+  }
+
+  /* Spacing */
+  .space-y-6 > * + * {
+    margin-top: 12px;
+  }
+
+  .gap-3 {
+    gap: 8px;
+  }
+
+  /* Buttons */
+  .flex.gap-4.justify-end {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+    min-width: unset;
+  }
+
+  /* Cards */
+  .p-4 {
+    padding: 12px;
+  }
+
+  /* Permission items */
+  label.flex.items-start {
+    padding: 6px;
+  }
+}
+
+/* ========================================
+   RTL SUPPORT
+   ======================================== */
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+[dir="rtl"] .ml-8 {
+  margin-left: 0;
+  margin-right: 20px;
+}
+
+@media (min-width: 600px) {
+  [dir="rtl"] .ml-8 {
+    margin-right: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  [dir="rtl"] .ml-8 {
+    margin-right: 12px;
+  }
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .space-y-6 {
+  padding-right: 0;
+  padding-left: 4px;
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  .border.rounded-lg,
+  .btn,
+  .btn-icon,
+  label {
+    animation: none;
+    transition: none;
+  }
+
+  .spinner,
+  .spinner-small {
+    animation: spin 2s linear infinite;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .border {
+    border-width: 2px;
+    border-color: #000;
+  }
+
+  input[type="checkbox"] {
+    border: 2px solid #000;
+  }
+
+  .btn-secondary {
+    border-width: 2px;
+  }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  .btn,
+  .btn-icon,
+  .spinner,
+  .spinner-small {
+    display: none !important;
+  }
+
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+  }
+
+  .border {
+    border: 1px solid #000;
+  }
+
+  .bg-blue-50 {
+    background-color: #f0f0f0;
+    color: #000 !important;
+  }
+
+  .space-y-6 {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .border.rounded-lg {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================
+   KEYBOARD NAVIGATION
+   ======================================== */
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+label:has(input[type="checkbox"]:focus-visible) {
+  background-color: #f9fafb;
+}
+
+/* ========================================
+   SELECTION STATES
+   ======================================== */
+input[type="checkbox"]:checked + label,
+input[type="checkbox"]:checked ~ div {
+  /* Optional: Add visual feedback for checked items */
+}
+
+/* ========================================
+   TOUCH IMPROVEMENTS
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices */
+  .btn {
+    min-height: 48px;
+  }
+
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  input[type="checkbox"] {
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  label.flex.items-start {
+    padding: 12px 8px;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.box-border {
+  box-sizing: border-box;
+}

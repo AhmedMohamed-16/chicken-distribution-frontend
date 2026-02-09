@@ -1,0 +1,860 @@
+/* ============================================================
+   MOBILE-FIRST CSS - VEHICLE PERFORMANCE COMPONENT
+   Default: Mobile (< 768px)
+   Tablet: ≥ 768px
+   Desktop: ≥ 1024px
+   RTL Support: Full
+   ============================================================ */
+
+/* ============================================================
+   BASE CONTAINER - MOBILE DEFAULT
+   ============================================================ */
+
+.vehicle-performance {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+  width: 100%;
+}
+
+/* ============================================================
+   SUMMARY CARDS GRID - MOBILE (Stacked)
+   ============================================================ */
+
+.summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  min-height: 80px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Best performer card */
+.summary-card.best {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
+
+/* Variance card */
+.summary-card.variance {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================================
+   CARD ICONS - MOBILE
+   ============================================================ */
+
+.card-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.summary-card.best .card-icon,
+.summary-card.variance .card-icon {
+  color: #fff;
+}
+
+/* ============================================================
+   CARD CONTENT - MOBILE
+   ============================================================ */
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-label {
+  font-size: 0.875rem; /* 14px */
+  color: #666;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.summary-card.variance .card-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.card-value {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+  direction: ltr;
+  text-align: start;
+  word-break: break-word;
+}
+
+[dir="rtl"] .card-value {
+  text-align: end;
+}
+
+.summary-card.variance .card-value {
+  color: #fff;
+}
+
+/* ============================================================
+   RANKING CARD - MOBILE
+   ============================================================ */
+
+.ranking-card {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.ranking-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.ranking-card mat-card-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  line-height: 1.3;
+}
+
+.ranking-card mat-card-subtitle {
+  font-size: 0.8125rem; /* 13px */
+  color: #666;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+.ranking-card mat-card-content {
+  padding: 0;
+}
+
+/* ============================================================
+   PERFORMANCE TABLE - MOBILE (Scrollable)
+   ============================================================ */
+
+.performance-table {
+  width: 100%;
+  direction: rtl;
+  font-size: 0.8125rem; /* 13px */
+  overflow-x: auto;
+  display: block;
+}
+
+/* Make table scrollable on mobile */
+.performance-table thead,
+.performance-table tbody,
+.performance-table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.performance-table thead {
+  width: calc(100% - 17px); /* Account for scrollbar */
+}
+
+/* Table wrapper for horizontal scroll */
+.ranking-card mat-card-content {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table headers */
+.performance-table th {
+  background: #f5f7fa;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.75rem; /* 12px */
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  border-bottom: 2px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+/* Table cells */
+.performance-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   RANK BADGE - MOBILE
+   ============================================================ */
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.875rem; /* 14px */
+  background: #f5f5f5;
+  color: #666;
+}
+
+.rank-badge.gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #333;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.rank-badge.silver {
+  background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+  color: #333;
+  box-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
+}
+
+.rank-badge.bronze {
+  background: linear-gradient(135deg, #cd7f32 0%, #e6a85c 100%);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
+}
+
+.rank-badge mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================
+   VEHICLE INFO - MOBILE
+   ============================================================ */
+
+.vehicle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: start;
+}
+
+[dir="rtl"] .vehicle-info {
+  text-align: start;
+}
+
+.vehicle-info strong {
+  font-size: 0.875rem; /* 14px */
+  color: #333;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.plate-number {
+  font-size: 0.75rem; /* 12px */
+  color: #666;
+  direction: ltr;
+  line-height: 1.3;
+}
+
+[dir="rtl"] .plate-number {
+  direction: ltr;
+}
+
+/* ============================================================
+   PROFIT/LOSS INDICATORS - MOBILE
+   ============================================================ */
+
+.profit {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.loss {
+  color: #f44336;
+  font-weight: 600;
+}
+
+/* ============================================================
+   RATING CHIPS - MOBILE
+   ============================================================ */
+
+mat-chip {
+  font-size: 0.75rem; /* 12px */
+  padding: 0.25rem 0.5rem;
+  min-height: 24px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+mat-chip.excellent {
+  background-color: #4caf50 !important;
+  color: #fff !important;
+}
+
+mat-chip.good {
+  background-color: #8bc34a !important;
+  color: #fff !important;
+}
+
+mat-chip.average {
+  background-color: #ff9800 !important;
+  color: #fff !important;
+}
+
+mat-chip.needs-improvement {
+  background-color: #f44336 !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   TOP PERFORMER HIGHLIGHT - MOBILE
+   ============================================================ */
+
+.top-performer {
+  background-color: #fffbf0 !important;
+}
+
+/* ============================================================
+   TABLET STYLES - ≥ 768px
+   ============================================================ */
+
+@media (min-width: 768px) {
+  .vehicle-performance {
+    gap: 1.5rem;
+  }
+
+  /* Grid layout for summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .summary-card {
+    padding: 1.25rem;
+    gap: 1rem;
+    min-height: 90px;
+    border-radius: 10px;
+  }
+
+  .summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .summary-card.best:hover {
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+  }
+
+  .summary-card.variance:hover {
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+  }
+
+  .card-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-label {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .card-value {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  /* Ranking card */
+  .ranking-card {
+    border-radius: 10px;
+  }
+
+  .ranking-card mat-card-header {
+    padding: 1.25rem 1.5rem;
+    gap: 1rem;
+  }
+
+  .section-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .ranking-card mat-card-title {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  .ranking-card mat-card-subtitle {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  /* Table */
+  .performance-table {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .performance-table th {
+    font-size: 0.8125rem; /* 13px */
+    padding: 1rem 0.75rem;
+  }
+
+  .performance-table td {
+    padding: 1rem 0.75rem;
+  }
+
+  .rank-badge {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem; /* 16px */
+  }
+
+  .rank-badge mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .vehicle-info strong {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .plate-number {
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  mat-chip {
+    font-size: 0.8125rem; /* 13px */
+    padding: 0.375rem 0.75rem;
+    min-height: 28px;
+  }
+}
+
+/* ============================================================
+   DESKTOP STYLES - ≥ 1024px
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  .vehicle-performance {
+    gap: 2rem;
+  }
+
+  /* Enhanced grid for summary cards */
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .summary-card {
+    padding: 1.5rem;
+    gap: 1.25rem;
+    min-height: 100px;
+    border-radius: 12px;
+  }
+
+  .summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .summary-card.best:hover {
+    box-shadow: 0 6px 14px rgba(255, 215, 0, 0.5);
+  }
+
+  .summary-card.variance:hover {
+    box-shadow: 0 6px 14px rgba(102, 126, 234, 0.5);
+  }
+
+  .card-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-label {
+    font-size: 1rem; /* 16px */
+  }
+
+  .card-value {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  /* Ranking card */
+  .ranking-card {
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  .ranking-card mat-card-header {
+    padding: 1.5rem 2rem;
+    gap: 1rem;
+  }
+
+  .section-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .ranking-card mat-card-title {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  .ranking-card mat-card-subtitle {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .ranking-card mat-card-content {
+    padding: 0;
+  }
+
+  /* Table */
+  .performance-table {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .performance-table th {
+    font-size: 0.875rem; /* 14px */
+    padding: 1.25rem 1rem;
+  }
+
+  .performance-table td {
+    padding: 1.25rem 1rem;
+  }
+
+  .performance-table tr {
+    transition: background-color 0.2s ease;
+  }
+
+  .performance-table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.03);
+  }
+
+  .rank-badge {
+    width: 40px;
+    height: 40px;
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .rank-badge mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .vehicle-info strong {
+    font-size: 1rem; /* 16px */
+  }
+
+  .plate-number {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  mat-chip {
+    font-size: 0.875rem; /* 14px */
+    padding: 0.5rem 1rem;
+    min-height: 32px;
+  }
+}
+
+/* ============================================================
+   LARGE DESKTOP - ≥ 1440px
+   ============================================================ */
+
+@media (min-width: 1440px) {
+  .vehicle-performance {
+    gap: 2.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .summary-grid {
+    gap: 1.5rem;
+  }
+
+  .summary-card {
+    padding: 1.75rem;
+    min-height: 110px;
+  }
+
+  .card-icon {
+    font-size: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .card-label {
+    font-size: 1.0625rem; /* 17px */
+  }
+
+  .card-value {
+    font-size: 1.625rem; /* 26px */
+  }
+
+  .ranking-card mat-card-header {
+    padding: 1.75rem 2.5rem;
+  }
+
+  .section-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .ranking-card mat-card-title {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  .performance-table th {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .performance-table td {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY & FOCUS STATES
+   ============================================================ */
+
+.summary-card:focus-within {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+.performance-table tbody tr:focus-within {
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .summary-card {
+    border: 2px solid #333;
+  }
+
+  .summary-card.best {
+    border-color: #ffd700;
+  }
+
+  .summary-card.variance {
+    border-color: #667eea;
+  }
+
+  .performance-table th {
+    border-bottom-width: 3px;
+    border-bottom-color: #333;
+  }
+
+  .performance-table td {
+    border-bottom-color: #666;
+  }
+
+  .rank-badge {
+    border: 2px solid #333;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .summary-card:hover {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+  .vehicle-performance {
+    gap: 1rem;
+  }
+
+  .summary-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  .summary-card.best {
+    background: #ffd700 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .summary-card.variance {
+    background: #667eea !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ranking-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  .performance-table {
+    page-break-inside: auto;
+  }
+
+  .performance-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .performance-table thead {
+    display: table-header-group;
+  }
+
+  .performance-table tbody tr:hover {
+    background-color: transparent;
+  }
+
+  .rank-badge.gold,
+  .rank-badge.silver,
+  .rank-badge.bronze {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ============================================================
+   DARK MODE SUPPORT (Optional)
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .summary-card {
+    background: #2a2a2a;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-label {
+    color: #b0b0b0;
+  }
+
+  .card-value {
+    color: #fff;
+  }
+
+  .summary-card.variance .card-label {
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .ranking-card {
+    background: #2a2a2a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .ranking-card mat-card-header {
+    background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
+    border-bottom-color: #444;
+  }
+
+  .ranking-card mat-card-title {
+    color: #fff;
+  }
+
+  .ranking-card mat-card-subtitle {
+    color: #b0b0b0;
+  }
+
+  .performance-table th {
+    background: #333;
+    color: #fff;
+    border-bottom-color: #444;
+  }
+
+  .performance-table td {
+    border-bottom-color: #3a3a3a;
+    color: #e0e0e0;
+  }
+
+  .vehicle-info strong {
+    color: #fff;
+  }
+
+  .top-performer {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+  }
+
+  @media (min-width: 1024px) {
+    .performance-table tbody tr:hover {
+      background-color: rgba(102, 126, 234, 0.1);
+    }
+  }
+}
+
+/* ============================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================ */
+
+@media (pointer: coarse) {
+  .summary-card {
+    min-height: 88px;
+    padding: 1.25rem;
+  }
+
+  .performance-table th,
+  .performance-table td {
+    padding: 1rem 0.75rem;
+  }
+
+  mat-chip {
+    min-height: 32px;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Remove hover on touch devices */
+@media (hover: none) {
+  .summary-card:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .summary-card.best:hover {
+    box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+  }
+
+  .summary-card.variance:hover {
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  }
+
+  .performance-table tbody tr:hover {
+    background-color: transparent;
+  }
+}

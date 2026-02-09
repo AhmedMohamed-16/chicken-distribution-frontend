@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>تقرير الديون</mat-card-title>
@@ -12,7 +12,6 @@
       </div>
       } @else {
 
-      <!-- ===== Farms Debts ===== -->
       <h3>ديون المزارع</h3>
 
       @if (farmDebts().farms.length > 0) {
@@ -45,7 +44,6 @@
 
       <hr />
 
-      <!-- ===== Buyers Debts ===== -->
       <h3>ديون المشترين</h3>
 
       @if (buyerDebts().buyers.length > 0) {
@@ -76,6 +74,737 @@
       <p>لا توجد ديون على المشترين</p>
       }
       }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<!-- ============================================================================ -->
+<!-- DEBT REPORT TEMPLATE - COMPLETE MULTI-VEHICLE REFACTORING -->
+<!-- ============================================================================ -->
+<!-- File: src/app/features/reports/debt-report/debt-report.html -->
+
+<!-- <div class="debt-report-container" dir="rtl">
+   <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>account_balance_wallet</mat-icon>
+        تقارير الديون
+      </h1>
+      <p class="subtitle">إدارة ومتابعة الديون للمزارع والمشترين</p>
+    </div>
+  </div>
+
+   <mat-tab-group class="debt-tabs" animationDuration="300ms">
+     <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>agriculture</mat-icon>
+        <span>ديون المزارع</span>
+        @if (farmSummary()) {
+          <mat-icon
+            class="badge-icon"
+            [matBadge]="farmSummary()!.receivables_count + farmSummary()!.payables_count"
+            matBadgeSize="small"
+            matBadgeColor="warn">
+          </mat-icon>
+        }
+      </ng-template>
+
+      <div class="tab-content">
+         @if (farmLoading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>جاري تحميل بيانات المزارع...</p>
+          </div>
+        }
+
+         @if (farmError()) {
+          <mat-card class="error-card">
+            <mat-card-content>
+              <mat-icon>error_outline</mat-icon>
+              <div>
+                <p>{{ farmError() }}</p>
+                <button mat-raised-button color="primary" (click)="refreshFarmData()">
+                  <mat-icon>refresh</mat-icon>
+                  إعادة المحاولة
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+         @if (!farmLoading() && farmSummary()) {
+          <div class="summary-cards">
+            <mat-card class="summary-card receivables">
+              <mat-card-content>
+                <div class="card-icon">
+                  <mat-icon>arrow_downward</mat-icon>
+                </div>
+                <div class="card-details">
+                  <h3>إجمالي المطلوب منهم</h3>
+                  <p class="amount">{{ formatCurrency(farmSummary()!.total_receivables) }} جنيه</p>
+                  <p class="count">{{ farmSummary()!.receivables_count }} مزرعة</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="summary-card payables">
+              <mat-card-content>
+                <div class="card-icon">
+                  <mat-icon>arrow_upward</mat-icon>
+                </div>
+                <div class="card-details">
+                  <h3>إجمالي المطلوب لهم</h3>
+                  <p class="amount">{{ formatCurrency(farmSummary()!.total_payables) }} جنيه</p>
+                  <p class="count">{{ farmSummary()!.payables_count }} مزرعة</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="summary-card net-position" [class.positive]="farmSummary()!.net_position > 0">
+              <mat-card-content>
+                <div class="card-icon">
+                  <mat-icon>account_balance</mat-icon>
+                </div>
+                <div class="card-details">
+                  <h3>صافي الموقف</h3>
+                  <p class="amount">{{ formatCurrency(farmSummary()!.net_position) }} جنيه</p>
+                  <p class="status">
+                    @if (farmSummary()!.net_position > 0) {
+                      <span class="positive">لصالحنا</span>
+                    } @else if (farmSummary()!.net_position < 0) {
+                      <span class="negative">علينا</span>
+                    } @else {
+                      <span class="neutral">متوازن</span>
+                    }
+                  </p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
+
+         @if (!farmLoading() && hasReceivables()) {
+          <mat-expansion-panel class="debt-section receivables-section" [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>trending_down</mat-icon>
+                المزارع المدينة (مطلوب منهم)
+                <span class="badge">{{ farmReceivables().length }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="table-container">
+              <table mat-table [dataSource]="farmReceivables()" class="farms-table">
+                 <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>اسم المزرعة</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <div class="farm-info">
+                      <span class="farm-name">{{ farm.name }}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                 <ng-container matColumnDef="phone">
+                  <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                  <td mat-cell *matCellDef="let farm">
+                    @if (farm.phone) {
+                      <a href="tel:{{ farm.phone }}" class="phone-link">
+                        <mat-icon>phone</mat-icon>
+                        {{ farm.phone }}
+                      </a>
+                    } @else {
+                      <span class="no-data">-</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="balance">
+                  <th mat-header-cell *matHeaderCellDef>المبلغ المطلوب</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <span class="balance receivable">
+                      {{ formatCurrency(farm.current_balance) }} جنيه
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <button mat-raised-button color="primary" (click)="openFarmStatement(farm)">
+                      <mat-icon>receipt_long</mat-icon>
+                      كشف الحساب
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="farmColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: farmColumns;" class="farm-row"></tr>
+              </table>
+            </div>
+          </mat-expansion-panel>
+        }
+
+        @if (!farmLoading() && hasPayables()) {
+          <mat-expansion-panel class="debt-section payables-section" [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>trending_up</mat-icon>
+                المزارع الدائنة (مطلوب لهم)
+                <span class="badge">{{ farmPayables().length }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="table-container">
+              <table mat-table [dataSource]="farmPayables()" class="farms-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>اسم المزرعة</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <div class="farm-info">
+                      <span class="farm-name">{{ farm.name }}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="phone">
+                  <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                  <td mat-cell *matCellDef="let farm">
+                    @if (farm.phone) {
+                      <a href="tel:{{ farm.phone }}" class="phone-link">
+                        <mat-icon>phone</mat-icon>
+                        {{ farm.phone }}
+                      </a>
+                    } @else {
+                      <span class="no-data">-</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="balance">
+                  <th mat-header-cell *matHeaderCellDef>المبلغ المطلوب</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <span class="balance payable">
+                      {{ formatCurrency(farm.absolute_balance || Math.abs(farm.current_balance)) }} جنيه
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                  <td mat-cell *matCellDef="let farm">
+                    <button mat-raised-button color="warn" (click)="openFarmStatement(farm)">
+                      <mat-icon>receipt_long</mat-icon>
+                      كشف الحساب
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="farmColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: farmColumns;" class="farm-row"></tr>
+              </table>
+            </div>
+          </mat-expansion-panel>
+        }
+
+        @if (!farmLoading() && !hasReceivables() && !hasPayables() && !farmError()) {
+          <mat-card class="no-data-card">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <h3>لا توجد ديون للمزارع</h3>
+              <p>جميع الحسابات مسددة</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>shopping_cart</mat-icon>
+        <span>ديون المشترين</span>
+        @if (buyerCount()) {
+          <mat-icon
+            class="badge-icon"
+            [matBadge]="buyerCount()"
+            matBadgeSize="small"
+            matBadgeColor="warn">
+          </mat-icon>
+        }
+      </ng-template>
+
+      <div class="tab-content">
+         @if (buyerLoading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>جاري تحميل بيانات المشترين...</p>
+          </div>
+        }
+
+        @if (buyerError()) {
+          <mat-card class="error-card">
+            <mat-card-content>
+              <mat-icon>error_outline</mat-icon>
+              <div>
+                <p>{{ buyerError() }}</p>
+                <button mat-raised-button color="primary" (click)="refreshBuyerData()">
+                  <mat-icon>refresh</mat-icon>
+                  إعادة المحاولة
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (!buyerLoading() && buyerCount() > 0) {
+          <div class="summary-cards">
+            <mat-card class="summary-card buyer-debt">
+              <mat-card-content>
+                <div class="card-icon">
+                  <mat-icon>payments</mat-icon>
+                </div>
+                <div class="card-details">
+                  <h3>إجمالي ديون المشترين</h3>
+                  <p class="amount">{{ formatCurrency(buyerTotalDebt()) }} جنيه</p>
+                  <p class="count">{{ buyerCount() }} مشتري</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
+
+         @if (!buyerLoading() && hasBuyerDebts()) {
+          <mat-card class="buyers-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>list</mat-icon>
+                قائمة المشترين المدينين
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="buyers()" class="buyers-table">
+                   <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>اسم المشتري</th>
+                    <td mat-cell *matCellDef="let buyer">
+                      <div class="buyer-info">
+                        <span class="buyer-name">{{ buyer.name }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="phone">
+                    <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                    <td mat-cell *matCellDef="let buyer">
+                      @if (buyer.phone) {
+                        <a href="tel:{{ buyer.phone }}" class="phone-link">
+                          <mat-icon>phone</mat-icon>
+                          {{ buyer.phone }}
+                        </a>
+                      } @else {
+                        <span class="no-data">-</span>
+                      }
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="debt">
+                    <th mat-header-cell *matHeaderCellDef>المبلغ المستحق</th>
+                    <td mat-cell *matCellDef="let buyer">
+                      <span class="balance debt">
+                        {{ formatCurrency(buyer.total_debt) }} جنيه
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                    <td mat-cell *matCellDef="let buyer">
+                      <button mat-raised-button color="accent" (click)="openBuyerStatement(buyer)">
+                        <mat-icon>receipt_long</mat-icon>
+                        كشف الحساب
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="buyerColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: buyerColumns;" class="buyer-row"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (!buyerLoading() && !hasBuyerDebts() && !buyerError()) {
+          <mat-card class="no-data-card">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <h3>لا توجد ديون للمشترين</h3>
+              <p>جميع الحسابات مسددة</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div> -->
+<!-- debt-report.component.html -->
+<div class="debt-report-container">
+  <!-- Page Header -->
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>account_balance_wallet</mat-icon>
+        تقارير الديون
+      </mat-card-title>
+      <mat-card-subtitle>إدارة ومتابعة الديون للمزارع والمشترين</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Tabs -->
+      <mat-tab-group class="report-tabs" animationDuration="300ms">
+        <!-- Farm Debts Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>agriculture</mat-icon>
+            <span>ديون المزارع</span>
+            @if (farmSummary()) {
+            <span class="tab-badge">{{ farmSummary()!.receivables_count + farmSummary()!.payables_count }}</span>
+            }
+          </ng-template>
+
+          <div class="tab-content">
+            <!-- Export Button for Farm Debts -->
+            @if (!farmLoading() && (hasReceivables() || hasPayables())) {
+            <div class="action-buttons" style="margin-bottom: 16px;">
+              <button mat-raised-button color="primary" (click)="exportFarmDebtsToExcel()" class="action-btn">
+                <mat-icon>file_download</mat-icon>
+                تصدير تقرير المزارع Excel
+              </button>
+            </div>
+            }
+
+            <!-- Loading State -->
+            @if (farmLoading()) {
+            <div class="loading-container">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p class="loading-text">جاري تحميل بيانات المزارع...</p>
+            </div>
+            }
+
+            <!-- Error State -->
+            @if (farmError()) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">error_outline</mat-icon>
+              <h2>حدث خطأ</h2>
+              <p>{{ farmError() }}</p>
+              <button mat-raised-button color="primary" (click)="refreshFarmData()" class="action-btn">
+                <mat-icon>refresh</mat-icon>
+                إعادة المحاولة
+              </button>
+            </div>
+            }
+
+            <!-- Summary Cards -->
+            @if (!farmLoading() && farmSummary()) {
+            <div class="metrics-container">
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <mat-icon class="section-icon" style="color: #4caf50;">arrow_downward</mat-icon>
+                  <span class="metric-label">إجمالي المطلوب منهم</span>
+                  <span class="metric-value profit">{{ formatCurrency(farmSummary()!.total_receivables) }} جنيه</span>
+                  <span class="metric-label">{{ farmSummary()!.receivables_count }} مزرعة</span>
+                </div>
+
+                <div class="metric-item">
+                  <mat-icon class="section-icon" style="color: #f44336;">arrow_upward</mat-icon>
+                  <span class="metric-label">إجمالي المطلوب لهم</span>
+                  <span class="metric-value loss">{{ formatCurrency(farmSummary()!.total_payables) }} جنيه</span>
+                  <span class="metric-label">{{ farmSummary()!.payables_count }} مزرعة</span>
+                </div>
+
+                <div class="metric-item" [class.profit-bg]="farmSummary()!.net_position > 0">
+                  <mat-icon class="section-icon">account_balance</mat-icon>
+                  <span class="metric-label">صافي الموقف</span>
+                  <span class="metric-value" [class.profit]="farmSummary()!.net_position > 0"
+                    [class.loss]="farmSummary()!.net_position < 0">
+                    {{ formatCurrency(farmSummary()!.net_position) }} جنيه
+                  </span>
+                  <span class="metric-label">
+                    @if (farmSummary()!.net_position > 0) {
+                    <span style="color: #4caf50;">لصالحنا</span>
+                    } @else if (farmSummary()!.net_position < 0) { <span style="color: #f44336;">علينا</span>
+                  } @else {
+                  <span>متوازن</span>
+                  }
+                  </span>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- Receivables Section -->
+            @if (!farmLoading() && hasReceivables()) {
+            <mat-card class="metrics-card">
+              <mat-card-header>
+                <mat-icon class="section-icon">trending_down</mat-icon>
+                <mat-card-title>
+                  المزارع المدينة (مطلوب منهم)
+                  <mat-chip size="small">{{ farmReceivables().length }}</mat-chip>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-container">
+                  <table mat-table [dataSource]="farmReceivables()">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef>اسم المزرعة</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <span class="farm-name">{{ farm.name }}</span>
+                      </td>
+                    </ng-container>
+
+                    <!-- Phone Column -->
+                    <ng-container matColumnDef="phone">
+                      <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                      <td mat-cell *matCellDef="let farm">
+                        @if (farm.phone) {
+                        <a href="tel:{{ farm.phone }}" class="phone-link">
+                          <mat-icon>phone</mat-icon>
+                          {{ formatNumber(farm.phone )}}
+                        </a>
+                        } @else {
+                        <span style="color: #999;">-</span>
+                        }
+                      </td>
+                    </ng-container>
+
+                    <!-- Balance Column -->
+                    <ng-container matColumnDef="balance">
+                      <th mat-header-cell *matHeaderCellDef>المبلغ المطلوب</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <span class="metric-value profit">
+                          {{ formatCurrency(farm.current_balance) }} جنيه
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <button mat-raised-button color="primary" (click)="openFarmStatement(farm)" class="action-btn">
+                          <mat-icon>receipt_long</mat-icon>
+                          كشف الحساب
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="farmColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: farmColumns;"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            }
+
+            <!-- Payables Section -->
+            @if (!farmLoading() && hasPayables()) {
+            <mat-card class="metrics-card">
+              <mat-card-header>
+                <mat-icon class="section-icon">trending_up</mat-icon>
+                <mat-card-title>
+                  المزارع الدائنة (مطلوب لهم)
+                  <mat-chip size="small">{{ farmPayables().length }}</mat-chip>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-container">
+                  <table mat-table [dataSource]="farmPayables()">
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef>اسم المزرعة</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <span class="farm-name">{{ farm.name }}</span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="phone">
+                      <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                      <td mat-cell *matCellDef="let farm">
+                        @if (formatNumber(farm.phone)) {
+                        <a href="tel:{{ farm.phone }}" class="phone-link">
+                          <mat-icon>phone</mat-icon>
+                          {{ farm.phone }}
+                        </a>
+                        } @else {
+                        <span style="color: #999;">-</span>
+                        }
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="balance">
+                      <th mat-header-cell *matHeaderCellDef>المبلغ المطلوب</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <span class="metric-value loss">
+                          {{ formatCurrency(farm.absolute_balance || abs(farm.current_balance)) }} جنيه
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                      <td mat-cell *matCellDef="let farm">
+                        <button mat-raised-button color="warn" (click)="openFarmStatement(farm)" class="action-btn">
+                          <mat-icon>receipt_long</mat-icon>
+                          كشف الحساب
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="farmColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: farmColumns;"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            }
+
+            <!-- No Data State -->
+            @if (!farmLoading() && !hasReceivables() && !hasPayables() && !farmError()) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">check_circle</mat-icon>
+              <h2>لا توجد ديون للمزارع</h2>
+              <p>جميع الحسابات مسددة</p>
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Buyer Debts Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>shopping_cart</mat-icon>
+            <span>ديون المشترين</span>
+            @if (buyerCount()) {
+            <span class="tab-badge">{{ buyerCount() }}</span>
+            }
+          </ng-template>
+
+          <div class="tab-content">
+            <!-- Export Button for Buyer Debts -->
+            @if (!buyerLoading() && hasBuyerDebts()) {
+            <div class="action-buttons" style="margin-bottom: 16px;">
+              <button mat-raised-button color="primary" (click)="exportBuyerDebtsToExcel()" class="action-btn">
+                <mat-icon>file_download</mat-icon>
+                تصدير تقرير المشترين Excel
+              </button>
+            </div>
+            }
+
+            <!-- Loading State -->
+            @if (buyerLoading()) {
+            <div class="loading-container">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p class="loading-text">جاري تحميل بيانات المشترين...</p>
+            </div>
+            }
+
+            <!-- Error State -->
+            @if (buyerError()) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">error_outline</mat-icon>
+              <h2>حدث خطأ</h2>
+              <p>{{ buyerError() }}</p>
+              <button mat-raised-button color="primary" (click)="refreshBuyerData()" class="action-btn">
+                <mat-icon>refresh</mat-icon>
+                إعادة المحاولة
+              </button>
+            </div>
+            }
+
+            <!-- Summary Card -->
+            @if (!buyerLoading() && buyerCount() > 0) {
+            <div class="metrics-container">
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <mat-icon class="section-icon" style="color: #ff9800;">payments</mat-icon>
+                  <span class="metric-label">إجمالي ديون المشترين</span>
+                  <span class="metric-value warning">{{ formatCurrency(buyerTotalDebt()) }} جنيه</span>
+                  <span class="metric-label">{{ buyerCount() }} مشتري</span>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- Buyers Table -->
+            @if (!buyerLoading() && hasBuyerDebts()) {
+            <mat-card class="metrics-card">
+              <mat-card-header>
+                <mat-icon class="section-icon">list</mat-icon>
+                <mat-card-title>قائمة المشترين المدينين</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-container">
+                  <table mat-table [dataSource]="buyers()">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef>اسم المشتري</th>
+                      <td mat-cell *matCellDef="let buyer">
+                        <span class="buyer-name">{{ buyer.name }}</span>
+                      </td>
+                    </ng-container>
+
+                    <!-- Phone Column -->
+                    <ng-container matColumnDef="phone">
+                      <th mat-header-cell *matHeaderCellDef>رقم الهاتف</th>
+                      <td mat-cell *matCellDef="let buyer">
+                        @if (buyer.phone) {
+                        <a href="tel:{{ buyer.phone }}" class="phone-link">
+                          <mat-icon>phone</mat-icon>
+                          {{formatNumber( buyer.phone) }}
+                        </a>
+                        } @else {
+                        <span style="color: #999;">-</span>
+                        }
+                      </td>
+                    </ng-container>
+
+                    <!-- Debt Column -->
+                    <ng-container matColumnDef="debt">
+                      <th mat-header-cell *matHeaderCellDef>المبلغ المستحق</th>
+                      <td mat-cell *matCellDef="let buyer">
+                        <span class="metric-value warning">
+                          {{ formatCurrency(buyer.total_debt) }} جنيه
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+                      <td mat-cell *matCellDef="let buyer">
+                        <button mat-raised-button color="accent" (click)="openBuyerStatement(buyer)" class="action-btn">
+                          <mat-icon>receipt_long</mat-icon>
+                          كشف الحساب
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="buyerColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: buyerColumns;"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            }
+
+            <!-- No Data State -->
+            @if (!buyerLoading() && !hasBuyerDebts() && !buyerError()) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">check_circle</mat-icon>
+              <h2>لا توجد ديون للمشترين</h2>
+              <p>جميع الحسابات مسددة</p>
+            </div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </mat-card-content>
   </mat-card>
 </div>

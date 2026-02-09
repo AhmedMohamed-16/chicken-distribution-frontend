@@ -1,4 +1,4 @@
-    <div class="container">
+<!-- <div class="container">
       <mat-card>
         <mat-card-header>
           <mat-card-title>الشركاء</mat-card-title>
@@ -74,4 +74,116 @@
           }
         </mat-card-content>
       </mat-card>
-    </div>
+    </div> -->
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>الشركاء</mat-card-title>
+      <mat-card-subtitle>إدارة بيانات الشركاء والاستثمارات</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="actions-bar">
+        <button mat-raised-button color="primary" (click)="openAddDialog()">
+          <mat-icon>add</mat-icon>
+          إضافة شريك
+        </button>
+      </div>
+
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="partnersWithVehicleInfo()">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>الاسم</th>
+            <td mat-cell *matCellDef="let partner">{{ partner.name }}</td>
+          </ng-container>
+
+          <!-- Phone Column -->
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef>الهاتف</th>
+            <td mat-cell *matCellDef="let partner">{{ formatNumber(partner.phone || '-') }}</td>
+          </ng-container>
+
+          <!-- Investment Amount Column -->
+          <ng-container matColumnDef="investment_amount">
+            <th mat-header-cell *matHeaderCellDef>مبلغ الاستثمار</th>
+            <td mat-cell *matCellDef="let partner">
+              {{formatCurrency( partner.investment_amount ) }} ج
+            </td>
+          </ng-container>
+
+          <!-- Investment Percentage Column -->
+          <ng-container matColumnDef="investment_percentage">
+            <th mat-header-cell *matHeaderCellDef>نسبة الاستثمار</th>
+            <td mat-cell *matCellDef="let partner">
+              {{ formatPercentage(partner.investment_percentage) }}%
+            </td>
+          </ng-container>
+
+          <!-- Vehicle Investments Column -->
+          <ng-container matColumnDef="vehicle_investments">
+            <th mat-header-cell *matHeaderCellDef>الاستثمار في المركبات</th>
+            <td mat-cell *matCellDef="let partner">
+              @if (partner.is_vehicle_partner) {
+              <div class="vehicle-investments">
+                <mat-chip-set>
+                  @for (vehicle of partner.vehicles; track vehicle.id) {
+                  <mat-chip>
+                    <mat-icon matChipAvatar>directions_car</mat-icon>
+                    {{ vehicle.name }}
+                    ({{ getVehicleShare(vehicle) }}%)
+                  </mat-chip>
+                  }
+                </mat-chip-set>
+                <div class="investment-total" [matTooltip]="'إجمالي الاستثمار في المركبات'">
+                  <small>
+                    إجمالي: {{formatCurrency (partner.total_vehicle_investment ) }} ج
+                  </small>
+                </div>
+              </div>
+              } @else {
+              <span class="no-vehicles">
+                <mat-icon>block</mat-icon>
+                لا يستثمر في مركبات
+              </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+            <td mat-cell *matCellDef="let partner">
+              <button mat-icon-button (click)="openEditDialog(partner)" matTooltip="تعديل">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deletePartner(partner)" matTooltip="حذف">
+                <mat-icon color="warn">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        @if (partnersWithVehicleInfo().length === 0) {
+        <div class="no-data">
+          <mat-icon>people</mat-icon>
+          <p>لا توجد بيانات للشركاء</p>
+          <button mat-raised-button color="primary" (click)="openAddDialog()">
+            إضافة أول شريك
+          </button>
+        </div>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

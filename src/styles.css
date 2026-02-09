@@ -6,8 +6,9 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  direction: rtl;
+  text-align: right;
 }
-
 body {
   font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   direction: rtl;
@@ -35,17 +36,43 @@ html, body {
 }
 
 /* Custom Utility Classes */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+}
+
+.stack-mobile {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .stack-mobile {
+    flex-direction: column;
+  }
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card {
   background: white;
   border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
 }
 
@@ -77,7 +104,7 @@ html, body {
 .debt-indicator {
   color: #f44336;
   font-weight: bold;
-  margin-right: 8px;
+  margin-inline-start: 8px;
 }
 
 .success-indicator {
@@ -114,6 +141,8 @@ html, body {
 .data-table {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
 }
 
 .mat-mdc-table {
@@ -134,11 +163,18 @@ html, body {
     flex-direction: column;
   }
 
-  .button-group {
-    flex-direction: column;
+   .button-group > * {
+    width: 100%;
   }
-
   .mat-mdc-raised-button {
     width: 100%;
   }
+}
+/* <div class="container">
+  <div class="card">
+    <div class="form-row stack-mobile">
+    ⬅️ يطلع Responsive بدون CSS إضافي 💯
+ */
+.dashboard-container {
+  padding: 16px;
 }

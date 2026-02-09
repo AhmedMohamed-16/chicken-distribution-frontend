@@ -1,233 +1,1012 @@
-.container {
-  padding: 20px;
-}
+/* ============================================================
+   MOBILE-FIRST CSS - PERIOD REPORT COMPONENT
+   Default: Mobile (< 768px)
+   Tablet: ≥ 768px
+   Desktop: ≥ 1024px
+   RTL Support: Full
+   ============================================================ */
 
-.form-row {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 24px;
-}
+/* ============================================================
+   BASE CONTAINER - MOBILE DEFAULT
+   ============================================================ */
 
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 40px;
-}
-
-.period-info {
-  background: #f5f5f5;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-}
-
-.period-info h3 {
-  margin: 0 0 8px 0;
-  color: #1976d2;
-}
-
-.summary-section {
-  margin-bottom: 32px;
-}
-
-.summary-section h3 {
-  margin-bottom: 16px;
-  color: #333;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.summary-card {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.summary-card.profit {
-  background: #e8f5e9;
-}
-
-.summary-card .label {
-  margin: 0 0 8px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.summary-card .value {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.summary-card.profit .value {
-  color: #2e7d32;
-}
-
-.operations-section h3 {
-  margin-bottom: 16px;
-  color: #333;
-}
-
-.operation-card {
-  margin-bottom: 24px;
-}
-
-.operation-card h4 {
-  margin: 16px 0 8px 0;
-  color: #1976d2;
-  font-size: 16px;
-}
-
- 
-.profit-info {
-  background: #e8f5e9;
-  padding: 12px;
-  border-radius: 4px;
-  margin-top: 16px;
-}
-
-.profit-info p {
-  margin: 0;
-  color: #2e7d32;
-}
-/*  */
-
-
-.container {
-  padding: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 40px;
-}
-
-.report-content {
-  margin-top: 24px;
-}
-
-.summary-section {
-  margin-bottom: 32px;
-}
-
-.summary-section h3 {
-  margin-bottom: 16px;
-  color: #333;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.summary-card {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.summary-card.profit {
-  background: #e8f5e9;
-}
-
-.summary-card .label {
-  margin: 0 0 8px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.summary-card .value {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.summary-card.profit .value {
-  color: #2e7d32;
-}
-
-.section {
-  margin-bottom: 32px;
-}
-
-.section h3 {
-  margin-bottom: 16px;
-  color: #1976d2;
-  font-size: 16px;
-  font-weight: 500;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #1976d2;
-}
-
-.details-table {
+.period-report-container {
+  padding: 1rem;
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  direction: rtl;
+}
+
+/* ============================================================
+   MAIN CARD - MOBILE
+   ============================================================ */
+
+.main-card {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
+  margin-bottom: 1rem;
   overflow: hidden;
 }
 
-.details-table th {
-  background: #f5f5f5;
+.main-card mat-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 1rem;
+  margin: 0;
+  border-radius: 0;
+}
+
+.main-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
+  margin: 0;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.main-card mat-card-title mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.main-card mat-card-subtitle {
+  font-size: 0.875rem; /* 14px */
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0.5rem 0 0 0;
+  line-height: 1.3;
+}
+
+.main-card mat-card-content {
+  padding: 1rem;
+}
+
+/* ============================================================
+   DATE RANGE FORM - MOBILE (Stacked)
+   ============================================================ */
+
+.date-range-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+}
+
+.date-field {
+  width: 100%;
+}
+
+.date-field mat-form-field {
+  width: 100%;
+}
+
+/* ============================================================
+   BUTTONS - MOBILE
+   ============================================================ */
+
+.load-btn {
+  width: 100%;
+  height: 56px;
+  padding: 0 1rem;
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.action-btn {
+  width: 100%;
+  height: 48px;
+  padding: 0 1rem;
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+.action-btn mat-icon,
+.load-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================================
+   LOADING STATE - MOBILE
+   ============================================================ */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+}
+
+.loading-text {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+.loading-subtext {
+  font-size: 0.875rem; /* 14px */
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+/* ============================================================
+   PERIOD INFO BANNER - MOBILE (Stacked)
+   ============================================================ */
+
+.period-info-banner {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.period-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.period-label mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.period-text {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+}
+
+.period-info-banner mat-chip-set {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.period-info-banner mat-chip {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.alert-chip {
+  background-color: #ff5252 !important;
+  color: #fff !important;
+}
+
+.alert-badge {
+  background: #ff5252;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+/* ============================================================
+   REPORT TABS - MOBILE
+   ============================================================ */
+
+.report-tabs {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.report-tabs ::ng-deep .mat-mdc-tab-label {
+  min-width: auto;
+  padding: 0 0.75rem;
+  height: 56px;
+  font-size: 0.8125rem; /* 13px */
+}
+
+.report-tabs ::ng-deep .mat-mdc-tab-label mat-icon {
+  margin-left: 0.25rem;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.report-tabs ::ng-deep .mat-mdc-tab-label-content {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tab-content {
+  padding: 1rem;
+  min-height: 300px;
+}
+
+/* ============================================================
+   METRICS CONTAINER - MOBILE
+   ============================================================ */
+
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metrics-card {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.metrics-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.metrics-card mat-card-title {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  margin: 0;
   color: #333;
 }
 
-.details-table td,
-.details-table th {
-  padding: 12px 16px;
+.metrics-card mat-card-content {
+  padding: 1rem;
 }
 
-.details-table tr:hover {
-  background: #f9f9f9;
+/* ============================================================
+   METRICS GRID - MOBILE (Stacked)
+   ============================================================ */
+
+.metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-    align-items: stretch;
+.metric-item {
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 60px;
+}
+
+.metric-label {
+  font-size: 0.875rem; /* 14px */
+  color: #666;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.metric-value {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  color: #333;
+  direction: ltr;
+  text-align: start;
+  line-height: 1.2;
+}
+
+[dir="rtl"] .metric-value {
+  text-align: end;
+}
+
+.metric-value.profit {
+  color: #4caf50;
+}
+
+.metric-value.loss,
+.metric-value.negative {
+  color: #f44336;
+}
+
+.metric-value.warning {
+  color: #ff9800;
+}
+
+/* ============================================================
+   EMPTY STATE - MOBILE
+   ============================================================ */
+
+.empty-state {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: #667eea;
+  opacity: 0.5;
+  margin: 0 auto 1.5rem;
+}
+
+.empty-state h2 {
+  font-size: 1.375rem; /* 22px */
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.empty-state p {
+  font-size: 0.9375rem; /* 15px */
+  color: #666;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.empty-state mat-divider {
+  margin: 1.5rem 0;
+}
+
+.empty-state-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 8px;
+  text-align: start;
+}
+
+.feature mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.feature span {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   TABLET STYLES - ≥ 768px
+   ============================================================ */
+
+@media (min-width: 768px) {
+  .period-report-container {
+    padding: 1.5rem;
   }
 
-  .summary-grid {
-    grid-template-columns: 1fr;
+  .main-card {
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
   }
 
-  .details-table {
-    font-size: 14px;
+  .main-card mat-card-header {
+    padding: 1.25rem 1.5rem;
   }
 
-  .details-table td,
-  .details-table th {
-    padding: 8px 12px;
+  .main-card mat-card-title {
+    font-size: 1.25rem; /* 20px */
+    gap: 1rem;
+  }
+
+  .main-card mat-card-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .main-card mat-card-subtitle {
+    font-size: 1rem; /* 16px */
+  }
+
+  .main-card mat-card-content {
+    padding: 1.5rem;
+  }
+
+  /* Form layout - 2 columns */
+  .date-range-form {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .date-field {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+  }
+
+  .load-btn {
+    width: auto;
+    min-width: 180px;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .action-btn {
+    width: auto;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  /* Period banner - horizontal */
+  .period-info-banner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .period-label mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .period-text {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  .period-info-banner mat-chip-set {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .period-info-banner mat-chip {
+    width: auto;
+  }
+
+  /* Tabs */
+  .report-tabs ::ng-deep .mat-mdc-tab-label {
+    min-width: 120px;
+    padding: 0 1rem;
+    height: 60px;
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .report-tabs ::ng-deep .mat-mdc-tab-label mat-icon {
+    margin-left: 0.5rem;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab-content {
+    padding: 1.5rem;
+  }
+
+  /* Metrics grid - 2 columns */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .metric-item {
+    padding: 1.25rem;
+  }
+
+  .metric-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  .metric-label {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .metric-value {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 3rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 100px;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 2rem;
+  }
+
+  .empty-state h2 {
+    font-size: 1.75rem; /* 28px */
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    font-size: 1rem; /* 16px */
+    margin-bottom: 2rem;
+  }
+
+  .empty-state-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .feature {
+    padding: 1.25rem;
+  }
+
+  .feature mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
   }
 }
 
+/* ============================================================
+   DESKTOP STYLES - ≥ 1024px
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  .period-report-container {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .main-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .main-card mat-card-header {
+    padding: 1.5rem 2rem;
+  }
+
+  .main-card mat-card-title {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  .main-card mat-card-title mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .main-card mat-card-subtitle {
+    font-size: 1.0625rem; /* 17px */
+  }
+
+  .main-card mat-card-content {
+    padding: 2rem;
+  }
+
+  /* Form - all in one row */
+  .date-range-form {
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+  }
+
+  .date-field {
+    max-width: 220px;
+  }
+
+  .load-btn {
+    min-width: 200px;
+  }
+
+  .action-btn {
+    min-width: 160px;
+  }
+
+  /* Period banner */
+  .period-info-banner {
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .period-text {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  /* Tabs */
+  .report-tabs {
+    border-radius: 10px;
+  }
+
+  .report-tabs ::ng-deep .mat-mdc-tab-label {
+    min-width: 140px;
+    padding: 0 1.5rem;
+    height: 64px;
+    font-size: 1rem; /* 16px */
+  }
+
+  .report-tabs ::ng-deep .mat-mdc-tab-label mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .tab-content {
+    padding: 2rem;
+    min-height: 400px;
+  }
+
+  /* Metrics container */
+  .metrics-container {
+    gap: 1.5rem;
+  }
+
+  .metrics-card {
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metrics-card mat-card-header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .section-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .metrics-card mat-card-title {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .metrics-card mat-card-content {
+    padding: 1.5rem;
+  }
+
+  /* Metrics grid - 3-4 columns */
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .metric-item {
+    padding: 1.5rem;
+  }
+
+  .metric-label {
+    font-size: 1rem; /* 16px */
+  }
+
+  .metric-value {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  /* Loading */
+  .loading-container {
+    min-height: 400px;
+    padding: 4rem 2rem;
+  }
+
+  .loading-text {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 4rem 3rem;
+  }
+
+  .empty-state-features {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* ============================================================
+   LARGE DESKTOP - ≥ 1440px
+   ============================================================ */
+
+@media (min-width: 1440px) {
+  .period-report-container {
+    padding: 2.5rem;
+  }
+
+  .main-card mat-card-header {
+    padding: 1.75rem 2.5rem;
+  }
+
+  .main-card mat-card-content {
+    padding: 2.5rem;
+  }
+
+  .period-info-banner {
+    padding: 1.75rem 2.5rem;
+  }
+
+  .tab-content {
+    padding: 2.5rem;
+  }
+
+  .metrics-card mat-card-content {
+    padding: 2rem;
+  }
+
+  .metric-value {
+    font-size: 1.625rem; /* 26px */
+  }
+}
+
+/* ============================================================
+   LARGE NUMBERS TAB MODIFIER
+   ============================================================ */
+
+.tab-content.large-numbers ::ng-deep .mat-mdc-table td,
+.tab-content.large-numbers ::ng-deep .value,
+.tab-content.large-numbers ::ng-deep .amount {
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
+}
+
+.tab-content.large-numbers ::ng-deep .total,
+.tab-content.large-numbers ::ng-deep .net-profit,
+.tab-content.large-numbers ::ng-deep .revenue {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .tab-content.large-numbers ::ng-deep .mat-mdc-table td,
+  .tab-content.large-numbers ::ng-deep .value,
+  .tab-content.large-numbers ::ng-deep .amount {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .tab-content.large-numbers ::ng-deep .total,
+  .tab-content.large-numbers ::ng-deep .net-profit,
+  .tab-content.large-numbers ::ng-deep .revenue {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY & FOCUS STATES
+   ============================================================ */
+
+.main-card:focus-within {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+.metric-item:focus-within {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+@media (prefers-contrast: high) {
+  .main-card {
+    border: 2px solid #667eea;
+  }
+
+  .metrics-card {
+    border: 2px solid #333;
+  }
+
+  .metric-item {
+    border: 1px solid #666;
+  }
+
+  .period-info-banner {
+    border: 2px solid #667eea;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .metric-item:hover {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+  .period-report-container {
+    background: #fff;
+    padding: 0;
+  }
+
+  .main-card mat-card-header,
+  .action-buttons,
+  .load-btn,
+  .report-tabs ::ng-deep .mat-mdc-tab-labels {
+    display: none !important;
+  }
+
+  .main-card {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+
+  .tab-content {
+    padding: 0;
+    page-break-inside: avoid;
+  }
+
+  .metrics-card {
+    page-break-inside: avoid;
+  }
+
+  .period-info-banner {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============================================================
+   DARK MODE SUPPORT (Optional)
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .period-report-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+
+  .main-card,
+  .period-info-banner,
+  .empty-state,
+  .metrics-card {
+    background: #2a2a2a;
+    color: #e0e0e0;
+  }
+
+  .main-card mat-card-title,
+  .period-text,
+  .empty-state h2 {
+    color: #fff;
+  }
+
+  .metric-item,
+  .feature {
+    background: #333;
+    color: #e0e0e0;
+  }
+
+  .metric-label,
+  .empty-state p {
+    color: #b0b0b0;
+  }
+
+  .loading-container {
+    background: #2a2a2a;
+  }
+
+  .loading-text {
+    color: #fff;
+  }
+
+  .loading-subtext {
+    color: #b0b0b0;
+  }
+}
+
+/* ============================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================ */
+
+@media (pointer: coarse) {
+  .load-btn,
+  .action-btn {
+    min-height: 48px;
+  }
+
+  .metric-item {
+    min-height: 72px;
+  }
+
+  .report-tabs ::ng-deep .mat-mdc-tab-label {
+    height: 60px;
+  }
+}
+
+@media (hover: none) {
+  .metric-item:hover {
+    transform: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ============================================================
+   ANIMATION
+   ============================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.report-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-content {
+    animation: none;
+  }
+}

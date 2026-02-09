@@ -1,0 +1,66 @@
+.error-message {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      background-color: #fee;
+      border-left: 4px solid #dc3545;
+    }
+
+    .error-message.warning {
+      background-color: #fff3cd;
+      border-left-color: #ffc107;
+    }
+
+    .error-message.info {
+      background-color: #d1ecf1;
+      border-left-color: #17a2b8;
+    }
+
+    .error-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .error-icon {
+      font-size: 1.25rem;
+    }
+
+    .error-text {
+      color: #721c24;
+      font-size: 0.95rem;
+    }
+
+    .error-message.warning .error-text {
+      color: #856404;
+    }
+
+    .error-message.info .error-text {
+      color: #0c5460;
+    }
+
+    .dismiss-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      color: #721c24;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .dismiss-btn:hover {
+      opacity: 1;
+    }
+
+    .error-message.warning .dismiss-btn {
+      color: #856404;
+    }
+
+    .error-message.info .dismiss-btn {
+      color: #0c5460;
+    }

@@ -1,148 +1,549 @@
-  <div class="container">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>تحميل من المزرعة</mat-card-title>
-          <mat-card-subtitle>تسجيل عملية تحميل الدواجن</mat-card-subtitle>
-        </mat-card-header>
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تحميل من المزرعة</mat-card-title>
+      <mat-card-subtitle>تسجيل عملية تحميل الدواجن</mat-card-subtitle>
+    </mat-card-header>
 
-        <mat-card-content>
-          @if (loading()) {
-            <div class="loading-spinner">
-              <mat-spinner></mat-spinner>
-            </div>
-          } @else {
-            <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
-              <!-- Farm & Chicken Type Selection -->
-              <div class="form-section">
-                <h3>بيانات المزرعة</h3>
-                <div class="form-row">
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>المزرعة</mat-label>
-                    <mat-select formControlName="farm_id">
-                      @for (farm of farms(); track farm.id) {
-                        <mat-option [value]="farm.id">
-                          {{ farm.name }}
-                          @if (farm.total_debt > 0) {
-                            <span class="debt-indicator">(دين: {{ farm.total_debt }} ج)</span>
-                          }
-                        </mat-option>
-                      }
-                    </mat-select>
-                    <mat-error>المزرعة مطلوبة</mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>نوع الفراخ</mat-label>
-                    <mat-select formControlName="chicken_type_id">
-                      @for (type of chickenTypes(); track type.id) {
-                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                      }
-                    </mat-select>
-                    <mat-error>نوع الفراخ مطلوب</mat-error>
-                  </mat-form-field>
-                </div>
-              </div>
-
-              <mat-divider></mat-divider>
-
-              <!-- Weighing Section -->
-              <div class="form-section">
-                <h3>الوزن</h3>
-                <div class="form-row">
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>وزن العربية فاضية (كجم)</mat-label>
-                    <input matInput
-                           type="number"
-                           step="0.01"
-                           formControlName="empty_vehicle_weight">
-                    <mat-error>الوزن مطلوب</mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>عدد الأقفاص</mat-label>
-                    <input matInput
-                           type="number"
-                           formControlName="cage_count">
-                    <mat-error>عدد الأقفاص مطلوب</mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>وزن القفص الواحد (كجم)</mat-label>
-                    <input matInput
-                           type="number"
-                           step="0.01"
-                           formControlName="cage_weight_per_unit">
-                    <mat-error>وزن القفص مطلوب</mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>وزن العربية مليانة (كجم)</mat-label>
-                    <input matInput
-                           type="number"
-                           step="0.01"
-                           formControlName="loaded_vehicle_weight">
-                    <mat-error>الوزن مطلوب</mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="calculated-value">
-                  <strong>صافي وزن الفراخ: {{ netWeight() | number:'1.2-2' }} كجم</strong>
-                </div>
-              </div>
-
-              <mat-divider></mat-divider>
-
-              <!-- Pricing Section -->
-              <div class="form-section">
-                <h3>التسعير</h3>
-                <div class="form-row">
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>سعر الكيلو (جنيه)</mat-label>
-                    <input matInput
-                           type="number"
-                           step="0.01"
-                           formControlName="price_per_kg">
-                    <mat-error>السعر مطلوب</mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>المبلغ المدفوع (جنيه)</mat-label>
-                    <input matInput
-                           type="number"
-                           step="0.01"
-                           formControlName="paid_amount">
-                    <mat-error>المبلغ المدفوع مطلوب</mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="calculated-value">
-                  <strong>إجمالي المبلغ: {{ totalAmount() | number:'1.2-2' }} جنيه</strong>
-                </div>
-
-                <div class="calculated-value">
-                  <strong>المتبقي: {{ remainingAmount() | number:'1.2-2' }} جنيه</strong>
-                </div>
-              </div>
-
-              <div class="button-group">
-                <button mat-raised-button
-                        color="primary"
-                        type="submit"
-                        [disabled]="loadingForm.invalid || submitting()">
-                  @if (submitting()) {
-                    <mat-spinner diameter="20"></mat-spinner>
-                  } @else {
-                    تسجيل التحميل
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>المركبة</mat-label>
+          <mat-select formControlName="vehicle_id" required (selectionChange)="onVehicleChange($event)">
+            <mat-option *ngFor="let v of activeVehicles()" [value]="v.id">
+              {{ v.name }} - {{ v.plate_number }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+         <div class="form-section">
+          <h3>بيانات المزرعة</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المزرعة</mat-label>
+              <mat-select formControlName="farm_id">
+                @for (farm of farms(); track farm.id) {
+                <mat-option [value]="farm.id">
+                  {{ farm.name }}
+                  @if (farm.total_debt > 0) {
+                  <span class="debt-indicator">(دين: {{ farm.total_debt }} ج)</span>
                   }
-                </button>
-                <button mat-button type="button" (click)="cancel()">
-                  إلغاء
-                </button>
-              </div>
-            </form>
+                </mat-option>
+                }
+              </mat-select>
+              <mat-error>المزرعة مطلوبة</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>نوع الفراخ</mat-label>
+              <mat-select formControlName="chicken_type_id">
+                @for (type of chickenTypes(); track type.id) {
+                <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>نوع الفراخ مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+         <div class="form-section">
+          <h3>الوزن</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية فاضية (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="empty_vehicle_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>عدد الأقفاص</mat-label>
+              <input matInput type="number" formControlName="cage_count">
+              <mat-error>عدد الأقفاص مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن القفص الواحد (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="cage_weight_per_unit">
+              <mat-error>وزن القفص مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية مليانة (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="loaded_vehicle_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value">
+            <strong>صافي وزن الفراخ: {{ netWeight() | number:'1.2-2' }} كجم</strong>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+         <div class="form-section">
+          <h3>التسعير</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>سعر الكيلو (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+              <mat-error>السعر مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="paid_amount">
+              <mat-error>المبلغ المدفوع مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value">
+            <strong>إجمالي المبلغ: {{ totalAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+
+          <div class="calculated-value">
+            <strong>المتبقي: {{ remainingAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loadingForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            تسجيل التحميل
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<!-- src/app/features/daily-operations/farm-loading/farm-loading.component.html -->
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تحميل من المزرعة</mat-card-title>
+      <mat-card-subtitle>تسجيل عملية تحميل الدواجن</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
+
+         <div class="form-section">
+          <h3>المركبة</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>اختر المركبة</mat-label>
+            <mat-select formControlName="vehicle_id" required (selectionChange)="onVehicleChange($event)">
+              @for (vehicle of activeVehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                {{ vehicle.name }} - {{ vehicle.plate_number }}
+              </mat-option>
+              }
+              @empty {
+              <mat-option disabled>لا توجد مركبات نشطة</mat-option>
+              }
+            </mat-select>
+            <mat-error>اختيار المركبة مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+         <div class="form-section">
+          <h3>بيانات المزرعة</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المزرعة</mat-label>
+              <mat-select formControlName="farm_id" (selectionChange)="onFarmChange($event)">
+                @for (farm of farms(); track farm.id) {
+                <mat-option [value]="farm.id">
+                  {{ farm.name }}
+                  @if (farm.current_balance !== 0) {
+                  <span [class]="getBalanceTypeClass(farm)">
+                    ({{ formatBalance(farm) }})
+                  </span>
+                  }
+                </mat-option>
+                }
+              </mat-select>
+              <mat-error>المزرعة مطلوبة</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>نوع الفراخ</mat-label>
+              <mat-select formControlName="chicken_type_id">
+                @for (type of chickenTypes(); track type.id) {
+                <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>نوع الفراخ مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+           @if (balanceWarning()) {
+          <div class="balance-warning">
+            <mat-icon>info</mat-icon>
+            <span>{{ balanceWarning() }}</span>
+          </div>
           }
-        </mat-card-content>
-      </mat-card>
-    </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+         <div class="form-section">
+          <h3>الوزن</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية فاضية (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="empty_vehicle_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>عدد الأقفاص</mat-label>
+              <input matInput type="number" formControlName="cage_count">
+              <mat-error>عدد الأقفاص مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن القفص الواحد (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="cage_weight_per_unit">
+              <mat-error>وزن القفص مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية مليانة (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="loaded_vehicle_weight">
+              <mat-error>الوزن مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value success">
+            <mat-icon>scale</mat-icon>
+            <strong>صافي وزن الفراخ: {{ netWeight() | number:'1.2-2' }} كجم</strong>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+         <div class="form-section">
+          <h3>التسعير</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>سعر الكيلو (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+              <mat-error>السعر مطلوب</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="paid_amount">
+              <mat-error>المبلغ المدفوع مطلوب</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value info">
+            <mat-icon>payments</mat-icon>
+            <strong>إجمالي المبلغ: {{ totalAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+
+          <div class="calculated-value" [class.warning]="remainingAmount() > 0">
+            <mat-icon>{{ remainingAmount() > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+            <strong>المتبقي: {{ remainingAmount() | number:'1.2-2' }} جنيه</strong>
+          </div>
+        </div>
+
+         <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loadingForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>تسجيل التحميل</span>
+            </ng-container>
+
+
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            <mat-icon>cancel</mat-icon>
+            إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<!-- src/app/features/daily-operations/farm-loading/farm-loading.component.html -->
+<!-- src/app/features/daily-operations/farm-loading/farm-loading.component.html -->
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        {{ isDebtPaymentOnly() ? 'دفع/استلام للمزرعة' : 'تحميل من المزرعة' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isDebtPaymentOnly() ? 'تسديد ديون سابقة' : 'تسجيل عملية تحميل الدواجن' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
+
+        <!-- ✅ NEW: Payment Mode Toggle -->
+        <div class="mode-toggle-section">
+          <mat-slide-toggle formControlName="is_debt_payment_only" color="primary">
+            <strong>دفع ديون فقط (بدون تحميل)</strong>
+          </mat-slide-toggle>
+          <p class="mode-hint">
+            {{ isDebtPaymentOnly()
+            ? 'سيتم تسجيل دفع/استلام فقط بدون عملية تحميل'
+            : 'تسجيل عملية تحميل عادية مع إمكانية دفع ديون سابقة' }}
+          </p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Farm Selection (Always Required) -->
+        <div class="form-section">
+          <h3>بيانات المزرعة</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المزرعة</mat-label>
+            <mat-select formControlName="farm_id" (selectionChange)="onFarmChange()">
+              @for (farm of farms(); track farm.id) {
+              <mat-option [value]="farm.id">
+                {{ farm.name }}
+                @if (farm.current_balance !== 0) {
+                <span [class]="getBalanceTypeClass(farm)">
+                  ({{ formatBalance(farm) }})
+                </span>
+                }
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>المزرعة مطلوبة</mat-error>
+          </mat-form-field>
+
+          <!-- Balance Warning -->
+          @if (shouldShowPaymentField()) {
+          <div class="debt-warning">
+            <mat-icon>info</mat-icon>
+            <strong>{{ getBalanceWarningMessage() }}</strong>
+          </div>
+          }
+        </div>
+
+        <!-- ✅ Loading Section (Hidden in Debt-Only Mode) -->
+        @if (!isDebtPaymentOnly()) {
+        <mat-divider></mat-divider>
+
+        <!-- Vehicle Selection -->
+        <div class="form-section">
+          <h3>المركبة</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>اختر المركبة</mat-label>
+
+            <mat-select formControlName="vehicle_id" (selectionChange)="onVehicleChange($event)">
+              <!-- @for (vehicle of activeVehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number )}}
+              </mat-option>
+              } -->
+
+              @for (vehicle of activeVehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number) }}
+                <span class="vehicle-inventory-hint">
+                  (وزنها: {{ formatNumber(vehicle.empty_weight ,2) }} كجم)
+                </span>
+              </mat-option>
+              }
+              @empty {
+              <mat-option disabled>لا توجد مركبات نشطة</mat-option>
+              }
+            </mat-select>
+            <mat-error>اختيار المركبة مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Chicken Type -->
+        <div class="form-section">
+          <h3>نوع الفراخ</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>نوع الفراخ</mat-label>
+            <mat-select formControlName="chicken_type_id">
+              @for (type of chickenTypes(); track type.id) {
+              <mat-option [value]="type.id">{{ type.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>نوع الفراخ مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Weighing Section -->
+        <div class="form-section">
+          <h3>الوزن</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية فاضية (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="empty_vehicle_weight">
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>عدد الأقفاص</mat-label>
+              <input matInput type="number" formControlName="cage_count">
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن القفص الواحد (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="cage_weight_per_unit">
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية مليانة (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="loaded_vehicle_weight">
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value success">
+            <mat-icon>scale</mat-icon>
+            <strong>صافي وزن الفراخ: {{ formatNumber(netWeight() ,2) }} كجم</strong>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Pricing Section -->
+        <div class="form-section">
+          <h3>التسعير والدفع</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>سعر الكيلو (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+            </mat-form-field>
+
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="paid_amount" [max]="totalAmount()">
+              <mat-hint>الحد الأقصى: {{formatCurrency( totalAmount() ) }} جنيه</mat-hint>
+
+              <mat-error>المبلغ غير صحيح</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="calculated-value info">
+            <mat-icon>payments</mat-icon>
+            <strong>إجمالي المبلغ: {{formatCurrency( totalAmount() ) }} جنيه</strong>
+          </div>
+
+          <div class="calculated-value" [class.warning]="remainingAmount() > 0">
+            <mat-icon>{{ remainingAmount() > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+            <strong>المتبقي من الشراء: {{ formatCurrency(remainingAmount()) }} جنيه</strong>
+          </div>
+        </div>
+        }
+
+        <!-- ✅ Old Balance Payment Section (Conditional) -->
+        @if (shouldShowPaymentField()) {
+        <mat-divider></mat-divider>
+
+        <div class="form-section">
+          <h3>
+            <mat-icon>account_balance_wallet</mat-icon>
+            تسديد الديون السابقة
+          </h3>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>{{ getOldBalancePaymentLabel() }}</mat-label>
+            <input matInput type="number" step="0.01" formControlName="old_balance_paid" [max]="maxPaymentAmount()"
+              [required]="isPaymentRequired()">
+            <mat-hint>{{ getOldBalancePaymentHint() }}</mat-hint>
+            <mat-error>
+              @if (isPaymentRequired()) {
+              المبلغ مطلوب
+              } @else {
+              المبلغ غير صحيح
+              }
+            </mat-error>
+
+          </mat-form-field>
+
+          <!-- New Total Balance Display -->
+          <div class="calculated-value"
+            [class.success]="newTotalBalance() < selectedFarmBalance() && selectedFarmBalance() > 0"
+            [class.warning]="newTotalBalance() > selectedFarmBalance() && selectedFarmBalance() > 0"
+            [class.info]="selectedFarmBalance() < 0">
+            <mat-icon>account_balance</mat-icon>
+            <strong>الرصيد الإجمالي الجديد:
+              @if (newTotalBalance() > 0) {
+              <span class="text-green-600">+{{ formatCurrency(newTotalBalance()) }} ج.م</span>
+              <span class="hint-text">(المزرعة مدينة لنا)</span>
+              } @else if (newTotalBalance() < 0) { <span class="text-red-600">{{formatCurrency( newTotalBalance()) }}
+                ج.م</span>
+                <span class="hint-text">(نحن مدينون للمزرعة)</span>
+                } @else {
+                <span class="text-gray-600">0.00 ج.م</span>
+                <span class="hint-text">(مسوى)</span>
+                }
+            </strong>
+          </div>
+        </div>
+        }
+
+        <!-- Submit Buttons -->
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loadingForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              {{ getSubmitButtonText() }}
+            </ng-container>
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            <mat-icon>cancel</mat-icon>
+            إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

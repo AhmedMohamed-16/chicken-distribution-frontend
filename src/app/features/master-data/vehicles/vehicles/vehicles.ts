@@ -11,6 +11,9 @@ import { Vehicle } from '../../../../core/models';
  import { FormDialog } from '../form-dialog/form-dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog/confirmation-dialog';
+import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { AuthService } from '../../../../core/services/auth.service';
+import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
 @Component({
   selector: 'app-vehicles',
@@ -31,10 +34,19 @@ private dialog = inject(MatDialog);
 
   vehicles = signal<Vehicle[]>([]);
   loading = signal(false);
-  displayedColumns = ['name', 'plate_number', 'purchase_price', 'empty_weight', 'actions'];
+  displayedColumns = ['name', 'plate_number', 'purchase_price', 'empty_weight'];
+private utils = inject(ReportUtilitiesService);
+ formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
+formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
+formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
+formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
+  private authService = inject(AuthService);
 
   ngOnInit(): void {
     this.loadVehicles();
+      if (this.authService.hasPermission(PERMISSIONS.VEHICLES.MANAGE_VEHICLES)) {
+    this.displayedColumns.push('actions');
+  }
   }
 
   loadVehicles(): void {

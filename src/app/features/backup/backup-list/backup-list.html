@@ -1,0 +1,92 @@
+<div class="backup-list-container">
+  <div class="header">
+    <h2>النسخ الاحتياطية لقاعدة البيانات</h2>
+    <button
+      class="btn btn-refresh"
+      (click)="refreshBackups()"
+      [disabled]="loading()"
+      aria-label="تحديث قائمة النسخ الاحتياطية">
+      🔄 تحديث
+    </button>
+  </div>
+
+  <!-- معلومات آخر نسخة احتياطية -->
+  @if (lastBackup(); as last) {
+    <div class="last-backup-info">
+      <strong>آخر نسخة احتياطية:</strong> {{ formatDateTime(last.date) }}
+      <span class="file-size">({{ last.fileSizeMB }})</span>
+    </div>
+  } @else {
+    <div class="last-backup-info">
+      <strong>آخر نسخة احتياطية:</strong> لا يوجد
+    </div>
+  }
+
+  <!-- رسالة خطأ -->
+  @if (error()) {
+    <app-error-message
+      [message]="error()"
+      (dismiss)="dismissError()">
+    </app-error-message>
+  }
+
+  <!-- حالة التحميل -->
+  @if (loading()) {
+    <app-loading-spinner message="جاري تحميل النسخ الاحتياطية..."></app-loading-spinner>
+  }
+
+  <!-- قائمة النسخ الاحتياطية -->
+  @if (!loading() && hasBackups()) {
+    <div class="table-container">
+      <table class="backup-table">
+        <thead>
+          <tr>
+            <th>المعرف</th>
+            <th>اسم الملف</th>
+            <th>التاريخ</th>
+            <th>الحجم</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (backup of backups(); track backup.id) {
+            <tr>
+              <td>{{ backup.id }}</td>
+              <td class="filename">{{ backup.filename }}</td>
+              <td>{{ formatDateTime(backup.date) }}</td>
+              <td>{{ backup.fileSizeMB }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(backup.status)">
+                  {{ backup.status }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-download"
+                  (click)="downloadBackup(backup)"
+                  [disabled]="isDownloading(backup.id) || backup.status !== 'COMPLETED'"
+                  aria-label="تحميل النسخة الاحتياطية">
+                  @if (isDownloading(backup.id)) {
+                    <app-loading-spinner [inline]="true"></app-loading-spinner>
+                  } @else {
+                    📥 تحميل
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- حالة عدم وجود بيانات -->
+  @if (!loading() && !hasBackups()) {
+    <div class="empty-state">
+      <p class="empty-icon">📦</p>
+      <p class="empty-text">لا توجد نسخ احتياطية</p>
+      <p class="empty-subtext">أنشئ أول نسخة احتياطية للبدء</p>
+    </div>
+  }
+</div>

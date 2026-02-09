@@ -10,6 +10,8 @@ import { ChickenTypeService } from '../../../../core/services/chicken-type.servi
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog/confirmation-dialog';
 import { FormDialog } from '../form-dialog/form-dialog';
+import { AuthService } from '../../../../core/services/auth.service';
+import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
 @Component({
   selector: 'app-chicken-types',
@@ -21,13 +23,19 @@ export class ChickenTypes implements OnInit {
   private snackBar = inject(MatSnackBar);
   private service = inject(ChickenTypeService);
   private dialog = inject(MatDialog);
+  private authService = inject(AuthService);
 
   types = signal<any[]>([]);
   loading = signal(false);
-  displayedColumns = ['name', 'description', 'actions'];
+  displayedColumns = ['name', 'description'];
 
   ngOnInit(): void {
     this.loadTypes();
+    console.log("this.authService.hasPermission(PERMISSIONS.CHICKEN_TYPES.MANAGE_CHICKEN_TYPES)",this.authService.hasPermission(PERMISSIONS.CHICKEN_TYPES.MANAGE_CHICKEN_TYPES));
+
+      if (this.authService.hasPermission(PERMISSIONS.CHICKEN_TYPES.MANAGE_CHICKEN_TYPES)) {
+        this.displayedColumns.push('actions');
+      }
   }
 
   loadTypes(): void {

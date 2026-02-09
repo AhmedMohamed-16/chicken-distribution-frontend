@@ -1,0 +1,510 @@
+/* ============================================================
+   MOBILE-FIRST CSS - REVENUE ANALYSIS CARD COMPONENT
+   Default: Mobile (< 768px)
+   Tablet: ≥ 768px
+   Desktop: ≥ 1024px
+   RTL Support: Full
+   ============================================================ */
+
+/* ============================================================
+   BASE STYLES - MOBILE DEFAULT (No Media Queries)
+   ============================================================ */
+
+mat-card {
+  width: 100%;
+  margin: 0 0 1rem 0;
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ============================================================
+   CARD HEADER - MOBILE
+   ============================================================ */
+
+mat-card-header {
+  background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0;
+  min-height: 60px;
+}
+
+mat-card-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+  word-wrap: break-word;
+}
+
+mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+/* ============================================================
+   CARD CONTENT - MOBILE
+   ============================================================ */
+
+mat-card-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ============================================================
+   INFO ROWS - MOBILE (Stacked Layout)
+   ============================================================ */
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  min-height: 44px; /* Touch-friendly minimum */
+}
+
+.info-row:first-child {
+  padding-top: 0.5rem;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0.5rem;
+}
+
+/* ============================================================
+   LABEL & VALUE - MOBILE
+   ============================================================ */
+
+.label {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
+  color: #616161;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.value {
+  font-size: 1.375rem; /* 22px */
+  font-weight: 700;
+  color: #2e7d32;
+  line-height: 1.2;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  direction: ltr;
+  text-align: start;
+  word-break: break-word;
+}
+
+/* RTL Support - Values align to end (right in RTL) */
+[dir="rtl"] .value {
+  direction: ltr;
+  text-align: end;
+}
+
+.bold-number {
+  font-weight: 800 !important;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   TABLET STYLES - ≥ 768px (Horizontal Layout)
+   ============================================================ */
+
+@media (min-width: 768px) {
+  mat-card {
+    margin: 0 0 1.5rem 0;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  mat-card-header {
+    padding: 1.25rem 1.5rem;
+    gap: 1rem;
+    min-height: 64px;
+  }
+
+  mat-card-title {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  mat-card-content {
+    padding: 1.5rem;
+    gap: 0;
+  }
+
+  /* Switch to horizontal layout */
+  .info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .info-row:first-child {
+    padding-top: 0;
+  }
+
+  .info-row:last-child {
+    padding-bottom: 0;
+  }
+
+  .label {
+    font-size: 1rem; /* 16px */
+    flex-shrink: 0;
+  }
+
+  .value {
+    font-size: 1.5rem; /* 24px */
+    text-align: end;
+  }
+
+  [dir="rtl"] .value {
+    text-align: start;
+  }
+
+  .bold-number {
+    letter-spacing: 0.03em;
+  }
+}
+
+/* ============================================================
+   DESKTOP STYLES - ≥ 1024px (Enhanced Spacing)
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  mat-card {
+    margin: 0 0 2rem 0;
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.3s ease;
+  }
+
+  mat-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  mat-card-header {
+    padding: 1.5rem 2rem;
+    gap: 1rem;
+    min-height: 72px;
+  }
+
+  mat-card-title {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  mat-card-content {
+    padding: 1.75rem 2rem;
+  }
+
+  .info-row {
+    padding: 1.25rem 0;
+    border-bottom-width: 1px;
+    transition: background-color 0.2s ease;
+  }
+
+  .info-row:hover {
+    background-color: rgba(46, 125, 50, 0.03);
+    border-radius: 8px;
+    margin: 0 -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .label {
+    font-size: 1.0625rem; /* 17px */
+  }
+
+  .value {
+    font-size: 1.625rem; /* 26px */
+  }
+
+  .bold-number {
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ============================================================
+   LARGE DESKTOP - ≥ 1440px (Premium Spacing)
+   ============================================================ */
+
+@media (min-width: 1440px) {
+  mat-card-header {
+    padding: 1.75rem 2.5rem;
+  }
+
+  mat-card-title {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  mat-card-content {
+    padding: 2rem 2.5rem;
+  }
+
+  .info-row {
+    padding: 1.5rem 0;
+  }
+
+  .label {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .value {
+    font-size: 1.75rem; /* 28px */
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY & FOCUS STATES
+   ============================================================ */
+
+/* Keyboard focus */
+mat-card:focus-within {
+  outline: 3px solid #2e7d32;
+  outline-offset: 2px;
+}
+
+.info-row:focus-within {
+  background-color: rgba(46, 125, 50, 0.05);
+  border-radius: 6px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  mat-card {
+    border: 2px solid #2e7d32;
+  }
+
+  mat-card-header {
+    border-bottom: 2px solid #1b5e20;
+  }
+
+  .info-row {
+    border-bottom-width: 2px;
+    border-bottom-color: #424242;
+  }
+
+  .label {
+    color: #212121;
+    font-weight: 600;
+  }
+
+  .value {
+    color: #1b5e20;
+    font-weight: 900;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  mat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .info-row:hover {
+    background-color: transparent;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+  mat-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+
+  mat-card-header {
+    background: #2e7d32 !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding: 1rem;
+  }
+
+  mat-card-content {
+    padding: 1rem;
+  }
+
+  .info-row {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .label {
+    color: #212121;
+    font-size: 14px;
+  }
+
+  .value {
+    color: #212121;
+    font-size: 16px;
+  }
+
+  /* Hide hover effects */
+  .info-row:hover {
+    background-color: transparent;
+  }
+}
+
+/* ============================================================
+   DARK MODE SUPPORT (Optional - if needed)
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  mat-card {
+    background: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-row {
+    border-bottom-color: #424242;
+  }
+
+  .label {
+    color: #b0b0b0;
+  }
+
+  .value {
+    color: #66bb6a;
+  }
+
+  @media (min-width: 1024px) {
+    mat-card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .info-row:hover {
+      background-color: rgba(66, 187, 106, 0.08);
+    }
+  }
+}
+
+/* ============================================================
+   LOADING SKELETON STATE (Optional Enhancement)
+   ============================================================ */
+
+.info-row.loading .value {
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 0%,
+    #f5f5f5 50%,
+    #e0e0e0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  min-width: 120px;
+  min-height: 1.5em;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-row.loading .value {
+    animation: none;
+    background: #e0e0e0;
+  }
+}
+
+/* Dark mode skeleton */
+@media (prefers-color-scheme: dark) {
+  .info-row.loading .value {
+    background: linear-gradient(
+      90deg,
+      #424242 0%,
+      #616161 50%,
+      #424242 100%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .info-row.loading .value {
+      background: #424242;
+    }
+  }
+}
+
+/* ============================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================ */
+
+/* Increase touch targets on touch devices */
+@media (pointer: coarse) {
+  .info-row {
+    min-height: 56px;
+    padding: 1.25rem 0;
+  }
+
+  mat-card-header {
+    min-height: 64px;
+  }
+}
+
+/* Remove hover effects on touch devices */
+@media (hover: none) {
+  .info-row:hover {
+    background-color: transparent;
+  }
+
+  mat-card:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@media (hover: none) and (min-width: 768px) {
+  mat-card:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (hover: none) and (min-width: 1024px) {
+  mat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}

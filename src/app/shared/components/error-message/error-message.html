@@ -1,0 +1,16 @@
+    @if (message()) {
+      <div class="error-message" [class]="type()">
+        <div class="error-content">
+          <span class="error-icon">⚠️</span>
+          <span class="error-text">{{ message() }}</span>
+        </div>
+        @if (dismissible()) {
+          <button
+            class="dismiss-btn"
+            (click)="onDismiss()"
+            aria-label="Dismiss error">
+            ✕
+          </button>
+        }
+      </div>
+    }

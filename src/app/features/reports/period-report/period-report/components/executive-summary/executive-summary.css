@@ -1,0 +1,1030 @@
+/* .executive-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .kpi-card {
+      display: flex;
+      gap: 16px;
+      padding: 24px;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .kpi-card.revenue {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .kpi-card.profit {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .kpi-card.margin {
+      background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+      color: white;
+    }
+
+    .kpi-card.daily {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .kpi-icon-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      opacity: 0.9;
+    }
+
+    .kpi-content {
+      flex: 1;
+    }
+
+    .kpi-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 8px 0;
+      opacity: 0.9;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .kpi-subtext {
+      font-size: 12px;
+      margin: 4px 0 0 0;
+      opacity: 0.8;
+    }
+
+    .kpi-trend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .kpi-trend mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .kpi-trend.up {
+      color: #a8ff78;
+    }
+
+    .kpi-trend.down {
+      color: #ffcccc;
+    }
+
+    .operational-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .operational-card mat-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: #667eea;
+    }
+
+    .operational-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #f5f7fa;
+      border-radius: 8px;
+    }
+
+    .stat-item.warning {
+      background: #fff3cd;
+      border-left: 4px solid #ff9800;
+    }
+
+    .stat-item mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: #667eea;
+    }
+
+    .stat-item.warning mat-icon {
+      color: #ff9800;
+    }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .performance-card {
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .performance-card.improving {
+      background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-left: 6px solid #4caf50;
+    }
+
+    .performance-card.declining {
+      background: linear-gradient(90deg, #ffebee 0%, #ffcdd2 100%);
+      border-left: 6px solid #f44336;
+    }
+
+    .performance-card.stable {
+      background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+      border-left: 6px solid #2196f3;
+    }
+
+    .performance-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .performance-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+
+    .performance-card.improving .performance-icon {
+      color: #4caf50;
+    }
+
+    .performance-card.declining .performance-icon {
+      color: #f44336;
+    }
+
+    .performance-card.stable .performance-icon {
+      color: #2196f3;
+    }
+
+    .performance-text h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #333;
+    }
+
+    .performance-text p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .operational-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+mat-card-content p::after {
+  font-weight: bolder;
+  font-size: 20px;
+  color: #2e7d32;
+} */
+/* ==========================================================================
+   MOBILE-FIRST EXECUTIVE SUMMARY STYLES
+   Base styles for mobile (default), then tablet (≥768px), then desktop (≥1024px)
+   ========================================================================== */
+
+/* ==========================================================================
+   BASE MOBILE STYLES (Default - No Media Query)
+   ========================================================================== */
+
+.executive-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   KPI Cards Grid - Mobile
+   -------------------------------------------------------------------------- */
+
+.kpi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kpi-card {
+  display: flex;
+  gap: 12px;
+  padding: 18px 16px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-height: 100px;
+}
+
+.kpi-card:active {
+  transform: scale(0.98);
+}
+
+/* KPI Card Colors */
+.kpi-card.revenue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.kpi-card.profit {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.kpi-card.margin {
+  background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+  color: white;
+}
+
+.kpi-card.daily {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+/* KPI Icon */
+.kpi-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.95;
+}
+
+/* KPI Content */
+.kpi-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0; /* للسماح بـ text overflow */
+}
+
+.kpi-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  opacity: 0.95;
+  line-height: 1.3;
+}
+
+.kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.kpi-subtext {
+  font-size: 11px;
+  margin: 4px 0 0 0;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* KPI Trend */
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kpi-trend mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.kpi-trend.up {
+  color: #a8ff78;
+}
+
+.kpi-trend.down {
+  color: #ffcccc;
+}
+
+/* --------------------------------------------------------------------------
+   Operational Card - Mobile
+   -------------------------------------------------------------------------- */
+
+.operational-card {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.operational-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 16px 16px 0;
+}
+
+.section-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.operational-card mat-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.operational-card mat-card-content {
+  padding: 0 16px 16px;
+}
+
+/* Operational Grid - Mobile (Single Column) */
+.operational-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  min-height: 60px;
+  transition: background-color 0.2s ease;
+}
+
+.stat-item:active {
+  background: #ebeef3;
+}
+
+.stat-item.warning {
+  background: #fff3cd;
+  border-right: 4px solid #ff9800;
+}
+
+.stat-item mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.stat-item.warning mat-icon {
+  color: #ff9800;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.stat-value {
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   Performance Card - Mobile
+   -------------------------------------------------------------------------- */
+
+.performance-card {
+  padding: 18px 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+.performance-card.improving {
+  background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-right: 5px solid #4caf50;
+}
+
+.performance-card.declining {
+  background: linear-gradient(90deg, #ffebee 0%, #ffcdd2 100%);
+  border-right: 5px solid #f44336;
+}
+
+.performance-card.stable {
+  background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+  border-right: 5px solid #2196f3;
+}
+
+.performance-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.performance-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.performance-card.improving .performance-icon {
+  color: #4caf50;
+}
+
+.performance-card.declining .performance-icon {
+  color: #f44336;
+}
+
+.performance-card.stable .performance-icon {
+  color: #2196f3;
+}
+
+.performance-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.performance-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #333;
+  line-height: 1.3;
+}
+
+.performance-text p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Special Styling (من الكود الأصلي)
+   -------------------------------------------------------------------------- */
+
+mat-card-content p::after {
+  font-weight: bolder;
+  font-size: 18px;
+  color: #2e7d32;
+}
+
+/* ==========================================================================
+   TABLET STYLES (≥768px)
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .executive-summary {
+    gap: 20px;
+    padding: 20px;
+  }
+
+  /* KPI Grid - 2 Columns on Tablet */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .kpi-card {
+    padding: 20px 18px;
+    border-radius: 10px;
+    gap: 14px;
+    min-height: 110px;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  .kpi-icon {
+    font-size: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .kpi-label {
+    font-size: 13px;
+    margin-bottom: 7px;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+  }
+
+  .kpi-subtext {
+    font-size: 12px;
+  }
+
+  .kpi-trend {
+    font-size: 13px;
+    margin-top: 7px;
+  }
+
+  .kpi-trend mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  /* Operational Card */
+  .operational-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .operational-card mat-card-header {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 18px 18px 0;
+  }
+
+  .section-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .operational-card mat-card-title {
+    font-size: 17px;
+  }
+
+  .operational-card mat-card-content {
+    padding: 0 18px 18px;
+  }
+
+  /* Operational Grid - 2 Columns on Tablet */
+  .operational-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-item {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .stat-item.warning {
+    border-right-width: 4px;
+  }
+
+  .stat-item mat-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .stat-value {
+    font-size: 19px;
+  }
+
+  /* Performance Card */
+  .performance-card {
+    padding: 20px 18px;
+    border-radius: 10px;
+  }
+
+  .performance-card.improving,
+  .performance-card.declining,
+  .performance-card.stable {
+    border-right-width: 5px;
+  }
+
+  .performance-content {
+    gap: 16px;
+  }
+
+  .performance-icon {
+    font-size: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .performance-text h3 {
+    font-size: 18px;
+    margin-bottom: 7px;
+  }
+
+  .performance-text p {
+    font-size: 14px;
+  }
+
+  mat-card-content p::after {
+    font-size: 19px;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP STYLES (≥1024px)
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  .executive-summary {
+    gap: 24px;
+    padding: 24px;
+  }
+
+  /* KPI Grid - Auto-fit with min 280px */
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .kpi-card {
+    padding: 24px;
+    border-radius: 12px;
+    gap: 16px;
+    min-height: 130px;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .kpi-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .kpi-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 32px;
+  }
+
+  .kpi-subtext {
+    font-size: 12px;
+  }
+
+  .kpi-trend {
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .kpi-trend mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Operational Card */
+  .operational-card {
+    border-radius: 12px;
+  }
+
+  .operational-card mat-card-header {
+    margin-bottom: 16px;
+    padding: 20px 20px 0;
+  }
+
+  .section-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .operational-card mat-card-title {
+    font-size: 18px;
+  }
+
+  .operational-card mat-card-content {
+    padding: 0 20px 20px;
+  }
+
+  /* Operational Grid - Auto-fit with min 200px */
+  .operational-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .stat-item {
+    padding: 16px;
+  }
+
+  .stat-item:hover {
+    background: #ebeef3;
+  }
+
+  .stat-item.warning {
+    border-left: 4px solid #ff9800;
+    border-right: none;
+  }
+
+  .stat-item.warning:hover {
+    background: #fff0d1;
+  }
+
+  .stat-item mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  /* Performance Card */
+  .performance-card {
+    padding: 24px;
+    border-radius: 12px;
+  }
+
+  .performance-card.improving,
+  .performance-card.declining,
+  .performance-card.stable {
+    border-left: 6px solid;
+    border-right: none;
+  }
+
+  .performance-card.improving {
+    border-left-color: #4caf50;
+  }
+
+  .performance-card.declining {
+    border-left-color: #f44336;
+  }
+
+  .performance-card.stable {
+    border-left-color: #2196f3;
+  }
+
+  .performance-content {
+    gap: 20px;
+  }
+
+  .performance-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .performance-text h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .performance-text p {
+    font-size: 14px;
+  }
+
+  mat-card-content p::after {
+    font-size: 20px;
+  }
+}
+
+/* ==========================================================================
+   LARGE DESKTOP STYLES (≥1440px) - للشاشات الكبيرة جداً
+   ========================================================================== */
+
+@media (min-width: 1440px) {
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 أعمدة على الشاشات الكبيرة */
+  }
+
+  .operational-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* ==========================================================================
+   RTL SUPPORT
+   ========================================================================== */
+
+[dir="rtl"] .stat-item.warning {
+  border-right: 4px solid #ff9800;
+  border-left: none;
+}
+
+[dir="rtl"] .performance-card.improving,
+[dir="rtl"] .performance-card.declining,
+[dir="rtl"] .performance-card.stable {
+  border-right: 5px solid;
+  border-left: none;
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .stat-item.warning {
+    border-left: 4px solid #ff9800;
+    border-right: none;
+  }
+
+  [dir="rtl"] .performance-card.improving,
+  [dir="rtl"] .performance-card.declining,
+  [dir="rtl"] .performance-card.stable {
+    border-left: 6px solid;
+    border-right: none;
+  }
+
+  [dir="rtl"] .performance-card.improving {
+    border-left-color: #4caf50;
+  }
+
+  [dir="rtl"] .performance-card.declining {
+    border-left-color: #f44336;
+  }
+
+  [dir="rtl"] .performance-card.stable {
+    border-left-color: #2196f3;
+  }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY & PERFORMANCE ENHANCEMENTS
+   ========================================================================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card,
+  .stat-item,
+  .performance-card {
+    transition: none;
+  }
+
+  .kpi-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .kpi-card {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .stat-item {
+    border: 1px solid #ccc;
+  }
+
+  .stat-item.warning {
+    border: 2px solid #ff9800;
+  }
+
+  .kpi-value,
+  .stat-value {
+    font-weight: 900 !important;
+  }
+}
+
+/* Focus states for accessibility */
+.kpi-card:focus-within,
+.stat-item:focus-within,
+.performance-card:focus-within {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Ensure text readability on gradient backgrounds */
+.kpi-card {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.performance-card.improving,
+.performance-card.declining,
+.performance-card.stable {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Print styles */
+@media print {
+  .executive-summary {
+    padding: 0;
+    gap: 16px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    page-break-inside: avoid;
+  }
+
+  .kpi-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .kpi-card.revenue,
+  .kpi-card.profit,
+  .kpi-card.margin,
+  .kpi-card.daily {
+    background: #f5f5f5 !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .operational-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-item {
+    page-break-inside: avoid;
+  }
+
+  .performance-card {
+    page-break-inside: avoid;
+  }
+}

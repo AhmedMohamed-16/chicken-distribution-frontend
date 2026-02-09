@@ -1,17 +1,55 @@
+/* ============================================================================
+   VEHICLE FORM DIALOG - FINAL RESPONSIVE CSS
+   ============================================================================ */
+
+/* ======== Dialog Content ======== */
+mat-dialog-content {
+  max-width: 600px;
+  padding: 24px;
+  overflow-y: auto;
+  max-height: 80vh;
+  box-sizing: border-box;
+}
+
+/* ======== Form Layout ======== */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-field {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ======== Dialog Actions ======== */
+mat-dialog-actions {
+  padding: 16px 24px;
+  gap: 8px;
+}
+
+mat-dialog-actions button {
+  min-width: 100px;
+}
+
+/* ======== Responsive Styles ======== */
+@media (max-width: 768px) {
   mat-dialog-content {
-      min-width: 500px;
-      padding: 24px;
-    }
+    max-width: 100%;
+    padding: 16px;
+  }
 
-    .form-row {
-      display: flex;
-      gap: 16px;
-    }
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
 
-    .form-field {
-      flex: 1;
-    }
-
-    .full-width {
-      width: 100%;
-    }
+/* ======== RTL Support ======== */
+[dir="rtl"] .form-row {
+  flex-direction: row-reverse;
+}

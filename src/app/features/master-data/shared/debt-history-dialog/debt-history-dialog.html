@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>تاريخ الديون</h2>
+<!-- <h2 mat-dialog-title>تاريخ الديون</h2>
 
 @if (loading()) {
 <div class="text-center">
@@ -12,7 +12,6 @@
 
 <table mat-table [dataSource]="dataSource()" class="full-width">
 
-  <!-- التاريخ -->
   <ng-container matColumnDef="date">
     <th mat-header-cell *matHeaderCellDef>التاريخ</th>
     <td mat-cell *matCellDef="let row">
@@ -20,7 +19,6 @@
     </td>
   </ng-container>
 
-  <!-- إجمالي البيع -->
   <ng-container matColumnDef="total_amount">
     <th mat-header-cell *matHeaderCellDef>إجمالي البيع</th>
     <td mat-cell *matCellDef="let row">
@@ -28,7 +26,6 @@
     </td>
   </ng-container>
 
-  <!-- المبلغ المدفوع -->
   <ng-container matColumnDef="paid_amount">
     <th mat-header-cell *matHeaderCellDef>المبلغ المدفوع</th>
     <td mat-cell *matCellDef="let row">
@@ -36,9 +33,8 @@
     </td>
   </ng-container>
 
-  <!-- المبلغ المتبقي -->
   <ng-container matColumnDef="remaining_amount">
-    <th mat-header-cell *matHeaderCellDef>المبلغ المتبقي</th>
+    <th mat-header-cell *matHeaderCellDef>الدين</th>
     <td mat-cell *matCellDef="let row">
       {{ row.remaining_amount !== '-' ? (row.remaining_amount | number:'1.2-2') + ' ج' : '-' }}
     </td>
@@ -48,4 +44,110 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
 </table>
-}
+} -->
+<!-- <h2 mat-dialog-title>تاريخ الديون</h2>
+
+@if (loading()) {
+<div class="text-center">
+  <mat-spinner></mat-spinner>
+</div>
+} @else {
+
+<mat-chip color="warn" style="margin-bottom: 12px">
+  الدين الحالي: {{ currentDebt() | number:'1.2-2' }} ج
+</mat-chip>
+
+<table mat-table [dataSource]="dataSource()" class="full-width">
+
+   <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+    <td mat-cell *matCellDef="let row">
+      {{ row.date | date:'yyyy-MM-dd hh:mm a'  }}
+    </td>
+  </ng-container>
+
+   <ng-container matColumnDef="total_amount">
+    <th mat-header-cell *matHeaderCellDef>إجمالي البيع</th>
+    <td mat-cell *matCellDef="let row">
+      {{ row.total_amount !== '-' ? (row.total_amount | number:'1.2-2') + ' ج' : '-' }}
+    </td>
+  </ng-container>
+
+   <ng-container matColumnDef="paid_amount">
+    <th mat-header-cell *matHeaderCellDef>المبلغ المدفوع</th>
+    <td mat-cell *matCellDef="let row">
+      {{ row.paid_amount | number:'1.2-2' }} ج
+    </td>
+  </ng-container>
+
+   <ng-container matColumnDef="debt_after">
+    <th mat-header-cell *matHeaderCellDef>الدين الحالي</th>
+    <td mat-cell *matCellDef="let row">
+      {{ row.debt_after | number:'1.2-2' }} ج
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+</table>
+} -->
+<h2 mat-dialog-title>تاريخ الديون</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (loading()) {
+  <div class="text-center">
+    <mat-spinner></mat-spinner>
+  </div>
+  } @else {
+
+  <mat-chip color="warn" style="margin-bottom: 12px">
+    الدين الحالي: {{formatCurrency( currentDebt())  }} ج
+  </mat-chip>
+
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource()" class="full-width">
+
+      <!-- التاريخ -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+        <td mat-cell *matCellDef="let row">
+          {{ formatDateTime(row.date )  }}
+        </td>
+      </ng-container>
+
+      <!-- إجمالي البيع -->
+      <ng-container matColumnDef="total_amount">
+        <th mat-header-cell *matHeaderCellDef>إجمالي البيع من {{this.data.entityType !=='buyer'? 'المزرعه':'عندنا'}}</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.total_amount !== '-' ? (formatCurrency(row.total_amount )) + ' ج' : '-' }}
+        </td>
+      </ng-container>
+
+      <!-- المبلغ المدفوع -->
+      <ng-container matColumnDef="paid_amount">
+        <th mat-header-cell *matHeaderCellDef>المبلغ المدفوع</th>
+        <td mat-cell *matCellDef="let row">
+          {{formatCurrency( row.paid_amount ) }} ج
+        </td>
+      </ng-container>
+
+      <!-- الدين -->
+      <ng-container matColumnDef="debt_after">
+        <th mat-header-cell *matHeaderCellDef>الدين الحالي</th>
+        <td mat-cell *matCellDef="let row">
+          {{ formatCurrency(row.debt_after ) }} ج
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    </table>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>إغلاق</button>
+</mat-dialog-actions>

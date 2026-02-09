@@ -1,0 +1,164 @@
+/* ========================================
+   User Details Dialog Styles (Mobile-First)
+   ======================================== */
+
+/* ---------- Dialog Content ---------- */
+[mat-dialog-content] {
+  padding: 0 !important;
+  margin: 0;
+  width: 100%;
+  max-height: 60vh;        /* Smaller on mobile */
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+}
+
+.p-0 {
+  padding: 0 !important;
+}
+
+/* ---------- Dialog Actions ---------- */
+[mat-dialog-actions] {
+  padding: 12px 16px;      /* Mobile padding */
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;  /* Stack on mobile */
+  gap: 10px;
+}
+
+.justify-end {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ---------- Close Button ---------- */
+[mat-dialog-actions] button[mat-button] {
+  min-width: 80px;
+  min-height: 44px;        /* Touch target */
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 1rem;
+  width: 100%;             /* Full width on mobile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Scrollbar Styling ---------- */
+[mat-dialog-content]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ---------- Focus State ---------- */
+[mat-dialog-actions] button:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+[mat-dialog-actions] button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===============================
+   Tablet Styles (≥600px)
+================================ */
+@media (min-width: 600px) {
+  [mat-dialog-content] {
+    max-height: 70vh;      /* Larger on tablet */
+  }
+
+  [mat-dialog-actions] {
+    padding: 16px 24px;
+    flex-direction: row;   /* Horizontal on tablet */
+    justify-content: flex-end;
+  }
+
+  .justify-end {
+    width: auto;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    width: auto;           /* Auto width on tablet+ */
+  }
+}
+
+/* ===============================
+   Desktop Styles (≥1024px)
+================================ */
+@media (min-width: 1024px) {
+  [mat-dialog-content] {
+    max-height: 75vh;
+  }
+
+  [mat-dialog-actions] {
+    padding: 16px 24px;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    min-width: 100px;
+    padding: 10px 20px;
+  }
+}
+
+/* ===============================
+   Small Mobile Refinements (<480px)
+================================ */
+@media (max-width: 480px) {
+  [mat-dialog-actions] {
+    padding: 12px;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] [mat-dialog-actions] {
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  [dir="rtl"] [mat-dialog-actions] {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+}
+
+/* ===============================
+   Accessibility
+================================ */
+@media (prefers-reduced-motion: reduce) {
+  [mat-dialog-content] {
+    scroll-behavior: auto;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  [mat-dialog-actions] {
+    border-top-width: 2px;
+  }
+}

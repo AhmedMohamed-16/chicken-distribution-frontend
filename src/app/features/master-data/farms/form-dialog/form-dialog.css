@@ -1,8 +1,95 @@
-    mat-dialog-content {
-      min-width: 500px;
-      padding: 24px;
-    }
+/* ==========================================
+   Dialog Content - Mobile First
+   ========================================== */
 
-    .full-width {
-      width: 100%;
-    }
+mat-dialog-content {
+  width: 100%;
+  padding: 16px; /* mobile default */
+  box-sizing: border-box;
+  max-width: 100%; /* mobile scrollable */
+}
+
+/* Form Fields */
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Form Field Inputs & Textareas */
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field input,
+mat-form-field textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease-in-out;
+}
+
+mat-form-field input:focus,
+mat-form-field textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6; /* focus ring */
+}
+
+/* Allow vertical resize on textareas */
+mat-form-field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Dialog Actions Buttons */
+mat-dialog-actions {
+  display: flex;
+  flex-direction: column; /* stacked on mobile */
+  gap: 12px;
+  padding: 16px 16px;
+}
+
+mat-dialog-actions button {
+  min-height: 44px; /* easy touch */
+  font-size: 1rem;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* RTL Support for Actions */
+[dir="rtl"] mat-dialog-actions {
+  flex-direction: column;
+}
+
+/* ==========================================
+   Tablet Styles (≥768px)
+   ========================================== */
+@media (min-width: 768px) {
+  mat-dialog-content {
+    padding: 20px;
+    max-width: 500px; /* Desktop max width */
+  }
+
+  mat-dialog-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}
+
+/* ==========================================
+   Desktop Styles (≥1024px)
+   ========================================== */
+@media (min-width: 1024px) {
+  mat-dialog-content {
+    padding: 24px;
+  }
+
+  mat-dialog-actions button {
+    font-size: 1.1rem;
+    padding: 14px 20px;
+  }
+}

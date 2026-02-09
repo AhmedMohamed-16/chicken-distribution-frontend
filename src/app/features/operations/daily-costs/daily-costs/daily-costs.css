@@ -1,3 +1,200 @@
- .full-width {
-      width: 100%;
-    }
+/* ============================================================================
+   DAILY COSTS – Mobile-First Responsive CSS (RTL Ready)
+   Strategy:
+   - Mobile is the default (no media queries)
+   - Tablet ≥ 768px
+   - Desktop ≥ 1024px
+   - Touch friendly (44px+)
+   - Horizontal scroll for tables
+   - Clean, structured, readable
+============================================================================ */
+
+/* =========================
+   Base / Mobile (Default)
+========================= */
+
+.costs-container {
+  direction: rtl;
+  padding: 16px;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+.costs-container h2 {
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.costs-container h3 {
+  margin: 28px 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* =========================
+   Form (Mobile)
+========================= */
+
+.costs-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.costs-container mat-form-field {
+  width: 100%;
+}
+
+/* Vehicle badge inside select */
+.vehicle-badge {
+  font-size: 0.75rem;
+  color: #777;
+  margin-inline-start: 6px;
+  font-style: italic;
+}
+
+/* =========================
+   Buttons (Mobile)
+========================= */
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.button-group button {
+  width: 100%;
+  min-height: 44px; /* touch target */
+  font-size: 0.95rem;
+}
+
+.button-group mat-spinner {
+  vertical-align: middle;
+}
+
+/* =========================
+   Costs List / Table (Mobile)
+========================= */
+
+.costs-list {
+  margin-top: 32px;
+  width: 100%;
+  overflow-x: auto; /* ✅ horizontal scroll on mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+.costs-list table {
+  width: 100%;
+  min-width: 520px; /* forces scroll on small screens */
+  border-collapse: collapse;
+  background: #fafafa;
+}
+
+.costs-list th,
+.costs-list td {
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.costs-list th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.costs-list td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.costs-list tr:last-child td {
+  border-bottom: none;
+}
+
+.costs-list tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Shared cost text */
+.shared-cost {
+  color: #999;
+  font-style: italic;
+}
+
+/* =========================
+   Tablet ≥ 768px
+========================= */
+
+@media (min-width: 768px) {
+  .costs-container {
+    padding: 20px;
+    max-width: 900px;
+  }
+
+  .costs-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .costs-container h3 {
+    font-size: 1.2rem;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .button-group button {
+    width: auto;
+    min-width: 160px;
+  }
+
+  .costs-list th,
+  .costs-list td {
+    font-size: 0.9rem;
+    padding: 14px 12px;
+  }
+}
+
+/* =========================
+   Desktop ≥ 1024px
+========================= */
+
+@media (min-width: 1024px) {
+  .costs-container {
+    max-width: 1000px;
+  }
+
+  .costs-list table {
+    min-width: 100%;
+  }
+
+  .costs-list th,
+  .costs-list td {
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================
+   RTL Enhancements
+========================= */
+
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="rtl"] .costs-list th,
+[dir="rtl"] .costs-list td {
+  text-align: right;
+}
+
+[dir="rtl"] .vehicle-badge {
+  margin-inline-start: 0;
+  margin-inline-end: 6px;
+}

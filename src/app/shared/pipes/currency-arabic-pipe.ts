@@ -1,17 +1,21 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { ArabicNumberPipe } from './arabic-number-pipe';
 
 @Pipe({
-  name: 'currencyArabic'
+  name: 'currencyArabic',
+  standalone: true
 })
 export class CurrencyArabicPipe implements PipeTransform {
- transform(value: number | null | undefined, showCurrency: boolean = true): string {
-    if (value === null || value === undefined) return '٠';
 
-    const formatted = value.toLocaleString('ar-EG', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  constructor(private arabicNumber: ArabicNumberPipe) {}
 
-    return showCurrency ? `${formatted} جنيه` : formatted;
+  transform(
+    value: number | string | null | undefined,
+    currency: string = 'جنيه'
+  ): string {
+
+    const formatted = this.arabicNumber.transform(value);
+
+    return formatted ? `${formatted} ${currency}` : '';
   }
 }

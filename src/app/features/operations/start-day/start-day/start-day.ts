@@ -15,6 +15,9 @@ import { OperationService } from '../../../../core/services/operation.service';
 import { VehicleService } from '../../../../core/services/vehicle.service';
 import { Vehicle,DailyOperation } from '../../../../core/models';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
 
 @Component({
   selector: 'app-start-day',
@@ -29,7 +32,9 @@ import { HttpErrorResponse } from '@angular/common/http';
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatIconModule
 
   ],
   templateUrl: './start-day.html',
@@ -45,15 +50,34 @@ export class StartDay implements OnInit{
   loading = signal(false);
   submitting = signal(false);
   vehicles = signal<Vehicle[]>([]);
-  maxDate = new Date();
+  maxDate = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
 
-  startDayForm = this.fb.nonNullable.group({
-    operation_date: [new Date(), Validators.required],
-    vehicle_id: [null as number | null, Validators.required]
+  // startDayForm = this.fb.nonNullable.group({
+  //   operation_date: [new Date(), Validators.required],
+  //   vehicle_id: [null as number | null, Validators.required]
+  // });
+
+
+private utils = inject(ReportUtilitiesService);
+ formatNumber = (num: number | undefined | null |string, decimals?: number) => this.utils.formatNumber(num, decimals);
+
+
+
+  // ✅ Track selected vehicle IDs
+  selectedVehicleIds = signal<number[]>([]);
+
+  startForm = this.fb.group({
+    operation_date: [new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })), Validators.required],
+    vehicle_ids: [[] as number[], [Validators.required, Validators.minLength(1)]]
   });
 
   ngOnInit(): void {
     this.loadVehicles();
+    // ✅ Track vehicle selection changes
+    this.startForm.get('vehicle_ids')?.valueChanges.subscribe(ids => {
+      this.selectedVehicleIds.set(ids || []);
+    });
+
   }
 
   loadVehicles(): void {
@@ -72,39 +96,76 @@ export class StartDay implements OnInit{
     });
   }
 
-  onSubmit(): void {
-    if (this.startDayForm.invalid) return;
+  // onSubmit(): void {
+  //   if (this.startDayForm.invalid) return;
 
+  //   this.submitting.set(true);
+  //   const formValue = this.startDayForm.getRawValue();
+  //   const payload = {
+  //     operation_date: this.formatDate(formValue.operation_date!),
+  //     vehicle_id: formValue.vehicle_id!
+  //   };
+
+  //   this.operationService.startDay(payload).subscribe({
+
+  //     next: (response:any) => {
+  //       const operation: DailyOperation = response.data;
+  //       if(response.alreadyExists)
+  //       this.snackBar.open('تم استكمال اليوم ', 'حسناً', { duration: 3000 });
+  //       else
+  //       this.snackBar.open('تم بدء واستكمال اليوم بنجاح', 'حسناً', { duration: 3000 });
+  //     console.log(operation)
+  //       this.router.navigate(['/operations/daily', operation.id]);
+  //     },
+  //     error: (error:HttpErrorResponse) => {
+  //       this.submitting.set(false);
+  //       this.snackBar.open(
+  //         error.error?.message || 'فشل بدء واستكمال اليوم',
+  //         'حسناً',
+  //         { duration: 3000 }
+  //       );
+  //     }
+  //   });
+  // }
+  onSubmit() {
+    if (!this.startForm.valid) return;
     this.submitting.set(true);
-    const formValue = this.startDayForm.getRawValue();
-    const payload = {
-      operation_date: this.formatDate(formValue.operation_date!),
-      vehicle_id: formValue.vehicle_id!
+    this.loading.set(true);
+
+    const data = {
+      operation_date: this.formatDate(this.startForm.value.operation_date!),
+      vehicle_ids: this.startForm.value.vehicle_ids!
     };
 
-    this.operationService.startDay(payload).subscribe({
-
+    this.operationService.startDay(data).subscribe({
       next: (response:any) => {
-        const operation: DailyOperation = response.data;
-        if(response.alreadyExists)
-        this.snackBar.open('تم استكمال اليوم ', 'حسناً', { duration: 3000 });
+
+        const operation: any = response.data;
+        console.log("data",response)
+        if(response?.vehicleResults){
+       if(response.vehicleResults[0].OperationAlreadyExists)
+        {this.snackBar.open('تم بدء الرحله واستكمال اليوم', 'حسناً', { duration: 3000 });
+        }
+        else if(response.vehicleResults[0].vehicleAlreadyExists)
+        {this.snackBar.open('تم استكمال الرحله واستكمال اليوم', 'حسناً', { duration: 3000 });
+        }
+
+        }
+
         else
-        this.snackBar.open('تم بدء واستكمال اليوم بنجاح', 'حسناً', { duration: 3000 });
-      console.log(operation)
+        this.snackBar.open('تم بدء رحله التوزيع و بدء اليوم بنجاح', 'حسناً', { duration: 3000 });
         this.router.navigate(['/operations/daily', operation.id]);
       },
       error: (error:HttpErrorResponse) => {
-        this.submitting.set(false);
-        this.snackBar.open(
-          error.error?.message || 'فشل بدء واستكمال اليوم',
-          'حسناً',
-          { duration: 3000 }
-        );
+        this.loading.set(false);
+        this.snackBar.open( error.error?.message ||'فشل بدء رحله', 'حسناً', { duration: 3000 });
+        console.error(error.error?.message);
       }
     });
   }
-
   cancel(): void {
+    console.log("DWq,ld");
+
     this.router.navigate(['/dashboard']);
   }
 
@@ -114,4 +175,17 @@ export class StartDay implements OnInit{
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+
+  getVehicleName(id: number): string {
+    return this.vehicles().find(v => v.id === id)?.name || '';
+  }
+
+  removeVehicle(vehicleId: number) {
+    const current = this.startForm.value.vehicle_ids || [];
+    const updated = current.filter(id => id !== vehicleId);
+    this.startForm.patchValue({ vehicle_ids: updated });
+  }
+
+
+
 }

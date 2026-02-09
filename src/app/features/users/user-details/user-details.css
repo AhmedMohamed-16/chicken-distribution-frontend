@@ -1,0 +1,635 @@
+/* ========================================
+   User Details Dialog Styles (Mobile-First)
+   ======================================== */
+
+/* ---------- Dialog Content ---------- */
+[mat-dialog-content] {
+  padding: 0 !important;
+  margin: 0;
+  width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.p-0 {
+  padding: 0 !important;
+}
+
+/* ---------- Dialog Actions ---------- */
+[mat-dialog-actions] {
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.justify-end {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ---------- Close Button ---------- */
+[mat-dialog-actions] button[mat-button] {
+  min-width: 80px;
+  min-height: 44px;
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 1rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Scrollbar Styling ---------- */
+[mat-dialog-content]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+[mat-dialog-content]::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ========================================
+   User Details Content (Mobile-First)
+   ======================================== */
+
+/* ---------- Container ---------- */
+.container {
+  padding: 16px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.p-6 {
+  padding: 16px;
+}
+
+.max-w-4xl {
+  max-width: 100%;
+}
+
+/* ---------- Loading Spinner ---------- */
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.py-12 {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ---------- Header ---------- */
+.mb-6 {
+  margin-bottom: 16px;
+}
+
+.text-3xl {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-gray-600 {
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+/* ---------- Status Badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.badge-blue {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+/* ---------- Card ---------- */
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.mb-4 {
+  margin-bottom: 12px;
+}
+
+/* ---------- Card Title ---------- */
+.text-xl {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* ---------- Grid Layout ---------- */
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: 1fr;
+}
+
+.gap-4 {
+  gap: 12px;
+}
+
+/* ---------- Info Fields ---------- */
+.card .grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.card .grid > div:last-child {
+  border-bottom: none;
+}
+
+.card label {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.card p {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+/* ---------- Permissions Section ---------- */
+.space-y-4 > * + * {
+  margin-top: 12px;
+}
+
+.space-y-4 > div {
+  padding: 12px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+}
+
+.space-y-4 h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+/* ---------- Empty State ---------- */
+.text-center {
+  text-align: center;
+}
+
+.py-8 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1565c0;
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  min-height: 36px;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Focus States ---------- */
+.btn:focus,
+[mat-dialog-actions] button:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.btn:focus:not(:focus-visible),
+[mat-dialog-actions] button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------- Utility Classes ---------- */
+.w-full {
+  width: 100%;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+/* ===============================
+   Tablet Styles (≥600px)
+================================ */
+@media (min-width: 600px) {
+  /* Dialog */
+  [mat-dialog-content] {
+    max-height: 70vh;
+  }
+
+  [mat-dialog-actions] {
+    padding: 16px 24px;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .justify-end {
+    width: auto;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    width: auto;
+  }
+
+  /* Container */
+  .container {
+    padding: 20px;
+  }
+
+  .p-6 {
+    padding: 20px;
+  }
+
+  /* Grid */
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gap-4 {
+    gap: 16px;
+  }
+
+  /* Card */
+  .card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card .grid > div {
+    border-bottom: none;
+    padding: 0;
+  }
+
+  /* Typography */
+  .text-3xl {
+    font-size: 1.75rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .badge {
+    padding: 6px 16px;
+    font-size: 0.875rem;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  .py-12 {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .py-8 {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+}
+
+/* ===============================
+   Desktop Styles (≥1024px)
+================================ */
+@media (min-width: 1024px) {
+  /* Dialog */
+  [mat-dialog-content] {
+    max-height: 75vh;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    min-width: 100px;
+    padding: 10px 20px;
+  }
+
+  /* Container */
+  .container {
+    padding: 24px;
+  }
+
+  .p-6 {
+    padding: 24px;
+  }
+
+  .max-w-4xl {
+    max-width: 56rem;
+  }
+
+  /* Card */
+  .card {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Typography */
+  .text-3xl {
+    font-size: 2rem;
+  }
+
+  .mb-6 {
+    margin-bottom: 24px;
+  }
+
+  .mb-4 {
+    margin-bottom: 16px;
+  }
+
+  /* Spacing */
+  .space-y-4 > * + * {
+    margin-top: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* ===============================
+   Small Mobile (<480px)
+================================ */
+@media (max-width: 480px) {
+  /* Dialog */
+  [mat-dialog-actions] {
+    padding: 12px;
+  }
+
+  [mat-dialog-actions] button[mat-button] {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Typography */
+  .text-3xl {
+    font-size: 1.25rem;
+  }
+
+  .text-xl {
+    font-size: 1.05rem;
+  }
+
+  /* Header */
+  .flex.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Badge */
+  .badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .badge-blue {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Permissions */
+  .flex-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] [mat-dialog-actions] {
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  [dir="rtl"] [mat-dialog-actions] {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+}
+
+[dir="rtl"] .grid,
+[dir="rtl"] .flex {
+  direction: rtl;
+}
+
+/* ===============================
+   Accessibility
+================================ */
+@media (prefers-reduced-motion: reduce) {
+  [mat-dialog-content],
+  .card,
+  .btn {
+    animation: none;
+    transition: none;
+  }
+
+  .spinner {
+    animation: spin 2s linear infinite;
+  }
+}
+
+@media (prefers-contrast: high) {
+  [mat-dialog-actions] {
+    border-top-width: 2px;
+  }
+
+  .badge {
+    border: 1px solid currentColor;
+  }
+
+  .card {
+    border: 1px solid #e0e0e0;
+  }
+}
+
+/* ===============================
+   Print Styles
+================================ */
+@media print {
+  .btn,
+  .spinner,
+  [mat-dialog-actions] {
+    display: none;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+    page-break-inside: avoid;
+  }
+
+  .badge {
+    border: 1px solid currentColor;
+  }
+
+  [mat-dialog-content] {
+    max-height: none;
+    overflow: visible;
+  }
+}

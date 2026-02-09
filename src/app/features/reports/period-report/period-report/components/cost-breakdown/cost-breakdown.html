@@ -1,0 +1,43 @@
+<mat-card class="costs-card">
+  <mat-card-header>
+    <mat-icon>payments</mat-icon>
+    <mat-card-title>تحليل التكاليف</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="info-row">
+      <span class="label">إجمالي التكاليف:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(breakdown().total_costs) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">المشتريات:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(breakdown().components.purchases) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">تكاليف المركبات:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(breakdown().components.vehicle_costs) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">التكاليف التشغيلية:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(breakdown().components.operating_costs) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">الخسائر:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(breakdown().components.losses) }} ج
+      </span>
+    </div>
+  </mat-card-content>
+</mat-card>

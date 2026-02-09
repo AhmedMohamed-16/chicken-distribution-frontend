@@ -1,0 +1,14 @@
+@if (comparison().has_comparison && comparison().changes) {
+  <mat-card>
+    <mat-card-header>
+      <mat-icon>compare_arrows</mat-icon>
+      <mat-card-title>مقارنة مع الفترة السابقة</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>تغير الإيرادات: {{ formatPercentage(comparison().changes!.revenue_change_pct, 1) }}%</p>
+      <p>تغير الربح: {{ formatPercentage(comparison().changes!.profit_change_pct, 1) }}%</p>
+      <p>الاتجاه العام: {{ comparison().changes!.overall_trend }}</p>
+      <!-- Add comparison charts and detailed metrics -->
+    </mat-card-content>
+  </mat-card>
+}

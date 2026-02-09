@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>التقرير اليومي</mat-card-title>
@@ -27,8 +27,7 @@
       </div>
       } @else if (report()) {
       <div class="report-content">
-        <!-- Summary Section -->
-        <div class="summary-section">
+         <div class="summary-section">
           <h3>الملخص المالي</h3>
           <div class="summary-grid">
             <div class="summary-card">
@@ -54,7 +53,6 @@
           </div>
         </div>
 
-        <!-- Farm Transactions -->
         @if (report()!.farm_transactions && report()!.farm_transactions.length > 0) {
         <div class="section">
           <h3>معاملات المزارع</h3>
@@ -85,7 +83,6 @@
         </div>
         }
 
-        <!-- Sale Transactions -->
         @if (report()!.sales && report()!.sales.length > 0) {
         <div class="section">
           <h3>معاملات المبيعات</h3>
@@ -116,7 +113,6 @@
         </div>
         }
 
-        <!-- Daily Costs -->
         @if (report()!.costs && report()!.costs.length > 0) {
         <div class="section">
           <h3>التكاليف اليومية</h3>
@@ -142,7 +138,6 @@
         </div>
         }
 
-        <!-- Transport Losses -->
         @if (report()!.losses && report()!.losses.length > 0) {
         <div class="section">
           <h3>خسائر النقل</h3>
@@ -167,6 +162,1417 @@
           </table>
         </div>
         }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<!-- ============================================================================ -->
+<!-- DAILY REPORT TEMPLATE - COMPLETE MULTI-VEHICLE REFACTORING -->
+<!-- ============================================================================ -->
+<!-- File: src/app/features/reports/daily-report/daily-report.html -->
+
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>التقرير اليومي</mat-card-title>
+      <mat-card-subtitle>عرض تفاصيل العمليات اليومية</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="dateForm" (ngSubmit)="loadReport()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>اختر التاريخ</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">
+            <mat-icon>search</mat-icon>
+            عرض التقرير
+          </button>
+        </div>
+      </form>
+
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>جاري تحميل التقرير...</p>
+      </div>
+      }
+
+      @else if (report()) {
+      <div class="report-content">
+
+         @if (vehicles().length > 0) {
+        <div class="vehicles-section">
+          <h3>المركبات المستخدمة</h3>
+          <mat-chip-set>
+            @for (vehicle of vehicles(); track vehicle.id) {
+            <mat-chip>
+              <mat-icon matChipAvatar>local_shipping</mat-icon>
+              {{ vehicle.name }} - {{ vehicle.plate_number }}
+            </mat-chip>
+            }
+          </mat-chip-set>
+        </div>
+        }
+
+         @if (vehicles().length > 1) {
+        <div class="filter-section">
+          <mat-form-field appearance="outline" class="vehicle-filter">
+            <mat-label>تصفية حسب المركبة</mat-label>
+            <mat-select [value]="selectedVehicleId()" (selectionChange)="onVehicleFilterChange($event.value)">
+              <mat-option [value]="null">
+                <mat-icon>list</mat-icon>
+                عرض الكل
+              </mat-option>
+              @for (vehicle of vehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.name }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        }
+
+         <div class="summary-section">
+          <h3>
+            @if (selectedVehicleId()) {
+            الملخص المالي - {{ getVehicleName(selectedVehicleId()) }}
+            } @else {
+            الملخص المالي الإجمالي
+            }
+          </h3>
+          <div class="summary-grid">
+            <div class="summary-card purchases">
+              <mat-icon>shopping_cart</mat-icon>
+              <p class="label">إجمالي المشتريات</p>
+              <p class="value">{{ filteredSummary()?.total_purchases | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card sales">
+              <mat-icon>point_of_sale</mat-icon>
+              <p class="label">إجمالي المبيعات</p>
+              <p class="value">{{ filteredSummary()?.total_sales | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card costs">
+              <mat-icon>payments</mat-icon>
+              <p class="label">{{!selectedVehicleId()?'التكاليف العامه':'التكاليف العامه لكل مركبه'}}</p>
+              <p class="value">
+                {{
+                selectedVehicleId()
+                ? (filteredSummary()?.total_costs_per_vehicle | number:'1.2-2')
+                : (filteredSummary()?.total_costs | number:'1.2-2')
+                }} ج
+              </p>
+            </div>
+            <div class="summary-card costs">
+              <mat-icon>payments</mat-icon>
+              <p class="label">{{!selectedVehicleId()?'تكاليف المركبات':'تكاليف المركبه'}}</p>
+              <p class="value">{{ filteredSummary()?.total_vehicle_costs | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card losses">
+              <mat-icon>warning</mat-icon>
+              <p class="label">الخسائر</p>
+              <p class="value">{{ filteredSummary()?.total_losses | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card profit">
+              <mat-icon>trending_up</mat-icon>
+              <p class="label">صافي الربح</p>
+              <p class="value">{{ filteredSummary()?.net_profit | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+        </div>
+
+         @if (vehicles().length === 1) {
+        <mat-card class="single-vehicle-card">
+          <mat-card-content>
+
+            <div class="single-vehicle-header">
+              <mat-icon color="primary">local_shipping</mat-icon>
+              <h3>تفاصيل المركبة</h3>
+            </div>
+
+            <div class="vehicle-info">
+              <div class="info-item">
+                <span class="label">اسم المركبة:</span>
+                <span class="value">{{ vehicles()[0].name }}</span>
+              </div>
+
+              <div class="info-item">
+                <span class="label">رقم اللوحة:</span>
+                <span class="value">{{ vehicles()[0].plate_number }}</span>
+              </div>
+            </div>
+
+            <p class="hint">
+              يوجد مركبة واحدة فقط، والملخص المالي أعلاه يعبر عنها بالكامل.
+            </p>
+
+          </mat-card-content>
+        </mat-card>
+        }
+
+
+
+
+         @if (filteredFarmTransactions().length > 0) {
+        <div class="section">
+          <h3>
+            <mat-icon>agriculture</mat-icon>
+            معاملات المزارع
+            <span class="count-badge">({{ filteredFarmTransactions().length }})</span>
+          </h3>
+          <table mat-table [dataSource]="filteredFarmTransactions()" class="details-table">
+
+             @if (!selectedVehicleId()) {
+            <ng-container matColumnDef="vehicle">
+              <th mat-header-cell *matHeaderCellDef>المركبة</th>
+              <td mat-cell *matCellDef="let tx">
+                <mat-chip>{{ getVehicleName(tx.vehicle_id) }}</mat-chip>
+              </td>
+            </ng-container>
+            }
+
+            <ng-container matColumnDef="farm">
+              <th mat-header-cell *matHeaderCellDef>المزرعة</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.Farm?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.net_chicken_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let tx">{{ tx.total_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="selectedVehicleId() ? farmColumns.slice(1) : farmColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: selectedVehicleId() ? farmColumns.slice(1) : farmColumns"></tr>
+          </table>
+        </div>
+        }
+
+         @if (filteredSales().length > 0) {
+        <div class="section">
+          <h3>
+            <mat-icon>sell</mat-icon>
+            معاملات المبيعات
+            <span class="count-badge">({{ filteredSales().length }})</span>
+          </h3>
+          <table mat-table [dataSource]="filteredSales()" class="details-table">
+
+             @if (!selectedVehicleId()) {
+            <ng-container matColumnDef="vehicle">
+              <th mat-header-cell *matHeaderCellDef>المركبة</th>
+              <td mat-cell *matCellDef="let sale">
+                <mat-chip>{{ getVehicleName(sale.vehicle_id) }}</mat-chip>
+              </td>
+            </ng-container>
+            }
+
+            <ng-container matColumnDef="buyer">
+              <th mat-header-cell *matHeaderCellDef>المشتري</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.Buyer?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.net_chicken_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let sale">{{ sale.total_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="selectedVehicleId() ? saleColumns.slice(1) : saleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: selectedVehicleId() ? saleColumns.slice(1) : saleColumns"></tr>
+          </table>
+        </div>
+        }
+
+         @if (filteredCosts().length > 0) {
+        <div class="section">
+          <h3>
+            <mat-icon>receipt</mat-icon>
+            التكاليف اليومية
+            <span class="count-badge">({{ filteredCosts().length }})</span>
+          </h3>
+          <table mat-table [dataSource]="filteredCosts()" class="details-table">
+
+             @if (!selectedVehicleId()) {
+            <ng-container matColumnDef="vehicle">
+              <th mat-header-cell *matHeaderCellDef>المركبة</th>
+              <td mat-cell *matCellDef="let cost">
+                <mat-chip [class.shared-cost]="!cost.vehicle_id">
+                  {{ getVehicleName(cost.vehicle_id) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+            }
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>الفئة</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.CostCategory?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <ng-container matColumnDef="notes">
+              <th mat-header-cell *matHeaderCellDef>ملاحظات</th>
+              <td mat-cell *matCellDef="let cost">{{ cost.notes || '-' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="selectedVehicleId() ? costColumns.slice(1) : costColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: selectedVehicleId() ? costColumns.slice(1) : costColumns"></tr>
+          </table>
+        </div>
+        }
+
+         @if (filteredLosses().length > 0) {
+        <div class="section">
+          <h3>
+            <mat-icon>error_outline</mat-icon>
+            خسائر النقل
+            <span class="count-badge">({{ filteredLosses().length }})</span>
+          </h3>
+          <table mat-table [dataSource]="filteredLosses()" class="details-table">
+
+             @if (!selectedVehicleId()) {
+            <ng-container matColumnDef="vehicle">
+              <th mat-header-cell *matHeaderCellDef>المركبة</th>
+              <td mat-cell *matCellDef="let loss">
+                <mat-chip>{{ getVehicleName(loss.vehicle_id) }}</mat-chip>
+              </td>
+            </ng-container>
+            }
+
+            <ng-container matColumnDef="chicken_type">
+              <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.ChickenType?.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="weight">
+              <th mat-header-cell *matHeaderCellDef>الوزن المفقود</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.dead_weight }} كجم</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>قيمة الخسارة</th>
+              <td mat-cell *matCellDef="let loss">{{ loss.loss_amount | number:'1.2-2' }} ج</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="selectedVehicleId() ? lossColumns.slice(1) : lossColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: selectedVehicleId() ? lossColumns.slice(1) : lossColumns"></tr>
+          </table>
+        </div>
+        }
+
+         @if (!hasAnyDetails() && vehicles().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>لا توجد بيانات</h3>
+          <p>لا توجد عمليات مسجلة لهذا التاريخ</p>
+        </div>
+        }
+
+
+      </div>
+      }
+
+       @else {
+      <div class="no-report-state">
+        <mat-icon>calendar_today</mat-icon>
+        <p>اختر تاريخًا لعرض التقرير</p>
+      </div>
+      }
+
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<div class="container">
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assessment</mat-icon>
+        التقرير اليومي المفصل
+      </mat-card-title>
+      <mat-card-subtitle>
+        عرض شامل لجميع العمليات والحركات المالية
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- ========== DATE SELECTION ========== -->
+      <form [formGroup]="dateForm" (ngSubmit)="loadReport()" class="date-form">
+        <mat-form-field appearance="outline">
+          <mat-label>اختر التاريخ</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading()">
+            <mat-icon>search</mat-icon>
+            عرض التقرير
+          </button>
+
+          @if (hasReport()) {
+          <div class="export-menu-container">
+            <button mat-stroked-button type="button" (click)="exportToExcel()" class="action-btn">
+              <mat-icon>download</mat-icon>
+              تصدير Excel
+            </button>
+          </div>
+
+          <button mat-stroked-button type="button" (click)="printReport()" class="action-btn">
+            <mat-icon>print</mat-icon>
+            طباعة
+          </button>
+
+          <button mat-stroked-button color="warn" type="button" (click)="clearReport()" class="action-btn">
+            <mat-icon>clear</mat-icon>
+            مسح
+          </button>
+          }
+        </div>
+      </form>
+      <!-- ========== LOADING STATE ========== -->
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>جاري تحميل التقرير...</p>
+      </div>
+      }
+
+      <!-- ========== REPORT CONTENT ========== -->
+      @else if (report()) {
+      <div class="report-content">
+
+        <!-- ========== OPERATION INFO ========== -->
+        @if (operationInfo(); as info) {
+        <mat-card class="info-card">
+          <mat-card-content>
+            <div class="operation-header">
+              <div class="info-section">
+                <h3>
+                  <mat-icon>info</mat-icon>
+                  معلومات العملية
+                </h3>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="label">رقم العملية:</span>
+                    <div class="values-container">
+                      @for(id of info.operation_id; track id){
+                      <span class="value">#{{ formatNumber(id,0) }} |</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">التاريخ:</span>
+                    <span class="value">{{ formatDateTime(info.operation_date) }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">الحالة:</span>
+                    <mat-chip [class]="info.status === 'CLOSED' ? 'status-closed' : 'status-open'">
+                      {{ info.status === 'CLOSED' ? 'مغلقة' : 'مفتوحة' }}
+                    </mat-chip>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">المستخدم:</span>
+                    <div class="values-container">
+                      @for(user of info.users; track user.id){
+                      <span class="value">{{ user.full_name }} |</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">عدد المركبات:</span>
+                    <span class="value">{{ formatNumber(info.vehicles_count) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vehicles Display -->
+              <div class="vehicles-display">
+                <h4>
+                  <mat-icon>local_shipping</mat-icon>
+                  المركبات المستخدمة
+                </h4>
+                <mat-chip-set>
+                  @for (vehicle of info.vehicles; track vehicle.id) {
+                  <mat-chip>
+                    <mat-icon matChipAvatar>local_shipping</mat-icon>
+                    {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number) }}
+                    @if (vehicle.partners && vehicle.partners.length > 0) {
+                    <span class="partners-count" matTooltip="عدد الشركاء: {{ formatNumber(vehicle.partners.length) }}">
+                      ({{ formatNumber(vehicle.partners.length) }})
+                    </span>
+                    }
+                  </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- ========== VEHICLE FILTER ========== -->
+        @if (vehicles().length > 1) {
+        <mat-card class="filter-card">
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="vehicle-filter">
+              <mat-label>
+                <mat-icon>filter_alt</mat-icon>
+                تصفية حسب المركبة
+              </mat-label>
+              <mat-select [value]="selectedVehicleId()" (selectionChange)="onVehicleFilterChange($event.value)">
+                <mat-option [value]="null">
+                  <mat-icon>list</mat-icon>
+                  عرض الكل
+                </mat-option>
+                @for (vehicle of vehicles(); track vehicle.id) {
+                <mat-option [value]="vehicle.id">
+                  <mat-icon>local_shipping</mat-icon>
+                  {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number )}}
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- ========== FINANCIAL SUMMARY ========== -->
+        @if (financialSummary(); as summary) {
+        <mat-card class="summary-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>account_balance</mat-icon>
+              @if (selectedVehicleId()) {
+              الملخص المالي - {{ getVehicleName(selectedVehicleId()) }}
+              } @else {
+              الملخص المالي الإجمالي
+              }
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-grid">
+              <div class="summary-item purchases">
+                <mat-icon>shopping_cart</mat-icon>
+                <div class="summary-details">
+                  <span class="label"> إجمالي المشتريات</span>
+                  <span class="value">{{ formatCurrency(summary.total_purchases) }} ج</span>
+                </div>
+              </div>
+
+              <div class="summary-item sales">
+                <mat-icon>point_of_sale</mat-icon>
+                <div class="summary-details">
+                  <span class="label">إجمالي المبيعات</span>
+                  <span class="value">{{ formatCurrency(summary.total_revenue) }} ج</span>
+                </div>
+              </div>
+
+              <div class="summary-item vehicle-costs">
+                <mat-icon>directions_car</mat-icon>
+                <div class="summary-details">
+                  <span class="label">تكاليف المركبات</span>
+                  <span class="value">{{ formatCurrency(summary.vehicle_costs) }} ج</span>
+                </div>
+              </div>
+
+              <div class="summary-item other-costs">
+                <mat-icon>payments</mat-icon>
+                <div class="summary-details">
+                  <span class="label">التكاليف الأخرى</span>
+                  <span class="value">{{ formatCurrency(summary.other_costs) }} ج</span>
+                </div>
+              </div>
+              <div class="summary-item losses">
+                <mat-icon>warning</mat-icon>
+                <div class="summary-details">
+                  <span class="label">إجمالي الفقد علينا</span>
+                  <span class="value">{{ formatCurrency(summary.lossesWithoutFarm) }} ج</span>
+                </div>
+              </div>
+              <div class="summary-item losses">
+                <mat-icon>warning</mat-icon>
+                <div class="summary-details">
+                  <span class="label">إجمالي الفقد علي المزارع</span>
+                  <span class="value">{{ formatCurrency(summary.lossesWithFarm) }} ج</span>
+                </div>
+              </div>
+
+              <div class="summary-item profit" [class.negative]="summary.net_profit < 0">
+                <mat-icon>{{ summary.net_profit >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                <div class="summary-details">
+                  <span class="label">صافي الربح</span>
+                  <span class="value">{{ formatCurrency(summary.net_profit) }} ج</span>
+                  <span class="percentage">{{ summary.profit_margin_percentage }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- ========== TABBED DETAILS ========== -->
+        <mat-card class="tabs-card">
+          <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
+
+            <!-- ========== FARM TRANSACTIONS TAB ========== -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>agriculture</mat-icon>
+                معاملات المزارع
+                <span class="tab-badge">{{ formatNumber(filteredFarmTransactions().length) }}</span>
+              </ng-template>
+
+              <div class="tab-content">
+                @if (filteredFarmTransactions().length > 0) {
+                @for (transaction of filteredFarmTransactions(); track transaction.transaction_id) {
+                <mat-expansion-panel class="transaction-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="panel-title-content">
+                        <mat-icon>agriculture</mat-icon>
+                        <span class="sequence">#{{ formatNumber(transaction.sequence_number) }}</span>
+                        <span class="farm-name">{{ transaction.farm?.name }}</span>
+                        <mat-chip size="small">{{ transaction.chicken_type?.name }}</mat-chip>
+                        @if (!selectedVehicleId()) {
+                        <mat-chip size="small" color="accent">
+                          {{ transaction.vehicle?.name }}
+                        </mat-chip>
+                        }
+                      </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      <span class="amount">{{ formatCurrency(transaction.pricing.total_amount) }} ج</span>
+                      <mat-chip size="small" [class]="getPaymentStatusClass(
+                                transaction.debt_info.is_full_payment,
+                                transaction.debt_info.has_remaining_debt
+                              )">
+                        {{ transaction.debt_info.status }}
+                      </mat-chip>
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <!-- Transaction Details -->
+                  <div class="transaction-details">
+                    <!-- Farm Info -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>business</mat-icon>
+                        معلومات المزرعة
+                      </h4>
+                      <div class="info-grid">
+                        <div class="info-item">
+                          <span class="label">اسم المزرعة:</span>
+                          <span class="value">{{ transaction.farm?.name }}</span>
+                        </div>
+                        @if (transaction.farm?.owner_name) {
+                        <div class="info-item">
+                          <span class="label">المالك:</span>
+                          <span class="value">{{ transaction.farm?.owner_name }}</span>
+                        </div>
+                        }
+                        @if (transaction.farm?.phone) {
+                        <div class="info-item">
+                          <span class="label">الهاتف:</span>
+                          <span class="value">{{formatNumber( transaction.farm?.phone) }}</span>
+                        </div>
+                        }
+                        <div class="info-item">
+                          <span class="label">الرصيد الحالي:</span>
+                          <span class="value balance"
+                            [class]="getBalanceStatusClass(transaction.farm?.current_balance ?? 0)">
+                            {{ formatCurrency(transaction.farm?.current_balance) }} ج
+                            ({{ transaction.farm?.balance_type }})
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Weighing Details -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>scale</mat-icon>
+                        بيانات الوزن
+                      </h4>
+                      <div class="weighing-grid">
+                        <div class="weighing-item">
+                          <span class="label">وزن العربية فارغة:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.empty_vehicle_weight, 2) }}
+                            كجم</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">وزن العربية محملة:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.loaded_vehicle_weight, 2) }}
+                            كجم</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">عدد الأقفاص:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.cage_count) }}</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">وزن القفص الواحد:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.cage_weight_per_unit, 2) }}
+                            كجم</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">إجمالي وزن الأقفاص:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.total_cage_weight, 2) }} كجم</span>
+                        </div>
+                        <div class="weighing-item highlight">
+                          <span class="label">صافي وزن الفراخ:</span>
+                          <span class="value">{{ formatNumber(transaction.weighing.net_chicken_weight, 2) }} كجم</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Pricing Details -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>attach_money</mat-icon>
+                        التسعير والدفع
+                      </h4>
+                      <div class="pricing-grid">
+                        <div class="pricing-item">
+                          <span class="label">سعر الكيلو:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.price_per_kg) }} ج</span>
+                        </div>
+                        <div class="pricing-item highlight">
+                          <span class="label">إجمالي المبلغ:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.total_amount) }} ج</span>
+                        </div>
+                        <div class="pricing-item">
+                          <span class="label">المدفوع نقداً:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.paid_amount) }} ج</span>
+                        </div>
+                        @if (transaction.pricing.used_credit > 0) {
+                        <div class="pricing-item">
+                          <span class="label">المستخدم من الرصيد:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.used_credit) }} ج</span>
+                        </div>
+                        <div class="pricing-item">
+                          <span class="label">إجمالي المدفوع:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.total_paid_with_credit) }} ج</span>
+                        </div>
+                        }
+                        <div class="pricing-item">
+                          <span class="label">المتبقي:</span>
+                          <span class="value">{{ formatCurrency(transaction.pricing.remaining_amount) }} ج</span>
+                        </div>
+                        <div class="pricing-item">
+                          <span class="label">نسبة الدفع:</span>
+                          <span class="value">{{formatPercentage( transaction.pricing.payment_percentage) }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Debt Information -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>account_balance_wallet</mat-icon>
+                        تفاصيل الدين
+                      </h4>
+                      <div class="debt-info">
+                        <mat-chip-set>
+                          @for (detail of transaction.debt_info.status_details; track detail) {
+                          <mat-chip>{{ detail }}</mat-chip>
+                          }
+                        </mat-chip-set>
+
+                        <div class="breakdown-grid">
+                          <div class="breakdown-item">
+                            <span class="label">الدفع النقدي:</span>
+                            <span class="value">{{ formatCurrency(transaction.debt_info.breakdown.cash_paid) }} ج</span>
+                          </div>
+                          @if (transaction.debt_info.breakdown.credit_used > 0) {
+                          <div class="breakdown-item">
+                            <span class="label">الرصيد المستخدم:</span>
+                            <span class="value">{{ formatCurrency(transaction.debt_info.breakdown.credit_used) }}
+                              ج</span>
+                          </div>
+                          }
+                          @if (transaction.debt_info.breakdown.new_debt_created > 0) {
+                          <div class="breakdown-item">
+                            <span class="label">دين جديد:</span>
+                            <span class="value">{{ formatCurrency(transaction.debt_info.breakdown.new_debt_created) }}
+                              ج</span>
+                          </div>
+                          }
+                          <div class="breakdown-item highlight">
+                            <span class="label">التأثير الصافي على الرصيد:</span>
+                            <span class="value">{{ formatCurrency(transaction.debt_info.breakdown.net_balance_impact) }}
+                              ج</span>
+                          </div>
+                        </div>
+
+                        <div class="interpretation">
+                          <mat-icon>info</mat-icon>
+                          <p>{{ transaction.debt_info.interpretation }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Transaction Time -->
+                    <div class="transaction-footer">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ formatDateTime(transaction.transaction_time) }}</span>
+                      @if (transaction.notes) {
+                      <mat-icon matTooltip="{{ transaction.notes }}">note</mat-icon>
+                      }
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+                }
+                } @else {
+                <div class="empty-state">
+                  <mat-icon>inbox</mat-icon>
+                  <p>لا توجد معاملات مزارع</p>
+                </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- ========== SALES TAB ========== -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>sell</mat-icon>
+                المبيعات
+                <span class="tab-badge">{{ formatNumber(filteredSales().length) }}</span>
+              </ng-template>
+
+              <div class="tab-content">
+                @if (filteredSales().length > 0) {
+                @for (sale of filteredSales(); track sale.transaction_id) {
+                <mat-expansion-panel class="transaction-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="panel-title-content">
+                        <mat-icon>sell</mat-icon>
+                        <span class="sequence">#{{ formatNumber(sale.sequence_number) }}</span>
+                        <span class="buyer-name">{{ sale.buyer?.name }}</span>
+                        <mat-chip size="small">{{ sale.chicken_type?.name }}</mat-chip>
+                        @if (!selectedVehicleId()) {
+                        <mat-chip size="small" color="accent">
+                          {{ sale.vehicle?.name }}
+                        </mat-chip>
+                        }
+                      </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      <span class="amount">{{ formatCurrency(sale.pricing.total_amount) }} ج</span>
+                      <mat-chip size="small" [class]="getPaymentStatusClass(
+                                sale.debt_info.is_full_payment,
+                                sale.debt_info.has_remaining_debt
+                              )">
+                        {{ sale.debt_info.status }}
+                      </mat-chip>
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <!-- Sale Details -->
+                  <div class="transaction-details">
+                    <!-- Buyer Info -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>person</mat-icon>
+                        معلومات محل الفراخ
+                      </h4>
+                      <div class="info-grid">
+                        <div class="info-item">
+                          <span class="label">اسم محل الفراخ:</span>
+                          <span class="value">{{ sale.buyer?.name }}</span>
+                        </div>
+                        @if (sale.buyer?.phone) {
+                        <div class="info-item">
+                          <span class="label">الهاتف:</span>
+                          <span class="value">{{ formatNumber(sale.buyer?.phone )}}</span>
+                        </div>
+                        }
+                        @if (sale.buyer?.address) {
+                        <div class="info-item">
+                          <span class="label">العنوان:</span>
+                          <span class="value">{{ sale.buyer?.address }}</span>
+                        </div>
+                        }
+                        <div class="info-item">
+                          <span class="label">إجمالي الديون:</span>
+                          <span class="value balance" [class.receivable]="(sale.buyer?.total_debt ?? 0) > 0">
+                            {{ formatCurrency(sale.buyer?.total_debt) }} ج
+                            ({{ sale.buyer?.debt_status }})
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Weighing Details -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>scale</mat-icon>
+                        بيانات الوزن
+                      </h4>
+                      <div class="weighing-grid">
+                        <div class="weighing-item">
+                          <span class="label">وزن الأقفاص محملة:</span>
+                          <span class="value">{{ formatNumber(sale.weighing.loaded_cages_weight, 2) }} كجم</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">وزن الأقفاص فارغة:</span>
+                          <span class="value">{{ formatNumber(sale.weighing.empty_cages_weight, 2) }} كجم</span>
+                        </div>
+                        <div class="weighing-item">
+                          <span class="label">عدد الأقفاص:</span>
+                          <span class="value">{{ formatNumber(sale.weighing.cage_count) }}</span>
+                        </div>
+                        <div class="weighing-item highlight">
+                          <span class="label">صافي وزن الفراخ:</span>
+                          <span class="value">{{ formatNumber(sale.weighing.net_chicken_weight, 2) }} كجم</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Pricing Details -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>attach_money</mat-icon>
+                        التسعير والدفع
+                      </h4>
+                      <div class="pricing-grid">
+                        <div class="pricing-item">
+                          <span class="label">سعر الكيلو:</span>
+                          <span class="value">{{ formatCurrency(sale.pricing.price_per_kg) }} ج</span>
+                        </div>
+                        <div class="pricing-item highlight">
+                          <span class="label">إجمالي المبلغ:</span>
+                          <span class="value">{{ formatCurrency(sale.pricing.total_amount) }} ج</span>
+                        </div>
+                        <div class="pricing-item">
+                          <span class="label">المدفوع:</span>
+                          <span class="value">{{ formatCurrency(sale.pricing.paid_amount) }} ج</span>
+                        </div>
+                        @if (sale.pricing.old_debt_paid > 0) {
+                        <div class="pricing-item">
+                          <span class="label">سداد من الدين القديم:</span>
+                          <span class="value">{{ formatCurrency(sale.pricing.old_debt_paid) }} ج</span>
+                        </div>
+                        }
+                        <div class="pricing-item">
+                          <span class="label">المتبقي:</span>
+                          <span class="value">{{ formatCurrency(sale.pricing.remaining_amount) }} ج</span>
+                        </div>
+                        <div class="pricing-item">
+                          <span class="label">نسبة الدفع:</span>
+                          <span class="value">{{ formatPercentage(sale.pricing.payment_percentage) }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Debt Impact -->
+                    <div class="details-section">
+                      <h4>
+                        <mat-icon>account_balance_wallet</mat-icon>
+                        تأثير الدين
+                      </h4>
+                      <div class="debt-info">
+                        <div class="breakdown-grid">
+                          <div class="breakdown-item">
+                            <span class="label">تغيير الدين:</span>
+                            <span class="value">{{ formatCurrency(sale.debt_info.buyer_debt_change) }} ج</span>
+                          </div>
+                          <div class="breakdown-item highlight">
+                            <span class="label">التأثير الصافي:</span>
+                            <span class="value">{{ formatCurrency(sale.debt_info.net_debt_impact) }} ج</span>
+                          </div>
+                        </div>
+
+                        <div class="status-flags">
+                          @if (sale.debt_info.is_full_payment) {
+                          <mat-chip color="primary">
+                            <mat-icon>check_circle</mat-icon>
+                            دفع كامل
+                          </mat-chip>
+                          }
+                          @if (sale.debt_info.has_remaining_debt) {
+                          <mat-chip color="warn">
+                            <mat-icon>warning</mat-icon>
+                            يوجد متبقي
+                          </mat-chip>
+                          }
+                          @if (sale.debt_info.paid_old_debt) {
+                          <mat-chip color="accent">
+                            <mat-icon>payment</mat-icon>
+                            سدد من الدين القديم
+                          </mat-chip>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Transaction Time -->
+                    <div class="transaction-footer">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ formatDateTime(sale.transaction_time) }}</span>
+                      @if (sale.notes) {
+                      <mat-icon matTooltip="{{ sale.notes }}">note</mat-icon>
+                      }
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+                }
+                } @else {
+                <div class="empty-state">
+                  <mat-icon>inbox</mat-icon>
+                  <p>لا توجد عمليات بيع</p>
+                </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- ========== COSTS TAB ========== -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>receipt</mat-icon>
+                التكاليف
+                <span class="tab-badge">{{ formatNumber(filteredCosts().length) }}</span>
+              </ng-template>
+
+              <div class="tab-content">
+                @if (filteredCosts().length > 0) {
+                <!-- Group by Category -->
+                @for (category of filteredCosts(); track category.category_info.id) {
+                <mat-card class="category-card">
+                  <mat-card-header>
+                    <mat-card-title>
+                      <mat-icon>{{ category.category_info.is_vehicle_cost ? 'directions_car' : 'payments' }}</mat-icon>
+                      {{ category.category_info.name }}
+                      <mat-chip size="small">{{ formatNumber(category.count) }} عدد</mat-chip>
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                      الإجمالي: {{ formatCurrency(category.total_amount) }} ج
+                    </mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="costs-list">
+                      @for (cost of category.costs; track cost.cost_id) {
+                      <div class="cost-item">
+                        <div class="cost-header">
+                          @if (!selectedVehicleId() && cost.vehicle) {
+                          <mat-chip size="small" class="vehicle-chip">
+                            <mat-icon>local_shipping</mat-icon>
+                            {{ cost.vehicle.name }}
+                          </mat-chip>
+                          }
+                          @if (!selectedVehicleId() && !cost.vehicle) {
+                          <mat-chip size="small" class="shared-chip">
+                            <mat-icon>share</mat-icon>
+                            مشترك
+                          </mat-chip>
+                          }
+                          <span class="cost-allocation">{{ cost.cost_details.allocation }}</span>
+                        </div>
+                        <div class="cost-body">
+                          <div class="cost-description">
+                            <mat-icon>description</mat-icon>
+                            <span>{{ cost.cost_details.description }}</span>
+                          </div>
+                          <div class="cost-footer">
+                            <span class="cost-amount">{{ formatCurrency(cost.cost_details.amount) }} ج</span>
+                            <span class="cost-time">
+                              <mat-icon>schedule</mat-icon>
+                              {{ formatTime(cost.recorded_at) }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      }
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+                }
+                } @else {
+                <div class="empty-state">
+                  <mat-icon>inbox</mat-icon>
+                  <p>لا توجد تكاليف مسجلة</p>
+                </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- ========== LOSSES TAB ========== -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>warning</mat-icon>
+                الخسائر
+                <span class="tab-badge">{{ formatNumber(filteredLosses().length) }}</span>
+              </ng-template>
+
+              <div class="tab-content">
+                @if (filteredLosses().length > 0) {
+                @for (loss of filteredLosses(); track loss.loss_id) {
+                <mat-card class="loss-card">
+                  <mat-card-content>
+                    <div class="loss-header">
+                      <div class="loss-title">
+                        <mat-icon>error_outline</mat-icon>
+                        <span>{{ loss.chicken_type?.name }}</span>
+                        @if (!selectedVehicleId()) {
+                        <mat-chip size="small">{{ loss.vehicle.name }}</mat-chip>
+                        }
+                      </div>
+                      <div class="loss-amount">
+                        {{ formatCurrency(loss.loss_details.loss_amount) }} ج
+                      </div>
+                    </div>
+
+                    <div class="loss-details">
+                      <div class="detail-item">
+                        <span class="label">الوزن الميت:</span>
+                        <span class="value">{{ formatNumber(loss.loss_details.dead_weight, 2) }} كجم</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">السعر:</span>
+                        <span class="value">{{ formatCurrency(loss.loss_details.price_per_kg) }} ج/كجم</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">الموقع:</span>
+                        <span class="value">{{ loss.loss_details.location }}</span>
+                      </div>
+                    </div>
+
+                    @if (loss.farm_responsibility.is_farm_responsible) {
+                    <mat-divider></mat-divider>
+                    <div class="responsibility-section">
+                      <h4>
+                        <mat-icon>gavel</mat-icon>
+                        المسؤولية
+                      </h4>
+                      <p class="farm-responsible">
+                        <mat-icon>business</mat-icon>
+                        المزرعة المسؤولة: <strong>{{ loss.farm_responsibility.farm?.name }}</strong>
+                      </p>
+                      @if (loss.farm_responsibility.balance_impact) {
+                      <div class="balance-impact">
+                        <mat-icon>account_balance</mat-icon>
+                        <p>{{ loss.farm_responsibility.balance_impact.explanation }}</p>
+                        <mat-chip size="small" color="warn">
+                          {{ formatCurrency(loss.farm_responsibility.balance_impact.amount) }} ج
+                        </mat-chip>
+                      </div>
+                      }
+                    </div>
+                    } @else {
+                    <div class="general-loss">
+                      <mat-icon>info</mat-icon>
+                      <p>{{ loss.farm_responsibility.note }}</p>
+                    </div>
+                    }
+
+                    <div class="loss-footer">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ formatDateTime(loss.recorded_at) }}</span>
+                      @if (loss.notes) {
+                      <mat-icon matTooltip="{{ loss.notes }}">note</mat-icon>
+                      }
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+                }
+                } @else {
+                <div class="empty-state">
+                  <mat-icon>check_circle</mat-icon>
+                  <p>لا توجد خسائر مسجلة</p>
+                </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- ========== DEBT MOVEMENTS TAB ========== -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>sync_alt</mat-icon>
+                حركات الديون
+                <span class="tab-badge">
+                  {{ formatNumber(farmDebtPayments().length + buyerDebtPayments().length) }}
+                </span>
+              </ng-template>
+
+              <div class="tab-content">
+                <!-- Farm Debt Payments -->
+                @if (farmDebtPayments().length > 0) {
+                <h3>
+                  <mat-icon>agriculture</mat-icon>
+                  مدفوعات المزارع
+                </h3>
+                @for (payment of farmDebtPayments(); track payment.payment_id) {
+                <mat-card class="payment-card">
+                  <mat-card-content>
+                    <div class="payment-header">
+                      <div class="payment-title">
+                        <mat-icon>agriculture</mat-icon>
+                        <span>{{ payment.farm?.name }}</span>
+                      </div>
+                      <mat-chip [class]="payment.payment_details.direction === 'FROM_FARM' ? 'from-farm' : 'to-farm'">
+                        {{ payment.payment_details.direction_arabic }}
+                      </mat-chip>
+                    </div>
+
+                    <div class="payment-details">
+                      <div class="amount-display">
+                        <span class="label">المبلغ:</span>
+                        <span class="value">{{ formatCurrency(payment.payment_details.amount) }} ج</span>
+                      </div>
+                      <p class="explanation">{{ payment.payment_details.explanation }}</p>
+                      <div class="balance-info">
+                        <span class="label">الرصيد الحالي:</span>
+                        <span class="value">
+                          @if (payment.farm?.balance_display) {
+                          {{ payment.farm?.balance_display }}
+                          } @else {
+                          {{ formatCurrency(payment.farm?.current_balance) }} ج
+                          @if ((payment.farm?.current_balance ?? 0) < 0) { (لنا عليهم) } @else if
+                            ((payment.farm?.current_balance ?? 0)> 0) { (لهم علينا) } @else { (متصفي) } }
+                        </span>
+                      </div>
+                    </div>
+
+                    @if (payment.notes) {
+                    <div class="payment-notes">
+                      <mat-icon>note</mat-icon>
+                      <p>{{ payment.notes }}</p>
+                    </div>
+                    }
+
+                    <div class="payment-footer">
+                      <mat-icon>event</mat-icon>
+                      <span>{{ formatDateTime(payment.payment_date )}}</span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+                }
+                }
+
+                <!-- Buyer Debt Payments -->
+                @if (buyerDebtPayments().length > 0) {
+                <h3>
+                  <mat-icon>person</mat-icon>
+                  مدفوعات محلات الفراخ
+                </h3>
+                @for (payment of buyerDebtPayments(); track payment.payment_id) {
+                <mat-card class="payment-card">
+                  <mat-card-content>
+                    <div class="payment-header">
+                      <div class="payment-title">
+                        <mat-icon>person</mat-icon>
+                        <span>{{ payment.buyer?.name }}</span>
+                      </div>
+                      <mat-chip color="primary">سداد دين</mat-chip>
+                    </div>
+
+                    <div class="payment-details">
+                      <div class="amount-display">
+                        <span class="label">المبلغ:</span>
+                        <span class="value">{{ formatCurrency(payment.payment_details.amount) }} ج</span>
+                      </div>
+                      <p class="explanation">{{ payment.payment_details.explanation }}</p>
+                      <div class="balance-info">
+                        <span class="label">الدين الحالي:</span>
+                        <span class="value">
+                          {{ formatCurrency(payment.buyer?.total_debt) }} ج
+                          @if ((payment.buyer?.total_debt ?? 0) > 0) {
+                          (مدين)
+                          } @else {
+                          (متصفي)
+                          }
+                        </span>
+                      </div>
+                    </div>
+
+                    @if (payment.notes) {
+                    <div class="payment-notes">
+                      <mat-icon>note</mat-icon>
+                      <p>{{ payment.notes }}</p>
+                    </div>
+                    }
+
+                    <div class="payment-footer">
+                      <mat-icon>event</mat-icon>
+                      <span>{{ formatDateTime(payment.payment_date )}}</span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+                }
+                }
+
+                @if (farmDebtPayments().length === 0 && buyerDebtPayments().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>inbox</mat-icon>
+                  <p>لا توجد حركات ديون منفصلة</p>
+                </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- ========== PROFIT DISTRIBUTION TAB ========== -->
+            @if (profitDistribution(); as distribution) {
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon>pie_chart</mat-icon>
+                توزيع الأرباح
+              </ng-template>
+
+              <div class="tab-content">
+                <mat-card class="distribution-card">
+                  <mat-card-header>
+                    <mat-card-title>
+                      <mat-icon>calculate</mat-icon>
+                      ملخص توزيع الأرباح
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                      تم الحساب في: {{ formatDateTime(distribution.calculated_at) }}
+                    </mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <!-- Totals -->
+                    <div class="totals-grid">
+                      <div class="total-item revenue">
+                        <mat-icon>trending_up</mat-icon>
+                        <div>
+                          <span class="label">إجمالي الإيرادات</span>
+                          <span class="value">{{ formatCurrency(distribution.totals.total_revenue) }} ج</span>
+                        </div>
+                      </div>
+                      <div class="total-item purchases">
+                        <mat-icon>shopping_cart</mat-icon>
+                        <div>
+                          <span class="label"> إجمالي الشراء</span>
+                          <span class="value">{{ formatCurrency(distribution.totals.total_purchases) }} ج</span>
+                        </div>
+                      </div>
+                      <div class="total-item costs">
+                        <mat-icon>payments</mat-icon>
+                        <div>
+                          <span class="label">التكاليف الكلية</span>
+                          <span class="value">{{ formatCurrency(distribution.totals.total_costs) }} ج</span>
+                        </div>
+                      </div>
+                      <div class="total-item losses">
+                        <mat-icon>warning</mat-icon>
+                        <div>
+                          <span class="label">الخسائر</span>
+                          <span class="value">{{ formatCurrency(distribution.totals.total_losses) }} ج</span>
+                        </div>
+                      </div>
+                      <div class="total-item profit">
+                        <mat-icon>account_balance</mat-icon>
+                        <div>
+                          <span class="label">صافي الربح</span>
+                          <span class="value">{{ formatCurrency(distribution.totals.net_profit) }} ج</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <!-- Partner Profits -->
+                    <h3>
+                      <mat-icon>group</mat-icon>
+                      أرباح الشركاء
+                    </h3>
+                    <div class="partners-grid">
+                      @for (partner of distribution.partner_profits; track partner.partner?.id) {
+                      <mat-card class="partner-card">
+                        <mat-card-content>
+                          <div class="partner-header">
+                            <h4>{{ partner.partner?.name }}</h4>
+                            <mat-chip size="small">
+                              {{ formatPercentage(partner.partner?.investment_percentage, 2) }}
+                            </mat-chip>
+                            @if (partner.partner?.is_vehicle_partner) {
+                            <mat-chip size="small" color="accent">شريك مركبة</mat-chip>
+                            }
+                          </div>
+
+                          <div class="profit-breakdown">
+                            <div class="breakdown-item">
+                              <span class="label">حصة الربح الأساسية:</span>
+                              <span class="value">{{ formatCurrency(partner.base_profit_share) }}
+                                ج</span>
+                            </div>
+                            @if (partner.vehicle_cost_share > 0) {
+                            <div class="breakdown-item deduction">
+                              <span class="label">حصة تكاليف المركبة:</span>
+                              <span class="value">- {{ formatCurrency(partner.vehicle_cost_share) }}
+                                ج</span>
+                            </div>
+                            }
+                            <mat-divider></mat-divider>
+                            <div class="breakdown-item final">
+                              <span class="label">الربح النهائي:</span>
+                              <span class="value">{{ formatCurrency(partner.final_profit) }} ج</span>
+                            </div>
+                            <div class="percentage">
+                              {{formatPercentage( partner.profit_percentage )}} من الربح الكلي
+                            </div>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                      }
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </mat-tab>
+            }
+
+          </mat-tab-group>
+        </mat-card>
+      </div>
+      }
+
+      <!-- ========== NO REPORT STATE ========== -->
+      @else {
+      <div class="no-report-state">
+        <mat-icon>calendar_today</mat-icon>
+        <h3>اختر تاريخًا لعرض التقرير</h3>
+        <p>قم باختيار تاريخ من الأعلى للحصول على التقرير المفصل</p>
       </div>
       }
     </mat-card-content>

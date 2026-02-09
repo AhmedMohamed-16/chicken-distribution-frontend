@@ -1,0 +1,6 @@
+<div class="spinner-container" [class.inline]="inline()">
+      <div class="spinner"></div>
+      @if (message()) {
+        <p class="spinner-message">{{ message() }}</p>
+      }
+    </div>

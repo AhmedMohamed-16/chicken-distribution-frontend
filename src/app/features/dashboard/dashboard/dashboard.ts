@@ -8,6 +8,9 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { AuthService } from '../../../core/services/auth.service';
 import { OperationService } from '../../../core/services/operation.service';
 import { ReportService } from '../../../core/services/report.service';
+import { ReportUtilitiesService } from '../../../core/services/ReportUtilitiesService';
+import { PERMISSIONS } from '../../../core/constants/Permissions.constant';
+import { HasPermissionDirective } from '../../../core/directives/hasPermission.directive';
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -16,18 +19,30 @@ import { ReportService } from '../../../core/services/report.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatGridListModule
+    MatGridListModule,
+    HasPermissionDirective
+
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   authService = inject(AuthService);
-  currentDate = signal(new Date());
+  currentDate = signal(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })));
+private utils = inject(ReportUtilitiesService);
+  PERMISSIONS = PERMISSIONS;
+ operationsPermissions = [
+  PERMISSIONS.OPERATIONS.RECORD_FARM_LOADING,
+  PERMISSIONS.OPERATIONS.RECORD_SALE,
+  PERMISSIONS.OPERATIONS.RECORD_TRANSPORT_LOSS,
+  PERMISSIONS.OPERATIONS.RECORD_COST,
+  PERMISSIONS.OPERATIONS.CLOSE_OPERATION,
+];
+formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
 
   ngOnInit(): void {
     setInterval(() => {
-      this.currentDate.set(new Date());
+      this.currentDate.set(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })));
     }, 60000);
   }
 

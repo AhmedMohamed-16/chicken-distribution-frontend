@@ -1,0 +1,155 @@
+/* ===============================
+   Container & Card (Mobile-First)
+================================ */
+.container {
+  padding: 16px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+mat-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Card Header */
+mat-card-header {
+  margin-bottom: 16px;
+}
+
+mat-card-title {
+  font-size: 1.25rem; /* Mobile-friendly */
+  font-weight: 600;
+}
+
+mat-card-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Actions Bar */
+.actions-bar {
+  display: flex;
+  flex-direction: column; /* Stack on mobile */
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.actions-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px; /* Touch target */
+  width: 100%;      /* Full width on mobile */
+  font-size: 0.95rem;
+  padding: 0 12px;
+}
+
+/* Loading */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+/* Table Container */
+mat-card-content {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-spacing: 0;
+  min-width: 400px; /* Prevent squishing */
+}
+
+/* Table Cells */
+th.mat-header-cell {
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: left;
+}
+
+td.mat-cell {
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Actions Column */
+td.mat-cell:last-child {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===============================
+   Tablet Styles (≥768px)
+================================ */
+@media (min-width: 768px) {
+  mat-card-title {
+    font-size: 1.5rem;
+  }
+
+  .actions-bar {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: auto;
+  }
+
+  .actions-bar button {
+    width: auto; /* Auto width on tablet */
+  }
+}
+
+/* ===============================
+   Desktop Styles (≥1024px)
+================================ */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px;
+  }
+
+  mat-card-header {
+    margin-bottom: 20px;
+  }
+
+  .actions-bar button {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+}
+
+/* ===============================
+   Mobile Refinements (Small Screens)
+================================ */
+@media (max-width: 480px) {
+  .actions-bar {
+    justify-content: stretch;
+  }
+
+  .actions-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Hide description column for small screens */
+  .mat-column-description {
+    display: none;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] .actions-bar {
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  [dir="rtl"] .actions-bar {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+}

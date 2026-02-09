@@ -1,67 +1,297 @@
-    <div class="container">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>تسجيل خسائر النقل</mat-card-title>
-          <mat-card-subtitle>تسجيل الدواجن النافقة أثناء النقل</mat-card-subtitle>
-        </mat-card-header>
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تسجيل خسائر النقل</mat-card-title>
+      <mat-card-subtitle>تسجيل الدواجن النافقة أثناء النقل</mat-card-subtitle>
+    </mat-card-header>
 
-        <mat-card-content>
-          @if (loading()) {
-            <div class="loading-spinner">
-              <mat-spinner></mat-spinner>
-            </div>
-          } @else {
-            <form [formGroup]="lossForm" (ngSubmit)="onSubmit()">
-              <div class="form-row">
-                <mat-form-field class="form-field" appearance="outline">
-                  <mat-label>نوع الفراخ</mat-label>
-                  <mat-select formControlName="chicken_type_id">
-                    @for (type of chickenTypes(); track type.id) {
-                      <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                    }
-                  </mat-select>
-                  <mat-error>نوع الفراخ مطلوب</mat-error>
-                </mat-form-field>
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="lossForm" (ngSubmit)="onSubmit()">
+         <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المركبة</mat-label>
+            <mat-select formControlName="vehicle_id" required>
+              @for (vehicle of activeVehicles(); track vehicle.vehicle_id) {
+              <mat-option [value]="vehicle.vehicle_id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.vehicle_name }} - {{ vehicle.plate_number }}
+              </mat-option>
+              }
+            </mat-select>
+            <mat-hint>اختر المركبة التي حدثت بها الخسارة</mat-hint>
+            <mat-error>اختيار المركبة مطلوب</mat-error>
+          </mat-form-field>
+        </div>
 
-                <mat-form-field class="form-field" appearance="outline">
-                  <mat-label>وزن النافق (كجم)</mat-label>
-                  <input matInput type="number" step="0.01" formControlName="dead_weight">
-                  <mat-error>الوزن مطلوب</mat-error>
-                </mat-form-field>
-              </div>
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>نوع الفراخ</mat-label>
+            <mat-select formControlName="chicken_type_id">
+              @for (type of chickenTypes(); track type.id) {
+              <mat-option [value]="type.id">{{ type.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>نوع الفراخ مطلوب</mat-error>
+          </mat-form-field>
 
-              <div class="form-row">
-                <mat-form-field class="form-field" appearance="outline">
-                  <mat-label>السعر للكيلو (جنيه)</mat-label>
-                  <input matInput type="number" step="0.01" formControlName="price_per_kg">
-                  <mat-error>السعر مطلوب</mat-error>
-                </mat-form-field>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>وزن النافق (كجم)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="dead_weight">
+            <mat-error>الوزن مطلوب</mat-error>
+          </mat-form-field>
+        </div>
 
-                <mat-form-field class="form-field" appearance="outline">
-                  <mat-label>الموقع</mat-label>
-                  <input matInput formControlName="location">
-                </mat-form-field>
-              </div>
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>السعر للكيلو (جنيه)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="price_per_kg">
+            <mat-error>السعر مطلوب</mat-error>
+          </mat-form-field>
 
-              <div class="calculated-value">
-                <strong>قيمة الخسارة: {{ lossAmount() | number:'1.2-2' }} جنيه</strong>
-              </div>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>الموقع</mat-label>
+            <input matInput formControlName="location">
+          </mat-form-field>
+        </div>
 
-              <div class="button-group">
-                <button mat-raised-button color="warn" type="submit"
-                        [disabled]="lossForm.invalid || submitting()">
-                  @if (submitting()) {
-                    <mat-spinner diameter="20"></mat-spinner>
-                  } @else {
-                    تسجيل الخسارة
+        <div class="calculated-value">
+          <strong>قيمة الخسارة: {{ lossAmount() | number:'1.2-2' }} جنيه</strong>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="warn" type="submit" [disabled]="lossForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            تسجيل الخسارة
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            إلغاء
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تسجيل خسائر النقل</mat-card-title>
+      <mat-card-subtitle>تسجيل الدواجن النافقة أثناء النقل</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="lossForm" (ngSubmit)="onSubmit()">
+
+        <!-- VEHICLE SELECTION (REQUIRED) -->
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المركبة</mat-label>
+            <mat-select formControlName="vehicle_id" required>
+              @for (vehicle of activeVehicles(); track vehicle.vehicle_id) {
+              <mat-option [value]="vehicle.vehicle_id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.vehicle_name }} - {{ formatNumber(vehicle.plate_number) }}
+                <span class="vehicle-inventory-hint">
+                  (وزنها: {{ formatNumber(vehicle.empty_weight ,2) }} كجم)
+                </span>
+              </mat-option>
+              }
+            </mat-select>
+            <mat-hint>اختر المركبة التي حدثت بها الخسارة</mat-hint>
+            <mat-error>اختيار المركبة مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- CHICKEN TYPE & WEIGHT -->
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>نوع الفراخ</mat-label>
+            <mat-select formControlName="chicken_type_id" required>
+              @for (type of chickenTypes(); track type.id) {
+              <mat-option [value]="type.id">{{ type.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>نوع الفراخ مطلوب</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>وزن النافق (كجم)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="dead_weight" required>
+            <mat-hint>أدخل وزن الدواجن النافقة</mat-hint>
+            <mat-error>
+              @if (lossForm.get('dead_weight')?.hasError('required')) {
+              الوزن مطلوب
+              } @else if (lossForm.get('dead_weight')?.hasError('min')) {
+              الوزن يجب أن يكون أكبر من صفر
+              }
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- PRICE & LOCATION -->
+        <div class="form-row">
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>السعر للكيلو (جنيه)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="price_per_kg" required>
+            <mat-hint>سعر الشراء من المزرعة</mat-hint>
+            <mat-error>
+              @if (lossForm.get('price_per_kg')?.hasError('required')) {
+              السعر مطلوب
+              } @else if (lossForm.get('price_per_kg')?.hasError('min')) {
+              السعر يجب أن يكون أكبر من صفر
+              }
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>الموقع</mat-label>
+            <input matInput formControlName="location" placeholder="مثال: الطريق السريع - القاهرة">
+            <mat-hint>موقع حدوث الخسارة (اختياري)</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- NEW: FARM RESPONSIBILITY SECTION -->
+        <div class="farm-responsibility-section">
+          <div class="section-header">
+            <mat-icon matTooltip="إذا كانت الخسارة بسبب المزرعة (دواجن ضعيفة، مريضة، إلخ)">info</mat-icon>
+            <h3>مسؤولية المزرعة عن الخسارة</h3>
+          </div>
+
+          <mat-checkbox formControlName="isFarmResponsible" color="primary">
+            المزرعة مسؤولة عن هذه الخسارة
+          </mat-checkbox>
+
+          @if (lossForm.get('isFarmResponsible')?.value) {
+          <div class="farm-selection-container">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>اختر المزرعة المسؤولة</mat-label>
+              <!-- <mat-select formControlName="farm_id" required>
+                @for (farm of farms(); track farm.id) {
+                <mat-option [value]="farm.id">
+                  <div class="farm-option">
+                    <span class="farm-name">{{ farm.name }}</span>
+                    @if (farm.current_balance !== 0) {
+                    <span class="farm-balance" [class.debt]="farm.current_balance > 0"
+                      [class.credit]="farm.current_balance < 0">
+                      ({{ farm.current_balance < 0 ? 'مدين:' : 'دائن:' }} {{ Math.abs(farm.current_balance) |
+                        number:'1.2-2' }} جنيه) </span>
+                        }
+                  </div>
+                </mat-option>
+                }
+              </mat-select> -->
+              <mat-select formControlName="farm_id" (selectionChange)="onFarmChange()">
+
+                @for (farm of farms(); track farm.id) {
+                <mat-option [value]="farm.id">
+                  <span class="farm-name">{{ farm.name }}</span>
+
+                  @if (farm.current_balance !== 0) {
+                  <span class="farm-balance" [ngClass]="getBalanceTypeClass(farm)">
+                    ({{ formatBalance(farm) }})
+                  </span>
                   }
-                </button>
-                <button mat-button type="button" (click)="cancel()">
-                  إلغاء
-                </button>
+                </mat-option>
+                }
+              </mat-select>
+              <mat-hint>سيتم خصم قيمة الخسارة من رصيد المزرعة</mat-hint>
+              <mat-error>يرجى اختيار المزرعة المسؤولة</mat-error>
+            </mat-form-field>
+
+            <!-- Show selected farm impact -->
+            @if (lossForm.get('farm_id')?.value && lossAmount() > 0) {
+            <div class="farm-impact-alert">
+              <mat-icon>warning</mat-icon>
+              <div class="impact-details">
+                <strong>تأثير على رصيد المزرعة:</strong>
+                <p>
+                  سيتم خصم <strong>{{formatCurrency( lossAmount()) }} جنيه</strong>
+                  من رصيد مزرعة "{{ getSelectedFarm()?.name }}"
+                </p>
+                @if (getSelectedFarm()?.current_balance) {
+                <!-- <p class="new-balance">
+                  الرصيد الجديد:
+                  {{ (getSelectedFarm()!.current_balance + lossAmount()) | number:'1.2-2' }} جنيه
+                  ({{ getSelectedFarm()!.current_balance + lossAmount() < 0 ? 'مدين' : 'دائن' }})
+                </p> -->
+                }
               </div>
-            </form>
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="general-loss-info">
+            <mat-icon>info</mat-icon>
+            <p>هذه خسارة عامة (حرارة، حادث، إلخ) - لن يتم تحميلها لأي مزرعة</p>
+          </div>
           }
-        </mat-card-content>
-      </mat-card>
-    </div>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="form-field full-width" appearance="outline">
+            <mat-label>ملاحظات</mat-label>
+            <textarea matInput formControlName="notes" rows="3"
+              placeholder="أضف أي ملاحظات إضافية حول الخسارة (اختياري)"></textarea>
+            <mat-hint>مثال: دواجن كانت ضعيفة من المزرعة، أو ماتت بسبب الحرارة</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- CALCULATED LOSS AMOUNT -->
+        <div class="calculated-value">
+          <mat-icon>calculate</mat-icon>
+          <strong>قيمة الخسارة: {{ formatCurrency(lossAmount() ) }} جنيه</strong>
+        </div>
+
+        <!-- FORM SUMMARY (if farm responsible) -->
+        @if (lossForm.get('isFarmResponsible')?.value && lossForm.get('farm_id')?.value) {
+        <div class="form-summary">
+          <h4>ملخص العملية:</h4>
+          <ul>
+            <li>وزن النافق: {{ formatNumber(lossForm.get('dead_weight')?.value ,2) }} كجم</li>
+            <li>قيمة الخسارة: {{ formatCurrency(lossAmount() ) }} جنيه</li>
+            <li>المزرعة المسؤولة: {{ getSelectedFarm()?.name }}</li>
+            <li>سيتم تحديث رصيد المزرعة تلقائياً</li>
+          </ul>
+        </div>
+        }
+
+        <!-- ACTION BUTTONS -->
+        <div class="button-group">
+          <button mat-raised-button color="warn" type="submit" [disabled]="isSubmitDisabled()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>جاري التسجيل...</span>
+            } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              {{ 'تسجيل الخسارة' }}
+            </ng-container>
+
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">
+            <ng-container>
+              <mat-icon>cancel</mat-icon>
+              {{ 'إلغاء' }}
+            </ng-container>
+
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

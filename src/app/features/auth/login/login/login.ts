@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class Login {
  private fb = inject(FormBuilder);
   private authService:AuthService = inject(AuthService);
-
+private router = inject(Router);
   hidePassword = signal(true);
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -43,8 +44,13 @@ export class Login {
     this.errorMessage.set(null);
 
     this.authService.login(this.loginForm.getRawValue()).subscribe({
-      next: () => {
-        this.loading.set(false);
+       next: (response) => {
+        if (response.success) {
+           this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessage.set(response.message || 'فشل تسجيل الدخول');
+          this.loading.set(false);
+        }
       },
       error: (error:any) => {
         this.loading.set(false);
@@ -54,4 +60,51 @@ export class Login {
       }
     });
   }
+
+  // private fb = inject(FormBuilder);
+  // private authService = inject(AuthService);
+  // private router = inject(Router);
+
+  // isLoading = signal(false);
+  // errorMessage = signal<string>('');
+
+  // loginForm = this.fb.group({
+  //   username: ['', [Validators.required]],
+  //   password: ['', [Validators.required]]
+  // });
+
+  // onSubmit(): void {
+  //   if (this.loginForm.invalid) {
+  //     this.loginForm.markAllAsTouched();
+  //     return;
+  //   }
+
+  //   this.isLoading.set(true);
+  //   this.errorMessage.set('');
+
+  //   const credentials = {
+  //     username: this.loginForm.value.username!,
+  //     password: this.loginForm.value.password!
+  //   };
+
+  //   this.authService.login(credentials).subscribe({
+  //     next: (response) => {
+  //       if (response.success) {
+  //          this.router.navigate(['/dashboard']);
+  //       } else {
+  //         this.errorMessage.set(response.message || 'فشل تسجيل الدخول');
+  //         this.isLoading.set(false);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Login error:', error);
+  //       this.errorMessage.set(
+  //         error.error?.message ||
+  //         error.error?.error ||
+  //         'اسم المستخدم أو كلمة المرور غير صحيحة'
+  //       );
+  //       this.isLoading.set(false);
+  //     }
+  //   });
+  // }
 }

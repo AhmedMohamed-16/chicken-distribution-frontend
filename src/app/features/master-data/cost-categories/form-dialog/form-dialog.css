@@ -1,8 +1,122 @@
+/* ===============================
+   Dialog Content
+================================ */
 mat-dialog-content {
-  min-width: 500px;
+  width: 100%;
+  max-width: 500px;
   padding: 24px;
+  box-sizing: border-box;
 }
 
+/* Mobile */
+@media (max-width: 600px) {
+  mat-dialog-content {
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+
+/* ===============================
+   Form Fields
+================================ */
 .full-width {
   width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field input,
+mat-form-field textarea {
+  box-sizing: border-box;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+/* ===============================
+   Checkbox Section
+================================ */
+.checkbox-container {
+  margin: 16px 0;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkbox-label strong {
+  font-weight: 600;
+}
+
+.checkbox-label small {
+  color: #666;
+  font-size: 12px;
+}
+
+/* ===============================
+   Dialog Actions
+================================ */
+mat-dialog-actions {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+mat-dialog-actions button {
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+/* ===============================
+   Error Messages
+================================ */
+mat-error {
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+/* ===============================
+   Responsive Adjustments
+================================ */
+@media (min-width: 601px) {
+  mat-dialog-content {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  mat-dialog-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  mat-dialog-actions button {
+    width: 100%;
+  }
+
+  .checkbox-container {
+    padding: 12px;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] .checkbox-label {
+  text-align: right;
+}
+
+[dir="rtl"] mat-dialog-actions {
+  justify-content: flex-start;
+  gap: 8px;
 }

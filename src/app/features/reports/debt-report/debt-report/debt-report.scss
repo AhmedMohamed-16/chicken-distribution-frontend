@@ -1,0 +1,1732 @@
+
+
+// @import '../../../../core/assets/styles/unified-reports.css';
+
+// .debt-report-container {
+//   min-height: 100vh;
+//   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+//   padding: 24px;
+//   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+
+//   /* // Page Header */
+//   .page-header {
+//     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//     color: white;
+//     padding: 32px;
+//     border-radius: 16px;
+//     margin-bottom: 24px;
+//     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+
+//     .header-content {
+//       h1 {
+//         display: flex;
+//         align-items: center;
+//         gap: 16px;
+//         margin: 0 0 12px 0;
+//         font-size: 36px;
+//         font-weight: 700;
+
+//         mat-icon {
+//           font-size: 42px;
+//           width: 42px;
+//           height: 42px;
+//         }
+//       }
+
+//       .subtitle {
+//         margin: 0;
+//         font-size: 18px;
+//         opacity: 0.9;
+//         font-weight: 300;
+//       }
+//     }
+//   }
+
+//   /* // Tabs */
+//   .debt-tabs {
+//     background: white;
+//     border-radius: 16px;
+//     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+//     overflow: hidden;
+
+//     ::ng-deep {
+//       .mat-mdc-tab-labels {
+//         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+//         .mat-mdc-tab {
+//           color: rgba(255, 255, 255, 0.7);
+//           font-weight: 600;
+//           font-size: 16px;
+//           min-width: 200px;
+
+//           &.mat-mdc-tab-active {
+//             color: white;
+//           }
+
+//           mat-icon {
+//             margin-left: 8px;
+//           }
+
+//           .badge-icon {
+//             margin-right: 8px;
+//           }
+//         }
+//       }
+
+//       .mat-mdc-tab-body-wrapper {
+//         padding: 24px;
+//       }
+//     }
+//   }
+
+//   /* // Tab */
+//   Content
+//   .tab-content {
+//     min-height: 400px;
+//   }
+
+//   /* // Loading State */
+//   .loading-container {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     padding: 64px;
+//     gap: 16px;
+
+//     p {
+//       color: #666;
+//       font-size: 18px;
+//       margin: 0;
+//     }
+//   }
+
+//   /* // Error Card */
+//   .error-card {
+//     background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+//     border-right: 6px solid #f44336;
+//     border-radius: 12px;
+
+//     mat-card-content {
+//       display: flex;
+//       align-items: center;
+//       gap: 20px;
+//       padding: 24px;
+
+//       mat-icon {
+//         font-size: 48px;
+//         width: 48px;
+//         height: 48px;
+//         color: #c62828;
+//       }
+
+//       div {
+//         flex: 1;
+
+//         p {
+//           margin: 0 0 16px 0;
+//           font-size: 18px;
+//           color: #c62828;
+//         }
+
+//         button {
+//           mat-icon {
+//             margin-left: 8px;
+//             font-size: 20px;
+//             width: 20px;
+//             height: 20px;
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   /* // Summary Cards */
+//   .summary-cards {
+//     display: grid;
+//     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+//     gap: 24px;
+//     margin-bottom: 32px;
+
+//     .summary-card {
+//       border-radius: 16px;
+//       overflow: hidden;
+//       transition: all 0.3s ease;
+//       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+//       &:hover {
+//         transform: translateY(-8px);
+//         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+//       }
+
+//       mat-card-content {
+//         display: flex;
+//         align-items: center;
+//         gap: 24px;
+//         padding: 28px;
+
+//         .card-icon {
+//           width: 72px;
+//           height: 72px;
+//           border-radius: 50%;
+//           display: flex;
+//           align-items: center;
+//           justify-content: center;
+//           background: rgba(255, 255, 255, 0.2);
+//           backdrop-filter: blur(10px);
+
+//           mat-icon {
+//             font-size: 36px;
+//             width: 36px;
+//             height: 36px;
+//             color: white;
+//           }
+//         }
+
+//         .card-details {
+//           flex: 1;
+
+//           h3 {
+//             margin: 0 0 8px 0;
+//             font-size: 16px;
+//             font-weight: 500;
+//             opacity: 0.9;
+//             color: white;
+//           }
+
+//           .amount {
+//             margin: 0 0 4px 0;
+//             font-size: 28px;
+//             font-weight: 700;
+//             font-family: 'Courier New', monospace;
+//             color: white;
+//           }
+
+//           .count {
+//             margin: 0;
+//             font-size: 14px;
+//             opacity: 0.8;
+//             color: white;
+//           }
+
+//           .status {
+//             margin: 0;
+//             font-size: 14px;
+//             font-weight: 600;
+
+//             .positive {
+//               color: #4caf50;
+//             }
+
+//             .negative {
+//               color: #f44336;
+//             }
+
+//             .neutral {
+//               color: #ff9800;
+//             }
+//           }
+//         }
+//       }
+
+//       &.receivables {
+//         background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+//       }
+
+//       &.payables {
+//         background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
+//       }
+
+//       &.net-position {
+//         background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+
+//         &.positive {
+//           background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+//         }
+//       }
+
+//       &.buyer-debt {
+//         background: linear-gradient(135deg, #f57c00 0%, #fb8c00 100%);
+//       }
+//     }
+//   }
+
+//   /* // Debt Sections */
+//   .debt-section {
+//     margin-bottom: 24px;
+//     border-radius: 12px;
+//     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+//     &.receivables-section {
+//       ::ng-deep .mat-expansion-panel-header {
+//         background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+//         border-right: 6px solid #4caf50;
+//       }
+//     }
+
+//     &.payables-section {
+//       ::ng-deep .mat-expansion-panel-header {
+//         background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+//         border-right: 6px solid #f44336;
+//       }
+//     }
+
+//     ::ng-deep {
+//       .mat-expansion-panel-header {
+//         padding: 16px 24px;
+//         font-size: 18px;
+//         font-weight: 600;
+
+//         mat-panel-title {
+//           display: flex;
+//           align-items: center;
+//           gap: 12px;
+
+//           mat-icon {
+//             font-size: 24px;
+//             width: 24px;
+//             height: 24px;
+//           }
+
+//           .badge {
+//             background: rgba(0, 0, 0, 0.1);
+//             padding: 4px 12px;
+//             border-radius: 12px;
+//             font-size: 14px;
+//             margin-right: 12px;
+//           }
+//         }
+//       }
+
+//       .mat-expansion-panel-body {
+//         padding: 0;
+//       }
+//     }
+//   }
+
+//   /* // Buyers Card */
+//   .buyers-card {
+//     border-radius: 12px;
+//     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+//     mat-card-header {
+//       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//       color: white;
+//       padding: 20px 24px;
+//       margin: -16px -16px 16px -16px;
+
+//       mat-card-title {
+//         display: flex;
+//         align-items: center;
+//         gap: 12px;
+//         margin: 0;
+//         font-size: 20px;
+//         font-weight: 600;
+
+//         mat-icon {
+//           font-size: 24px;
+//           width: 24px;
+//           height: 24px;
+//         }
+//       }
+//     }
+//   }
+
+//   .table-container {
+//     overflow-x: auto;
+//     border-radius: 8px;
+
+//     table {
+//       width: 100%;
+//       background: white;
+
+//       th {
+//         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//         color: white;
+//         font-weight: 600;
+//         font-size: 15px;
+//         padding: 18px 16px;
+//         text-align: right;
+//         border: none;
+//       }
+
+//       td {
+//         padding: 16px;
+//         font-size: 15px;
+//         border-bottom: 1px solid #e0e0e0;
+
+//         .farm-info,
+//         .buyer-info {
+//           .farm-name,
+//           .buyer-name {
+//             font-weight: 500;
+//             color: #333;
+//           }
+//         }
+
+//         .phone-link {
+//           display: inline-flex;
+//           align-items: center;
+//           gap: 6px;
+//           color: #667eea;
+//           text-decoration: none;
+//           transition: color 0.2s;
+
+//           &:hover {
+//             color: #764ba2;
+//           }
+
+//           mat-icon {
+//             font-size: 18px;
+//             width: 18px;
+//             height: 18px;
+//           }
+//         }
+
+//         .no-data {
+//           color: #999;
+//         }
+
+//         .balance {
+//           display: inline-block;
+//           padding: 6px 16px;
+//           border-radius: 20px;
+//           font-weight: 600;
+//           font-family: 'Courier New', monospace;
+//           font-size: 16px;
+
+//           &.receivable {
+//             background: #e8f5e9;
+//             color: #2e7d32;
+//           }
+
+//           &.payable {
+//             background: #ffebee;
+//             color: #c62828;
+//           }
+
+//           &.debt {
+//             background: #fff3e0;
+//             color: #ef6c00;
+//           }
+//         }
+
+//         button {
+//           mat-icon {
+//             margin-left: 8px;
+//           }
+//         }
+//       }
+
+//       .farm-row,
+//       .buyer-row {
+//         transition: background-color 0.2s;
+
+//         &:hover {
+//           background-color: #f5f5f5;
+//         }
+//       }
+//     }
+//   }
+
+//   .no-data-card {
+//     background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+//     text-align: center;
+//     padding: 64px;
+//     border-radius: 12px;
+//     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+//     mat-card-content {
+//       display: flex;
+//       flex-direction: column;
+//       align-items: center;
+//       gap: 20px;
+
+//       mat-icon {
+//         font-size: 80px;
+//         width: 80px;
+//         height: 80px;
+//         color: #4caf50;
+//       }
+
+//       h3 {
+//         margin: 0;
+//         font-size: 24px;
+//         color: #333;
+//       }
+
+//       p {
+//         margin: 0;
+//         font-size: 16px;
+//         color: #666;
+//       }
+//     }
+//   }
+// }
+
+// @media (max-width: 1024px) {
+//   .debt-report-container {
+//     .summary-cards {
+//       grid-template-columns: 1fr;
+//     }
+//   }
+// }
+
+// @media (max-width: 768px) {
+//   .debt-report-container {
+//     padding: 16px;
+
+//     .page-header {
+//       padding: 24px;
+
+//       .header-content h1 {
+//         font-size: 28px;
+
+//         mat-icon {
+//           font-size: 32px;
+//           width: 32px;
+//           height: 32px;
+//         }
+//       }
+
+//       .subtitle {
+//         font-size: 16px;
+//       }
+//     }
+
+//     .debt-tabs ::ng-deep {
+//       .mat-mdc-tab {
+//         min-width: 120px;
+//         font-size: 14px;
+//       }
+
+//       .mat-mdc-tab-body-wrapper {
+//         padding: 16px;
+//       }
+//     }
+
+//     .summary-cards {
+//       .summary-card mat-card-content {
+//         flex-direction: column;
+//         text-align: center;
+
+//         .card-details {
+//           .amount {
+//             font-size: 24px;
+//           }
+//         }
+//       }
+//     }
+
+//     .table-container {
+//       table {
+//         th,
+//         td {
+//           padding: 12px 8px;
+//           font-size: 13px;
+//         }
+
+//         .balance {
+//           font-size: 14px;
+//           padding: 4px 12px;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// @media (max-width: 480px) {
+//   .debt-report-container {
+//     .table-container {
+//       table {
+//         th,
+//         td {
+//           padding: 8px 6px;
+//           font-size: 12px;
+//         }
+
+//         button {
+//           font-size: 12px;
+//           padding: 6px 12px;
+
+//           mat-icon {
+//             font-size: 16px;
+//             width: 16px;
+//             height: 16px;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+/* ========================================
+   DEBT REPORTS - UNIFIED STYLES
+   استيراد الأنماط المشتركة
+   ======================================== */
+// @import '../../../../core/assets/styles/unified-reports.css';
+
+// /* ========================================
+//    DEBT REPORT SPECIFIC STYLES
+//    ======================================== */
+
+// /* Phone Link Styling */
+// .phone-link {
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 4px;
+//   color: #667eea;
+//   text-decoration: none;
+//   transition: color 0.2s;
+// }
+
+// .phone-link:hover {
+//   color: #764ba2;
+//   text-decoration: underline;
+// }
+
+// .phone-link mat-icon {
+//   font-size: 18px;
+//   width: 18px;
+//   height: 18px;
+// }
+
+// /* Farm & Buyer Names */
+// .farm-name,
+// .buyer-name {
+//   font-weight: 600;
+//   font-size: 15px;
+//   color: #1a1a1a;
+// }
+
+// /* Tab Badge - مطابق للتصميم الموحد */
+// .tab-badge {
+//   background-color: #667eea;
+//   color: white;
+//   padding: 2px 8px;
+//   border-radius: 12px;
+//   font-size: 12px;
+//   margin-right: 8px;
+//   font-weight: 600;
+//   display: inline-block;
+// }
+
+// /* Profit Background for Metric Items */
+// .metric-item.profit-bg {
+//   background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+// }
+
+// /* ========================================
+//    STATEMENT DIALOG SPECIFIC STYLES
+//    ======================================== */
+
+// .statement-dialog {
+//   min-width: 90vw;
+//   max-width: 1400px;
+// }
+
+// .dialog-header {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding: 16px 24px;
+//   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//   color: white;
+//   margin: -24px -24px 24px -24px;
+//   border-radius: 8px 8px 0 0;
+// }
+
+// .dialog-header h2 {
+//   display: flex;
+//   align-items: center;
+//   gap: 12px;
+//   margin: 0;
+//   font-size: 22px;
+//   font-weight: 600;
+// }
+
+// .dialog-header mat-icon {
+//   font-size: 28px;
+//   width: 28px;
+//   height: 28px;
+// }
+
+// .close-btn {
+//   color: white;
+// }
+
+// /* Date Range Form - مطابق للتصميم الموحد */
+// .date-range-form {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 16px;
+// }
+
+// .date-fields {
+//   display: flex;
+//   gap: 16px;
+//   align-items: center;
+//   flex-wrap: wrap;
+// }
+
+// .form-group {
+//   flex: 1;
+//   min-width: 200px;
+// }
+
+// /* Balance Status Classes */
+// .profit {
+//   color: #4caf50 !important;
+//   font-weight: 600;
+// }
+
+// .loss,
+// .negative {
+//   color: #f44336 !important;
+//   font-weight: 600;
+// }
+
+// .warning {
+//   color: #ff9800 !important;
+//   font-weight: 600;
+// }
+
+// /* Transaction Type Chips */
+// mat-chip[data-type="purchase"] {
+//   background-color: #ff9800 !important;
+//   color: white !important;
+// }
+
+// mat-chip[data-type="sale"] {
+//   background-color: #4caf50 !important;
+//   color: white !important;
+// }
+
+// mat-chip[data-type="payment"] {
+//   background-color: #2196f3 !important;
+//   color: white !important;
+// }
+
+// /* Dialog Actions */
+// mat-dialog-actions {
+//   padding: 16px 24px;
+//   margin: 24px -24px -24px -24px;
+//   border-top: 1px solid #e0e0e0;
+// }
+
+// /* ========================================
+//    RESPONSIVE ADJUSTMENTS
+//    ======================================== */
+
+// @media (max-width: 768px) {
+//   .statement-dialog {
+//     min-width: 100vw;
+//   }
+
+//   .dialog-header h2 {
+//     font-size: 18px;
+//   }
+
+//   .date-fields {
+//     flex-direction: column;
+//   }
+
+//   .form-group {
+//     width: 100%;
+//   }
+// }
+
+// /* ========================================
+//    PRINT STYLES
+//    ======================================== */
+
+// @media print {
+//   .dialog-header .close-btn,
+//   mat-dialog-actions {
+//     display: none !important;
+//   }
+
+//   .statement-dialog {
+//     min-width: 100%;
+//   }
+// }
+
+
+// .statement-dialog-panel .mat-mdc-dialog-container {
+//   padding: 0 !important;
+//   border-radius: 16px;
+//   overflow: hidden; /* مهم */
+// }
+
+// /* نخلي الـ scroll في content فقط */
+// .statement-dialog-panel mat-dialog-content {
+//   overflow-y: auto;
+//   max-height: calc(90vh - 64px);
+// }
+/* ========================================
+   📱 DEBT REPORT STYLES - MOBILE FIRST
+   Imports unified styles and adds specific overrides
+   ======================================== */
+
+@import '../../../../core/assets/styles/unified-reports.css';
+
+/* ========================================
+   🎯 MOBILE BASE STYLES (DEFAULT)
+   ======================================== */
+
+/* ==================== Phone Links (Mobile Optimized) ==================== */
+.phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.2s;
+  padding: 8px;
+  margin: -8px;
+  border-radius: 6px;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.phone-link:active {
+  background-color: rgba(102, 126, 234, 0.1);
+  color: #764ba2;
+}
+
+.phone-link mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ==================== Names (Mobile Typography) ==================== */
+.farm-name,
+.buyer-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* ==================== Tab Badge (Mobile Size) ==================== */
+.tab-badge {
+  background-color: #667eea;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-right: 6px;
+  font-weight: 600;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ==================== Metric Item Special Background ==================== */
+.metric-item.profit-bg {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+/* ==================== Status Colors (Mobile) ==================== */
+.profit {
+  color: #4caf50 !important;
+  font-weight: 700;
+}
+
+.loss,
+.negative {
+  color: #f44336 !important;
+  font-weight: 700;
+}
+
+.warning {
+  color: #ff9800 !important;
+  font-weight: 700;
+}
+
+/* ==================== Transaction Type Chips (Mobile Touch) ==================== */
+mat-chip[data-type="purchase"] {
+  background-color: #ff9800 !important;
+  color: white !important;
+  min-height: 36px;
+  font-size: 12px;
+}
+
+mat-chip[data-type="sale"] {
+  background-color: #4caf50 !important;
+  color: white !important;
+  min-height: 36px;
+  font-size: 12px;
+}
+
+mat-chip[data-type="payment"] {
+  background-color: #2196f3 !important;
+  color: white !important;
+  min-height: 36px;
+  font-size: 12px;
+}
+
+/* ========================================
+   📊 TABLES - MOBILE FIRST
+   ======================================== */
+
+/* Mobile: Scrollable tables with better touch */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  min-width: 600px; /* Minimum width for readability */
+  border-collapse: collapse;
+  background: white;
+}
+
+thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+th {
+  padding: 12px 10px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+tbody tr:active {
+  background: #f0f4ff;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Action Buttons in Tables - Mobile Touch Size */
+td .action-btn {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+td .action-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ========================================
+   💬 STATEMENT DIALOG - MOBILE FIRST
+   ======================================== */
+
+/* Mobile: Full screen dialog */
+.statement-dialog {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* Dialog Container Styling */
+.statement-dialog-panel .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 0;
+  overflow: hidden;
+  max-height: 100vh;
+}
+
+/* Dialog Header - Mobile */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog-header h2 span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dialog-header mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.close-btn {
+  color: white;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  margin: -8px -4px -8px 0;
+}
+
+.close-btn mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Dialog Content - Mobile Scrollable */
+.statement-dialog-panel mat-dialog-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 56px - 72px); /* viewport - header - actions */
+  padding: 16px;
+}
+
+/* Date Range Form in Dialog - Mobile Stack */
+.statement-dialog .date-range-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statement-dialog .date-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statement-dialog .form-group {
+  width: 100%;
+}
+
+.statement-dialog .load-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+}
+
+/* Dialog Actions - Mobile Fixed Bottom */
+mat-dialog-actions {
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+  background: white;
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+mat-dialog-actions button {
+  flex: 1;
+  min-width: 120px;
+  height: 48px;
+  font-size: 14px;
+}
+
+/* ========================================
+   📱 MOBILE METRICS OVERRIDE
+   ======================================== */
+
+/* Ensure metrics are stacked on mobile */
+.metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric-item {
+  padding: 14px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #667eea;
+}
+
+.metric-item:active {
+  transform: scale(0.98);
+}
+
+.metric-item .section-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  align-self: flex-start;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  word-break: break-word;
+}
+
+/* ========================================
+   📱 MOBILE ACTION BUTTONS OVERRIDE
+   ======================================== */
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.action-btn {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  font-size: 14px;
+  justify-content: center;
+}
+
+/* ========================================
+   📱 MOBILE CARDS OVERRIDE
+   ======================================== */
+
+.metrics-card mat-card-header {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.metrics-card mat-card-title {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metrics-card .section-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.metrics-card mat-card-content {
+  padding: 0 16px 16px;
+}
+
+/* ========================================
+   📱 MOBILE EMPTY STATE OVERRIDE
+   ======================================== */
+
+.empty-state {
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+}
+
+.empty-state h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.empty-state .action-btn {
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   💻 TABLET (≥ 768px)
+   ======================================== */
+
+@media (min-width: 768px) {
+
+  /* Phone Links - Hover instead of Active */
+  .phone-link:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    color: #764ba2;
+    text-decoration: underline;
+  }
+
+  .phone-link:active {
+    background-color: rgba(102, 126, 234, 0.2);
+  }
+
+  /* Names - Larger Typography */
+  .farm-name,
+  .buyer-name {
+    font-size: 15px;
+  }
+
+  /* Tab Badge - Larger */
+  .tab-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    margin-right: 8px;
+  }
+
+  /* Tables - Better Spacing */
+  th {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+
+  td {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Table Hover instead of Active */
+  tbody tr:hover {
+    background: #f7fafc;
+  }
+
+  tbody tr:active {
+    background: #f0f4ff;
+  }
+
+  td .action-btn {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
+  /* Statement Dialog - Windowed */
+  .statement-dialog {
+    width: 90vw;
+    max-width: 900px;
+    height: auto;
+    max-height: 90vh;
+    margin: auto;
+    border-radius: 12px;
+  }
+
+  .statement-dialog-panel .mat-mdc-dialog-container {
+    border-radius: 12px;
+  }
+
+  .dialog-header {
+    padding: 16px 20px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .dialog-header h2 {
+    font-size: 20px;
+    gap: 10px;
+  }
+
+  .dialog-header mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .statement-dialog-panel mat-dialog-content {
+    max-height: calc(90vh - 68px - 76px);
+    padding: 20px;
+  }
+
+  /* Date Range Form - Horizontal */
+  .statement-dialog .date-fields {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .statement-dialog .form-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .statement-dialog .load-btn {
+    width: auto;
+    min-width: 160px;
+    height: 52px;
+  }
+
+  /* Dialog Actions - Side by Side */
+  mat-dialog-actions {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  mat-dialog-actions button {
+    flex: 0 1 auto;
+    min-width: 140px;
+    height: 52px;
+    font-size: 15px;
+  }
+
+  /* Metrics Grid - 2 Columns */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .metric-item {
+    padding: 16px;
+  }
+
+  .metric-label {
+    font-size: 13px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  /* Action Buttons - Horizontal */
+  .action-buttons {
+    flex-direction: row;
+    width: auto;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    width: auto;
+    min-width: 180px;
+    height: 52px;
+    font-size: 15px;
+  }
+
+  /* Cards - Better Spacing */
+  .metrics-card mat-card-header {
+    padding: 16px 20px;
+  }
+
+  .metrics-card mat-card-title {
+    font-size: 18px;
+    gap: 10px;
+  }
+
+  .metrics-card .section-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .metrics-card mat-card-content {
+    padding: 0 20px 20px;
+  }
+
+  /* Empty State - Larger */
+  .empty-state {
+    padding: 50px 30px;
+  }
+
+  .empty-icon {
+    font-size: 90px;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 24px;
+  }
+
+  .empty-state h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+}
+
+/* ========================================
+   🖥️ DESKTOP (≥ 1024px)
+   ======================================== */
+
+@media (min-width: 1024px) {
+
+  /* Names - Desktop Typography */
+  .farm-name,
+  .buyer-name {
+    font-size: 16px;
+  }
+
+  /* Tables - Desktop Spacing */
+  table {
+    min-width: 700px;
+  }
+
+  th {
+    padding: 16px;
+    font-size: 15px;
+  }
+
+  td {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  td .action-btn {
+    height: 52px;
+    padding: 0 24px;
+    font-size: 15px;
+  }
+
+  td .action-btn mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Statement Dialog - Larger Window */
+  .statement-dialog {
+    width: 85vw;
+    max-width: 1200px;
+    max-height: 85vh;
+  }
+
+  .dialog-header {
+    padding: 18px 24px;
+  }
+
+  .dialog-header h2 {
+    font-size: 22px;
+    gap: 12px;
+  }
+
+  .dialog-header mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .statement-dialog-panel mat-dialog-content {
+    max-height: calc(85vh - 72px - 80px);
+    padding: 24px;
+  }
+
+  .statement-dialog .load-btn {
+    height: 56px;
+    font-size: 16px;
+  }
+
+  mat-dialog-actions {
+    padding: 18px 24px;
+  }
+
+  mat-dialog-actions button {
+    min-width: 160px;
+    height: 56px;
+    font-size: 16px;
+  }
+
+  /* Metrics Grid - 3 Columns */
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .metric-item {
+    padding: 18px;
+    gap: 8px;
+  }
+
+  .metric-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .metric-item .section-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .metric-label {
+    font-size: 13px;
+  }
+
+  .metric-value {
+    font-size: 22px;
+  }
+
+  /* Action Buttons - Desktop Size */
+  .action-btn {
+    height: 56px;
+    padding: 0 24px;
+    font-size: 16px;
+  }
+
+  .action-btn mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Cards - Desktop Spacing */
+  .metrics-card mat-card-header {
+    padding: 18px 24px;
+    margin-bottom: 16px;
+  }
+
+  .metrics-card mat-card-title {
+    font-size: 20px;
+    gap: 12px;
+  }
+
+  .metrics-card .section-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .metrics-card mat-card-content {
+    padding: 0 24px 24px;
+  }
+
+  /* Empty State - Desktop */
+  .empty-state {
+    padding: 60px 40px;
+  }
+
+  .empty-icon {
+    font-size: 100px;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 24px;
+  }
+
+  .empty-state h2 {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+}
+
+/* ========================================
+   🖥️ LARGE DESKTOP (≥ 1400px)
+   ======================================== */
+
+@media (min-width: 1400px) {
+
+  /* Statement Dialog - Maximum Width */
+  .statement-dialog {
+    max-width: 1400px;
+  }
+
+  /* Metrics Grid - Can go up to 4 columns */
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* ========================================
+   ♿ ACCESSIBILITY ENHANCEMENTS
+   ======================================== */
+
+/* Focus Visible States */
+.phone-link:focus-visible,
+.action-btn:focus-visible,
+button:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .metric-item {
+    border: 2px solid currentColor;
+  }
+
+  .phone-link {
+    border: 1px solid currentColor;
+  }
+
+  table {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .metric-item:hover {
+    transform: none;
+  }
+
+  tbody tr:hover {
+    background: #f7fafc;
+    transform: none;
+  }
+}
+
+/* ========================================
+   🎯 RTL ENHANCEMENTS
+   ======================================== */
+
+[dir="rtl"] .phone-link {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .dialog-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .metric-item {
+  border-left: none;
+  border-right: 4px solid #667eea;
+}
+
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+/* ========================================
+   🖨️ PRINT STYLES
+   ======================================== */
+
+@media print {
+
+  /* Hide interactive elements */
+  .action-buttons,
+  .action-btn,
+  .close-btn,
+  mat-dialog-actions,
+  .dialog-header .close-btn {
+    display: none !important;
+  }
+
+  /* Full width for print */
+  .statement-dialog {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .statement-dialog-panel .mat-mdc-dialog-container {
+    border-radius: 0;
+  }
+
+  .statement-dialog-panel mat-dialog-content {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+
+  /* Simplify dialog header for print */
+  .dialog-header {
+    background: white;
+    color: black;
+    border-bottom: 2px solid #333;
+    page-break-after: avoid;
+  }
+
+  /* Tables should not break across pages */
+  table {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    background: white;
+    color: black;
+    border-bottom: 2px solid #333;
+  }
+
+  /* Ensure metrics print properly */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    page-break-inside: avoid;
+  }
+
+  .metric-item {
+    border: 1px solid #ddd;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+
+  /* Cards print without shadows */
+  .metrics-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================
+   🎨 SMOOTH TRANSITIONS (Respecting Motion)
+   ======================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  .phone-link,
+  .action-btn,
+  .metric-item,
+  tbody tr {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .dialog-header {
+    transition: box-shadow 0.2s ease-in-out;
+  }
+}

@@ -1,57 +1,564 @@
- .app-container {
-      height: 100vh;
-    }
+/* ============================================
+   MOBILE-FIRST APP LAYOUT STYLES
+   Base: Mobile (default)
+   Breakpoints: Tablet (≥768px), Desktop (≥1024px)
+   RTL Support: Built-in
+   ============================================ */
 
-    .app-sidenav {
-      width: 280px;
-      background-color: #fafafa;
-      border-left: 1px solid #e0e0e0;
-    }
+/* ============================================
+   HOST & GLOBAL SETTINGS
+   ============================================ */
 
-    .app-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+:host {
+  display: block;
+  direction: rtl;
+  height: 100%;
+}
 
-    .toolbar-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
+/* ============================================
+   MOBILE BASE STYLES (Default)
+   ============================================ */
 
-    .spacer {
-      flex: 1 1 auto;
-    }
+/* App Container */
+.app-container {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
 
-    .content {
-      padding: 24px;
-      min-height: calc(100vh - 64px);
-    }
+/* ===============================
+   SIDENAV - MOBILE (Overlay Mode)
+   =============================== */
 
-    mat-nav-list a {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 16px;
-      transition: background-color 0.2s;
-    }
+.app-sidenav {
+  width: 280px; /* Full comfortable width on mobile */
+  max-width: 85vw; /* Don't exceed 85% of viewport */
+  background-color: #fafafa;
+  border-left: 1px solid #e0e0e0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
 
-    mat-nav-list a:hover {
-      background-color: #e0e0e0;
-    }
+/* ===============================
+   TOOLBAR - MOBILE
+   =============================== */
 
-    mat-nav-list a.active {
-      background-color: #e3f2fd;
-      color: #1976d2;
-      border-right: 4px solid #1976d2;
-    }
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 56px; /* Standard mobile toolbar height */
+  padding: 0 8px; /* Compact padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-    mat-nav-list a.active mat-icon {
-      color: #1976d2;
-    }
+/* Toolbar Menu Button */
+.app-toolbar button[mat-icon-button] {
+  min-width: 48px;
+  min-height: 48px; /* Touch-friendly size */
+}
 
-    h3[mat-subheader] {
-      font-weight: 600;
-      color: #666;
-      padding: 16px 16px 8px;
-    }
+/* Toolbar Title - Mobile */
+.toolbar-title {
+  font-size: 16px; /* Smaller on mobile */
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+  max-width: 180px; /* Prevent overlap with user menu */
+}
+
+/* Spacer */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* User Menu Button - Mobile */
+.app-toolbar button[mat-button] {
+  padding: 0 8px;
+  min-height: 48px;
+  font-size: 14px;
+}
+
+.app-toolbar button[mat-button] mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin: 0 2px;
+}
+
+.app-toolbar button[mat-button] span {
+  display: none; /* Hide username on mobile to save space */
+}
+
+/* ===============================
+   SIDENAV CONTENT - MOBILE
+   =============================== */
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  background-color: #f5f5f5;
+}
+
+/* Router Content Padding - Mobile */
+router-outlet + * {
+  padding: 12px; /* Compact padding */
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ===============================
+   NAVIGATION LIST - MOBILE
+   =============================== */
+
+mat-nav-list {
+  padding: 8px 0;
+}
+
+/* Nav List Items - Mobile */
+mat-nav-list a {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Comfortable gap */
+  padding: 12px 16px;
+  min-height: 48px; /* Touch-friendly height */
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  border-right: 4px solid transparent; /* Reserve space for active indicator */
+}
+
+mat-nav-list a mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: rgba(0, 0, 0, 0.54);
+  flex-shrink: 0;
+}
+
+mat-nav-list a span {
+  flex: 1;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Hover State - Mobile (Light touch) */
+mat-nav-list a:active {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Active State - Mobile */
+mat-nav-list a.active {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-right-color: #1976d2;
+  font-weight: 500;
+}
+
+mat-nav-list a.active mat-icon {
+  color: #1976d2;
+}
+
+/* Subheaders - Mobile */
+h3[mat-subheader] {
+  font-weight: 600;
+  font-size: 12px; /* Smaller on mobile */
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px 8px;
+  margin: 8px 0 0 0;
+  line-height: 1.2;
+}
+
+/* Dividers */
+mat-divider {
+  margin: 8px 0;
+  border-top-color: #e0e0e0;
+}
+
+/* User Menu - Mobile */
+mat-menu {
+  min-width: 200px;
+}
+
+mat-menu button[mat-menu-item] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 14px;
+}
+
+mat-menu button[mat-menu-item] mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+/* RTL Support - Mobile */
+[dir="rtl"] .app-sidenav {
+  border-left: none;
+  border-right: 1px solid #e0e0e0;
+}
+
+[dir="rtl"] mat-nav-list a {
+  border-right: none;
+  border-left: 4px solid transparent;
+}
+
+[dir="rtl"] mat-nav-list a.active {
+  border-right: none;
+  border-left-color: #1976d2;
+}
+
+
+/* ============================================
+   TABLET STYLES (≥768px)
+   ============================================ */
+
+@media (min-width: 768px) {
+  /* Toolbar - Tablet */
+  .app-toolbar {
+    height: 60px; /* Slightly taller */
+    padding: 0 12px;
+  }
+
+  /* Toolbar Title - Tablet */
+  .toolbar-title {
+    font-size: 18px;
+    max-width: 300px;
+    margin-right: 12px;
+  }
+
+  /* Show username on tablet */
+  .app-toolbar button[mat-button] span {
+    display: inline; /* Show username */
+    margin: 0 4px;
+  }
+
+  .app-toolbar button[mat-button] {
+    padding: 0 12px;
+  }
+
+  /* Sidenav - Tablet */
+  .app-sidenav {
+    width: 280px;
+    max-width: 280px;
+  }
+
+  /* Content Padding - Tablet */
+  router-outlet + * {
+    padding: 20px;
+  }
+
+  /* Nav Items - Tablet */
+  mat-nav-list a {
+    gap: 14px;
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  mat-nav-list a mat-icon {
+    font-size: 24px;
+  }
+
+  /* Hover Effect - Tablet */
+  mat-nav-list a:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  /* Subheaders - Tablet */
+  h3[mat-subheader] {
+    font-size: 13px;
+    padding: 14px 20px 8px;
+  }
+}
+
+
+/* ============================================
+   DESKTOP STYLES (≥1024px)
+   ============================================ */
+
+@media (min-width: 1024px) {
+  /* Toolbar - Desktop */
+  .app-toolbar {
+    height: 64px; /* Standard desktop height */
+    padding: 0 16px;
+  }
+
+  /* Toolbar Title - Desktop */
+  .toolbar-title {
+    font-size: 20px;
+    max-width: none; /* No restriction */
+    margin-right: 16px;
+  }
+
+  .app-toolbar button[mat-button] {
+    padding: 0 16px;
+    font-size: 15px;
+  }
+
+  .app-toolbar button[mat-button] mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    margin: 0 4px;
+  }
+
+  /* Sidenav - Desktop (Side mode, always visible) */
+  .app-sidenav {
+    width: 300px;
+    max-width: 300px;
+    border-left: 1px solid #e0e0e0;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  }
+
+  [dir="rtl"] .app-sidenav {
+    border-left: none;
+    border-right: 1px solid #e0e0e0;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Content Padding - Desktop */
+  router-outlet + * {
+    padding: 24px;
+  }
+
+  /* Nav Items - Desktop */
+  mat-nav-list a {
+    gap: 16px;
+    padding: 16px 24px;
+    font-size: 15px;
+    border-radius: 0; /* Remove border radius for cleaner look */
+  }
+
+  mat-nav-list a mat-icon {
+    font-size: 24px;
+  }
+
+  /* Enhanced Hover - Desktop */
+  mat-nav-list a:hover {
+    background-color: #e8e8e8;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+
+  /* Active State - Desktop */
+  mat-nav-list a.active {
+    background-color: #e3f2fd;
+    border-right-width: 4px;
+  }
+
+  [dir="rtl"] mat-nav-list a.active {
+    border-left-width: 4px;
+  }
+
+  /* Subheaders - Desktop */
+  h3[mat-subheader] {
+    font-size: 14px;
+    padding: 16px 24px 8px;
+  }
+
+  /* Dividers - Desktop */
+  mat-divider {
+    margin: 12px 0;
+  }
+}
+
+
+/* ============================================
+   LARGE DESKTOP STYLES (≥1440px)
+   ============================================ */
+
+@media (min-width: 1440px) {
+  /* Sidenav - Large Desktop */
+  .app-sidenav {
+    width: 320px;
+    max-width: 320px;
+  }
+
+  /* Content Max Width - Large Desktop */
+  mat-sidenav-content {
+    max-width: 1600px; /* Prevent content from being too wide */
+    margin: 0 auto;
+  }
+
+  /* Content Padding - Large Desktop */
+  router-outlet + * {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Toolbar Title - Large Desktop */
+  .toolbar-title {
+    font-size: 22px;
+  }
+
+  /* Nav Items - Large Desktop */
+  mat-nav-list a {
+    padding: 18px 28px;
+    font-size: 16px;
+  }
+
+  mat-nav-list a mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  h3[mat-subheader] {
+    font-size: 14px;
+    padding: 18px 28px 10px;
+  }
+}
+
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Focus States */
+mat-nav-list a:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.app-toolbar button:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Skip to main content link (for screen readers) */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #1976d2;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 10000;
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  mat-nav-list a.active {
+    border-right-width: 6px;
+  }
+
+  [dir="rtl"] mat-nav-list a.active {
+    border-left-width: 6px;
+  }
+
+  .app-sidenav {
+    border-color: #000;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  mat-nav-list a,
+  mat-nav-list a:hover,
+  .app-toolbar {
+    transition: none;
+  }
+}
+
+/* Dark Mode Support (Optional - requires theme setup) */
+@media (prefers-color-scheme: dark) {
+  .app-sidenav {
+    background-color: #1e1e1e;
+    border-color: #333;
+  }
+
+  mat-nav-list a {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  mat-nav-list a mat-icon {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  mat-nav-list a:active {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  mat-nav-list a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  h3[mat-subheader] {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  mat-sidenav-content {
+    background-color: #121212;
+  }
+
+  mat-divider {
+    border-top-color: #333;
+  }
+}
+
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .app-toolbar,
+  .app-sidenav {
+    display: none;
+  }
+
+  mat-sidenav-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  router-outlet + * {
+    padding: 0;
+  }
+}
+
+
+/* ============================================
+   LOADING & ERROR STATES
+   ============================================ */
+
+/* Loading spinner in content area */
+.content-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Empty state */
+.content-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Error state */
+.content-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #f44336;
+}

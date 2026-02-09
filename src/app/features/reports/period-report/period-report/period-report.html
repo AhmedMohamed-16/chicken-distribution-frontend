@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>تقرير الفترة</mat-card-title>
@@ -34,14 +34,12 @@
       </div>
       } @else if (report()) {
       <div class="report-content">
-        <!-- Period Info -->
-        <div class="period-info">
+         <div class="period-info">
           <h3>الفترة: من {{ report()!.period.from }} إلى {{ report()!.period.to }}</h3>
           <p>عدد أيام التشغيل: {{ report()!.totals.days_operated }}</p>
         </div>
 
-        <!-- Summary Section -->
-        <div class="summary-section">
+         <div class="summary-section">
           <h3>الملخص المالي للفترة</h3>
           <div class="summary-grid">
             <div class="summary-card">
@@ -67,8 +65,7 @@
           </div>
         </div>
 
-        <!-- Operations by Date -->
-        <div class="operations-section">
+         <div class="operations-section">
           <h3>تفاصيل العمليات اليومية</h3>
 
           @for (operation of report()!.operations; track operation.operation_id) {
@@ -77,8 +74,7 @@
               <mat-card-title>{{ operation.operation_date }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <!-- Farm Transactions -->
-              @if (operation.FarmTransactions && operation.FarmTransactions.length > 0) {
+               @if (operation.FarmTransactions && operation.FarmTransactions.length > 0) {
               <h4>معاملات المزارع</h4>
               <table mat-table [dataSource]="operation.FarmTransactions" class="details-table">
                 <ng-container matColumnDef="farm">
@@ -106,8 +102,7 @@
               </table>
               }
 
-              <!-- Sale Transactions -->
-              @if (operation.SaleTransactions && operation.SaleTransactions.length > 0) {
+               @if (operation.SaleTransactions && operation.SaleTransactions.length > 0) {
               <h4>معاملات المبيعات</h4>
               <table mat-table [dataSource]="operation.SaleTransactions" class="details-table">
                 <ng-container matColumnDef="buyer">
@@ -135,8 +130,7 @@
               </table>
               }
 
-              <!-- Daily Costs -->
-              @if (operation.DailyCosts && operation.DailyCosts.length > 0) {
+               @if (operation.DailyCosts && operation.DailyCosts.length > 0) {
               <h4>التكاليف اليومية</h4>
               <table mat-table [dataSource]="operation.DailyCosts" class="details-table">
                 <ng-container matColumnDef="category">
@@ -159,7 +153,7 @@
               </table>
               }
 
-              <!-- Transport Losses -->
+
               @if (operation.TransportLosses && operation.TransportLosses.length > 0) {
               <h4>خسائر النقل</h4>
               <table mat-table [dataSource]="operation.TransportLosses" class="details-table">
@@ -183,7 +177,7 @@
               </table>
               }
 
-              <!-- Profit Distribution -->
+
               @if (operation.ProfitDistribution) {
               <div class="profit-info">
                 <p><strong>صافي الربح لهذا اليوم:</strong> {{ operation.ProfitDistribution.net_profit | number:'1.2-2'
@@ -197,5 +191,813 @@
       </div>
       }
     </mat-card-content>
+  </mat-card>
+</div> -->
+<!-- ============================================================================ -->
+<!-- PERIOD REPORT TEMPLATE - COMPLETE MULTI-VEHICLE REFACTORING -->
+<!-- ============================================================================ -->
+<!-- File: src/app/features/reports/period-report/period-report.html -->
+
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تقرير الفترة</mat-card-title>
+      <mat-card-subtitle>عرض تفاصيل العمليات خلال فترة محددة</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+       <form [formGroup]="periodForm" (ngSubmit)="loadReport()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>من تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerFrom" formControlName="from">
+            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>إلى تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerTo" formControlName="to">
+            <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">
+            <mat-icon>search</mat-icon>
+            عرض التقرير
+          </button>
+        </div>
+      </form>
+
+       @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>جاري تحميل التقرير...</p>
+      </div>
+      }
+
+       @else if (report()) {
+      <div class="report-content">
+
+         <div class="period-info">
+          <mat-icon>date_range</mat-icon>
+          <div class="period-details">
+            <h3>الفترة: من {{ report()!.from }} إلى {{ report()!.to }}</h3>
+            <p>
+              عدد أيام التشغيل: {{ filteredTotals().days_operated }}
+              @if (selectedVehicleId()) {
+              <span class="vehicle-label">- {{ getVehicleName(selectedVehicleId()) }}</span>
+              }
+            </p>
+          </div>
+        </div>
+
+         @if (allVehicles().length > 0) {
+        <div class="vehicles-section">
+          <h3>المركبات المستخدمة خلال الفترة</h3>
+          <mat-chip-set>
+            @for (vehicle of allVehicles(); track vehicle.id) {
+            <mat-chip [highlighted]="selectedVehicleId() === vehicle.id" (click)="onVehicleFilterChange(vehicle.id)">
+              <mat-icon matChipAvatar>local_shipping</mat-icon>
+              {{ vehicle.name }}
+            </mat-chip>
+            }
+          </mat-chip-set>
+        </div>
+        }
+
+         @if (allVehicles().length > 1) {
+        <div class="filter-section">
+          <mat-form-field appearance="outline" class="vehicle-filter">
+            <mat-label>تصفية حسب المركبة</mat-label>
+            <mat-select [value]="selectedVehicleId()" (selectionChange)="onVehicleFilterChange($event.value)">
+              <mat-option [value]="null">
+                <mat-icon>list</mat-icon>
+                عرض جميع المركبات
+              </mat-option>
+              @for (vehicle of allVehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.name }} - {{ vehicle.plate_number }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        }
+
+         <div class="summary-section">
+          <h3>
+            @if (selectedVehicleId()) {
+            الملخص المالي للفترة - {{ getVehicleName(selectedVehicleId()) }}
+            } @else {
+            الملخص المالي للفترة (جميع المركبات)
+            }
+          </h3>
+          <div class="summary-grid">
+            <div class="summary-card purchases">
+              <mat-icon>shopping_cart</mat-icon>
+              <p class="label">إجمالي المشتريات</p>
+              <p class="value">{{ filteredTotals().total_purchases | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card sales">
+              <mat-icon>point_of_sale</mat-icon>
+              <p class="label">إجمالي المبيعات</p>
+              <p class="value">{{ filteredTotals().total_sales | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card costs">
+              <mat-icon>payments</mat-icon>
+              <p class="label">التكاليف</p>
+              <p class="value">{{ filteredTotals().total_costs | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card losses">
+              <mat-icon>warning</mat-icon>
+              <p class="label">الخسائر</p>
+              <p class="value">{{ filteredTotals().total_losses | number:'1.2-2' }} ج</p>
+            </div>
+            <div class="summary-card profit">
+              <mat-icon>trending_up</mat-icon>
+              <p class="label">صافي الربح</p>
+              <p class="value">{{ filteredTotals().total_profit | number:'1.2-2' }} ج</p>
+            </div>
+          </div>
+        </div>
+
+         @if (allVehicles().length > 1 && !selectedVehicleId()) {
+        <div class="vehicle-summaries-section">
+          <h3>ملخص أداء كل مركبة</h3>
+          <div class="vehicle-cards-grid">
+            @for (summary of vehiclePeriodSummaries(); track summary.vehicle.id) {
+            <mat-card class="vehicle-summary-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>local_shipping</mat-icon>
+                  {{ summary.vehicle.name }}
+                </mat-card-title>
+                <mat-card-subtitle>
+                  {{ summary.vehicle.plate_number }} •
+                  {{ summary.days_operated }} يوم عمل
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="mini-summary">
+                  <div class="mini-item">
+                    <span class="mini-label">المشتريات:</span>
+                    <span class="mini-value">{{ summary.total_purchases | number:'1.2-2' }} ج</span>
+                  </div>
+                  <div class="mini-item">
+                    <span class="mini-label">المبيعات:</span>
+                    <span class="mini-value">{{ summary.total_sales | number:'1.2-2' }} ج</span>
+                  </div>
+                  <div class="mini-item">
+                    <span class="mini-label">التكاليف:</span>
+                    <span class="mini-value">{{ summary.total_costs | number:'1.2-2' }} ج</span>
+                  </div>
+                  <div class="mini-item">
+                    <span class="mini-label">الخسائر:</span>
+                    <span class="mini-value">{{ summary.total_losses | number:'1.2-2' }} ج</span>
+                  </div>
+                  <div class="mini-item profit-item">
+                    <span class="mini-label">صافي الربح:</span>
+                    <span class="mini-value profit">{{ summary.total_profit | number:'1.2-2' }} ج</span>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button color="primary" (click)="onVehicleFilterChange(summary.vehicle.id)">
+                  <mat-icon>visibility</mat-icon>
+                  عرض التفاصيل
+                </button>
+              </mat-card-actions>
+            </mat-card>
+            }
+          </div>
+        </div>
+        }
+
+         <div class="operations-section">
+          <h3>
+            <mat-icon>assignment</mat-icon>
+            تفاصيل العمليات اليومية
+            <span class="count-badge">({{ filteredOperations().length }} يوم)</span>
+          </h3>
+
+          @for (operation of filteredOperations(); track operation.id) {
+          <mat-expansion-panel class="operation-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>calendar_today</mat-icon>
+                {{ operation.operation_date }}
+              </mat-panel-title>
+              <mat-panel-description>
+                 <mat-chip-set>
+                  @for (vehicle of getOperationVehicles(operation); track vehicle.id) {
+                  <mat-chip class="mini-chip">
+                    {{ vehicle.name }}
+                  </mat-chip>
+                  }
+                </mat-chip-set>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="operation-content">
+
+               @if (filterOperationTransactions(operation.farm_transactions, selectedVehicleId()).length > 0) {
+              <div class="transaction-section">
+                <h4>
+                  <mat-icon>agriculture</mat-icon>
+                  معاملات المزارع
+                </h4>
+                <table mat-table
+                  [dataSource]="filterOperationTransactions(operation.farm_transactions, selectedVehicleId())"
+                  class="details-table">
+
+                   @if (!selectedVehicleId()) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let tx">
+                      <mat-chip class="table-chip">{{ getVehicleName(tx.vehicle_id) }}</mat-chip>
+                    </td>
+                  </ng-container>
+                  }
+
+                  <ng-container matColumnDef="farm">
+                    <th mat-header-cell *matHeaderCellDef>المزرعة</th>
+                    <td mat-cell *matCellDef="let tx">{{ tx.Farm?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="chicken_type">
+                    <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+                    <td mat-cell *matCellDef="let tx">{{ tx.ChickenType?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>الوزن</th>
+                    <td mat-cell *matCellDef="let tx">{{ tx.net_chicken_weight }} كجم</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+                    <td mat-cell *matCellDef="let tx">{{ tx.total_amount | number:'1.2-2' }} ج</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="getDynamicColumns(farmColumns)"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getDynamicColumns(farmColumns)"></tr>
+                </table>
+              </div>
+              }
+
+               @if (filterOperationTransactions(operation.sale_transactions, selectedVehicleId()).length > 0) {
+              <div class="transaction-section">
+                <h4>
+                  <mat-icon>sell</mat-icon>
+                  معاملات المبيعات
+                </h4>
+                <table mat-table
+                  [dataSource]="filterOperationTransactions(operation.sale_transactions, selectedVehicleId())"
+                  class="details-table">
+
+                  @if (!selectedVehicleId()) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let sale">
+                      <mat-chip class="table-chip">{{ getVehicleName(sale.vehicle_id) }}</mat-chip>
+                    </td>
+                  </ng-container>
+                  }
+
+                  <ng-container matColumnDef="buyer">
+                    <th mat-header-cell *matHeaderCellDef>المشتري</th>
+                    <td mat-cell *matCellDef="let sale">{{ sale.Buyer?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="chicken_type">
+                    <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+                    <td mat-cell *matCellDef="let sale">{{ sale.ChickenType?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>الوزن</th>
+                    <td mat-cell *matCellDef="let sale">{{ sale.net_chicken_weight }} كجم</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+                    <td mat-cell *matCellDef="let sale">{{ sale.total_amount | number:'1.2-2' }} ج</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="getDynamicColumns(saleColumns)"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getDynamicColumns(saleColumns)"></tr>
+                </table>
+              </div>
+              }
+
+               @if (filterOperationTransactions(operation.daily_costs, selectedVehicleId()).length > 0) {
+              <div class="transaction-section">
+                <h4>
+                  <mat-icon>receipt</mat-icon>
+                  التكاليف اليومية
+                </h4>
+                <table mat-table [dataSource]="filterOperationTransactions(operation.daily_costs, selectedVehicleId())"
+                  class="details-table">
+
+                  @if (!selectedVehicleId()) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let cost">
+                      <mat-chip class="table-chip" [class.shared-cost]="!cost.vehicle_id">
+                        {{ getVehicleName(cost.vehicle_id) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+                  }
+
+                  <ng-container matColumnDef="category">
+                    <th mat-header-cell *matHeaderCellDef>الفئة</th>
+                    <td mat-cell *matCellDef="let cost">{{ cost.CostCategory?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+                    <td mat-cell *matCellDef="let cost">{{ cost.amount | number:'1.2-2' }} ج</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="notes">
+                    <th mat-header-cell *matHeaderCellDef>ملاحظات</th>
+                    <td mat-cell *matCellDef="let cost">{{ cost.notes || '-' }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="getDynamicColumns(costColumns)"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getDynamicColumns(costColumns)"></tr>
+                </table>
+              </div>
+              }
+
+               @if (filterOperationTransactions(operation.transport_losses, selectedVehicleId()).length > 0) {
+              <div class="transaction-section">
+                <h4>
+                  <mat-icon>error_outline</mat-icon>
+                  خسائر النقل
+                </h4>
+                <table mat-table
+                  [dataSource]="filterOperationTransactions(operation.transport_losses, selectedVehicleId())"
+                  class="details-table">
+
+                  @if (!selectedVehicleId()) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let loss">
+                      <mat-chip class="table-chip">{{ getVehicleName(loss.vehicle_id) }}</mat-chip>
+                    </td>
+                  </ng-container>
+                  }
+
+                  <ng-container matColumnDef="chicken_type">
+                    <th mat-header-cell *matHeaderCellDef>نوع الفراخ</th>
+                    <td mat-cell *matCellDef="let loss">{{ loss.ChickenType?.name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="weight">
+                    <th mat-header-cell *matHeaderCellDef>الوزن المفقود</th>
+                    <td mat-cell *matCellDef="let loss">{{ loss.dead_weight }} كجم</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>قيمة الخسارة</th>
+                    <td mat-cell *matCellDef="let loss">{{ loss.loss_amount | number:'1.2-2' }} ج</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="getDynamicColumns(lossColumns)"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getDynamicColumns(lossColumns)"></tr>
+                </table>
+              </div>
+              }
+
+               @if (operation.profit_distribution) {
+              <div class="profit-info">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <p>
+                  <strong>صافي الربح لهذا اليوم:</strong>
+                  {{ operation.profit_distribution.net_profit | number:'1.2-2' }} ج
+                </p>
+              </div>
+              }
+
+            </div>
+          </mat-expansion-panel>
+          }
+        </div>
+
+         @if (filteredOperations().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>لا توجد عمليات</h3>
+          <p>لا توجد عمليات مسجلة
+            @if (selectedVehicleId()) {
+            لمركبة {{ getVehicleName(selectedVehicleId()) }}
+            }
+            خلال هذه الفترة
+          </p>
+        </div>
+        }
+
+      </div>
+      }
+
+      @else {
+      <div class="no-report-state">
+        <mat-icon>date_range</mat-icon>
+        <p>اختر فترة لعرض التقرير</p>
+      </div>
+      }
+
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<div class="period-report-container">
+  <!-- ========================================== -->
+  <!-- HEADER & DATE RANGE SELECTOR -->
+  <!-- ========================================== -->
+  <!-- <mat-card class="header-card"> -->
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assessment</mat-icon>
+        تقرير تحليل الفترة</mat-card-title>
+      <mat-card-subtitle>تحليل شامل للأداء المالي والتشغيلي</mat-card-subtitle>
+
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="periodForm" (ngSubmit)="loadReport()">
+        
+        <div class="date-range-form">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>من تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerFrom" formControlName="from">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>إلى تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerTo" formControlName="to">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" class="load-btn">
+            <mat-icon>search</mat-icon>
+            تحميل التقرير
+          </button>
+
+          <div class="action-buttons">
+            @if (hasReport()) {
+            <button mat-stroked-button type="button" (click)="exportReport()" class="action-btn">
+              <mat-icon>download</mat-icon>
+              تصدير Excel
+            </button>
+
+            <button mat-stroked-button type="button" (click)="printReport()" class="action-btn">
+              <mat-icon>print</mat-icon>
+              طباعة
+            </button>
+
+            <button mat-stroked-button color="warn" type="button" (click)="clearReport()" class="action-btn">
+              <mat-icon>clear</mat-icon>
+              مسح
+            </button>
+            }
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+    <!-- </mat-card> -->
+
+    <!-- ========================================== -->
+    <!-- LOADING STATE -->
+    <!-- ========================================== -->
+    @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p class="loading-text">جاري تحميل التقرير...</p>
+      <p class="loading-subtext">قد يستغرق هذا بضع ثوانٍ للفترات الطويلة</p>
+    </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- REPORT CONTENT -->
+    <!-- ========================================== -->
+    @else if (hasReport()) {
+    <div class="report-content">
+
+      <!-- Period Info Banner -->
+      <div class="period-info-banner">
+        <div class="period-label">
+          <mat-icon>date_range</mat-icon>
+          <span class="period-text">
+            من {{ formatDateTime(report()!.period.start_date) }} إلى {{ formatDateTime(report()!.period.end_date) }}
+          </span>
+        </div>
+
+        <mat-chip-set>
+          <mat-chip>
+            <mat-icon matChipAvatar>calendar_today</mat-icon>
+            {{ formatNumber(report()!.period.operating_days,0) }} يوم عمل
+          </mat-chip>
+          <mat-chip>
+            <mat-icon matChipAvatar>local_shipping</mat-icon>
+            {{formatNumber( report()!.period.vehicles_used ,0)}} مركبة
+          </mat-chip>
+          <mat-chip>
+            <mat-icon matChipAvatar>receipt</mat-icon>
+            {{ formatNumber(report()!.period.total_operations,0) }} عملية
+          </mat-chip>
+        </mat-chip-set>
+
+        @if (hasAlerts()) {
+        <mat-chip class="alert-chip" highlighted>
+          <mat-icon matChipAvatar>warning</mat-icon>
+          {{ alertCount() }} تنبيه
+        </mat-chip>
+        }
+      </div>
+
+      <!-- Tab Navigation -->
+      <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms" class="report-tabs">
+
+        <!-- TAB 1: Executive Summary -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>dashboard</mat-icon>
+            الملخص التنفيذي
+          </ng-template>
+
+          <div class="tab-content">
+            <app-executive-summary [summary]="report()!.executive_summary" [periodInfo]="report()!.period">
+            </app-executive-summary>
+
+            @if (report()!.period_comparison.has_comparison) {
+            <app-period-comparison [comparison]="report()!.period_comparison">
+            </app-period-comparison>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- TAB 2: Revenue Analysis -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>trending_up</mat-icon>
+            تحليل الإيرادات
+          </ng-template>
+
+          <div class="tab-content">
+            <app-revenue-breakdown [breakdown]="report()!.revenue_breakdown">
+            </app-revenue-breakdown>
+          </div>
+        </mat-tab>
+
+        <!-- TAB 3: Cost Analysis -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>payments</mat-icon>
+            تحليل التكاليف
+          </ng-template>
+
+          <div class="tab-content">
+            <app-cost-breakdown [breakdown]="report()!.cost_breakdown">
+            </app-cost-breakdown>
+          </div>
+        </mat-tab>
+
+        <!-- TAB 4: Vehicle Performance -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>local_shipping</mat-icon>
+            أداء المركبات
+          </ng-template>
+
+          <div class="tab-content">
+            <app-vehicle-performance [performance]="report()!.vehicle_performance">
+            </app-vehicle-performance>
+          </div>
+        </mat-tab>
+
+        <!-- TAB 5: Debt Position -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>account_balance</mat-icon>
+            المركز المالي
+          </ng-template>
+
+          <div class="tab-content large-numbers">
+            <app-debt-position [debtPosition]="report()!.debt_position">
+            </app-debt-position>
+          </div>
+        </mat-tab>
+
+        <!-- TAB 6: Operational Metrics -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>insights</mat-icon>
+            المؤشرات التشغيلية
+          </ng-template>
+
+          <div class="tab-content">
+            <div class="metrics-container">
+              <!-- Volume Metrics -->
+              <mat-card class="metrics-card">
+                <mat-card-header>
+                  <mat-icon class="section-icon">scale</mat-icon>
+                  <mat-card-title>مؤشرات الحجم</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="metrics-grid">
+                    <div class="metric-item">
+                      <span class="metric-label">إجمالي المشتريات</span>
+                      <span class="metric-value">
+                        {{ formatNumber(report()!.operational_metrics.volume_metrics.total_purchased_kg) }} كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">إجمالي المبيعات</span>
+                      <span class="metric-value">
+                        {{ formatNumber(report()!.operational_metrics.volume_metrics.total_sold_kg )}} كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">الخسائر</span>
+                      <span class="metric-value loss">
+                        {{ formatNumber(report()!.operational_metrics.volume_metrics.total_lost_kg ) }} كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">نسبة الخسائر</span>
+                      <span class="metric-value"
+                        [class.warning]="report()!.operational_metrics.volume_metrics.loss_percentage > 3">
+                        {{ formatPercentage(report()!.operational_metrics.volume_metrics.loss_percentage ) }}%
+                      </span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Pricing Metrics -->
+              <mat-card class="metrics-card">
+                <mat-card-header>
+                  <mat-icon class="section-icon">sell</mat-icon>
+                  <mat-card-title>مؤشرات التسعير</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="metrics-grid">
+                    <div class="metric-item">
+                      <span class="metric-label">متوسط سعر الشراء</span>
+                      <span class="metric-value">
+                        {{ formatCurrency(report()!.operational_metrics.pricing_metrics.avg_purchase_price_per_kg )
+                        }} ج/كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">متوسط سعر البيع</span>
+                      <span class="metric-value">
+                        {{ formatCurrency(report()!.operational_metrics.pricing_metrics.avg_sale_price_per_kg )}}
+                        ج/كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">هامش الربح الإجمالي</span>
+                      <span class="metric-value profit">
+                        {{ formatCurrency(report()!.operational_metrics.pricing_metrics.gross_margin_per_kg ) }}
+                        ج/كجم
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">نسبة هامش الربح</span>
+                      <span class="metric-value profit">
+                        {{ formatPercentage(report()!.operational_metrics.pricing_metrics.gross_margin_percentage)
+                        }}%
+                      </span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Efficiency Metrics -->
+              <mat-card class="metrics-card">
+                <mat-card-header>
+                  <mat-icon class="section-icon">speed</mat-icon>
+                  <mat-card-title>مؤشرات الكفاءة</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="metrics-grid">
+                    <div class="metric-item">
+                      <span class="metric-label">المزارع المتعاملة</span>
+                      <span class="metric-value">
+                        {{ report()!.operational_metrics.efficiency_metrics.farms_engaged }}
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">المشترين المتعاملين</span>
+                      <span class="metric-value">
+                        {{ report()!.operational_metrics.efficiency_metrics.buyers_engaged }}
+                      </span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">متوسط حجم الصفقة</span>
+                      <span class="metric-value">
+                        {{ formatNumber(report()!.operational_metrics.efficiency_metrics.avg_transaction_size_kg )
+                        }} كجم
+                      </span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- TAB 7: Alerts & Highlights -->
+        @if (hasAlerts()) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>warning</mat-icon>
+            التنبيهات
+            <span class="alert-badge">{{ alertCount() }}</span>
+          </ng-template>
+
+          <div class="tab-content">
+            <app-alerts-panel [highlightsAndAlerts]="report()!.highlights_and_alerts">
+            </app-alerts-panel>
+          </div>
+        </mat-tab>
+        }
+      </mat-tab-group>
+
+      <!-- Drill-Down Links Footer -->
+      <!-- <mat-card class="drill-down-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">link</mat-icon>
+          <mat-card-title>تقارير تفصيلية</mat-card-title>
+          <mat-card-subtitle>للحصول على مزيد من التفاصيل</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="drill-down-links">
+            <button mat-stroked-button color="primary">
+              <mat-icon>calendar_view_day</mat-icon>
+              العمليات اليومية
+            </button>
+            <button mat-stroked-button color="primary">
+              <mat-icon>local_shipping</mat-icon>
+              تفاصيل المركبات
+            </button>
+            <button mat-stroked-button color="primary">
+              <mat-icon>agriculture</mat-icon>
+              أرصدة المزارع
+            </button>
+            <button mat-stroked-button color="primary">
+              <mat-icon>people</mat-icon>
+              ديون المشترين
+            </button>
+            <button mat-stroked-button color="primary">
+              <mat-icon>account_balance_wallet</mat-icon>
+              أرباح الشركاء
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card> -->
+
+    </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- EMPTY STATE -->
+    <!-- ========================================== -->
+    @else {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">insert_chart</mat-icon>
+      <h2>مرحباً بك في تقرير تحليل الفترة</h2>
+      <p>اختر نطاق التواريخ أعلاه لعرض تحليل شامل للأداء</p>
+      <mat-divider></mat-divider>
+      <div class="empty-state-features">
+        <div class="feature">
+          <mat-icon>trending_up</mat-icon>
+          <span>تحليل الإيرادات والمبيعات</span>
+        </div>
+        <div class="feature">
+          <mat-icon>payments</mat-icon>
+          <span>تفصيل التكاليف والمصروفات</span>
+        </div>
+        <div class="feature">
+          <mat-icon>local_shipping</mat-icon>
+          <span>تقييم أداء المركبات</span>
+        </div>
+        <div class="feature">
+          <mat-icon>account_balance</mat-icon>
+          <span>المركز المالي والديون</span>
+        </div>
+      </div>
+    </div>
+    }
   </mat-card>
 </div>

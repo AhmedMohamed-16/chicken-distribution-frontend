@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>تقرير الأرباح</mat-card-title>
@@ -34,8 +34,7 @@
       </div>
       } @else if (report()) {
       <div class="report-content">
-        <!-- Summary Section -->
-        <div class="summary-section">
+         <div class="summary-section">
           <h3>ملخص الأرباح</h3>
           <div class="summary-grid">
             <div class="summary-card profit">
@@ -55,15 +54,12 @@
           </div>
         </div>
 
-        <!-- Partner Profits Table -->
-        <!-- Partner Profits Table -->
         @if (report()!.partner_totals && report()!.partner_totals.length > 0) {
         <div class="section">
           <h3>توزيع الأرباح على الشركاء</h3>
 
           <table mat-table [dataSource]="report()!.partner_totals" class="details-table">
 
-            <!-- Partner Name -->
             <ng-container matColumnDef="partner_name">
               <th mat-header-cell *matHeaderCellDef>اسم الشريك</th>
               <td mat-cell *matCellDef="let p">
@@ -71,7 +67,6 @@
               </td>
             </ng-container>
 
-            <!-- Base Share -->
             <ng-container matColumnDef="base_share">
               <th mat-header-cell *matHeaderCellDef>الربح الأساسي</th>
               <td mat-cell *matCellDef="let p" class="profit-amount">
@@ -79,7 +74,6 @@
               </td>
             </ng-container>
 
-            <!-- Vehicle Cost Deduction -->
             <ng-container matColumnDef="vehicle_cost">
               <th mat-header-cell *matHeaderCellDef>خصم المركبة</th>
               <td mat-cell *matCellDef="let p" class="profit-amount">
@@ -87,7 +81,6 @@
               </td>
             </ng-container>
 
-            <!-- Final Profit -->
             <ng-container matColumnDef="final_profit">
               <th mat-header-cell *matHeaderCellDef>صافي الربح</th>
               <td mat-cell *matCellDef="let p" class="profit-amount">
@@ -103,7 +96,6 @@
         }
 
 
-        <!-- Daily Profits Table -->
         @if (report()!.daily_distributions && report()!.daily_distributions.length > 0) {
         <div class="section">
           <h3>الأرباح اليومية</h3>
@@ -129,4 +121,2011 @@
       }
     </mat-card-content>
   </mat-card>
+</div> -->
+<!-- ============================================================================ -->
+<!-- PROFIT REPORT TEMPLATE - COMPLETE MULTI-VEHICLE REFACTORING -->
+<!-- ============================================================================ -->
+<!-- File: src/app/features/reports/profit-report/profit-report.html -->
+
+<!-- <div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>تقرير الأرباح</mat-card-title>
+      <mat-card-subtitle>عرض توزيع الأرباح على الشركاء</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+       <form [formGroup]="dateForm" (ngSubmit)="loadReport()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>من تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerFrom" formControlName="from">
+            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>إلى تاريخ</mat-label>
+            <input matInput [matDatepicker]="pickerTo" formControlName="to">
+            <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="dateForm.invalid">
+            <mat-icon>search</mat-icon>
+            عرض التقرير
+          </button>
+        </div>
+      </form>
+
+       @if (loading()) {
+        <div class="loading-spinner">
+          <mat-spinner></mat-spinner>
+          <p>جاري تحميل التقرير...</p>
+        </div>
+      }
+
+       @else if (report()) {
+        <div class="report-content">
+
+           @if (vehicles().length > 0) {
+            <div class="vehicles-section">
+              <h3>المركبات المستخدمة في الفترة</h3>
+              <mat-chip-set>
+                @for (vehicle of vehicles(); track vehicle.id) {
+                  <mat-chip>
+                    <mat-icon matChipAvatar>local_shipping</mat-icon>
+                    {{ vehicle.name }} - {{ vehicle.plate_number }}
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+
+           @if (vehicles().length > 1) {
+            <div class="filter-section">
+              <mat-form-field appearance="outline" class="vehicle-filter">
+                <mat-label>تصفية حسب المركبة</mat-label>
+                <mat-select
+                  [value]="selectedVehicleId()"
+                  (selectionChange)="onVehicleFilterChange($event.value)">
+                  <mat-option [value]="null">
+                    <mat-icon>list</mat-icon>
+                    عرض الكل
+                  </mat-option>
+                  @for (vehicle of vehicles(); track vehicle.id) {
+                    <mat-option [value]="vehicle.id">
+                      <mat-icon>local_shipping</mat-icon>
+                      {{ vehicle.name }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+
+           <div class="summary-section">
+            <h3>
+              @if (selectedVehicleId()) {
+                ملخص الأرباح - {{ getVehicleName(selectedVehicleId()) }}
+              } @else {
+                ملخص الأرباح الإجمالي
+              }
+            </h3>
+            <div class="summary-grid">
+              <div class="summary-card profit">
+                <mat-icon>trending_up</mat-icon>
+                <p class="label">صافي الربح</p>
+                <p class="value">{{ filteredTotals()?.net_profit | number:'1.2-2' }} ج</p>
+              </div>
+              <div class="summary-card revenue">
+                <mat-icon>point_of_sale</mat-icon>
+                <p class="label">إجمالي المبيعات</p>
+                <p class="value">{{ filteredTotals()?.total_revenue | number:'1.2-2' }} ج</p>
+              </div>
+              <div class="summary-card costs">
+                <mat-icon>payments</mat-icon>
+                <p class="label">إجمالي المشتريات</p>
+                <p class="value">{{ filteredTotals()?.total_purchases | number:'1.2-2' }} ج</p>
+              </div>
+              <div class="summary-card period">
+                <mat-icon>calendar_today</mat-icon>
+                <p class="label">الفترة</p>
+                <p class="value">
+                  {{ report()!.period.from }} - {{ report()!.period.to }}
+                </p>
+              </div>
+              <div class="summary-card partners">
+                <mat-icon>group</mat-icon>
+                <p class="label">عدد الشركاء</p>
+                <p class="value">{{ filteredPartnerProfits().length || 0 }}</p>
+              </div>
+            </div>
+          </div>
+
+           @if (vehicles().length > 1 && !selectedVehicleId()) {
+            <div class="vehicle-summaries-section">
+              <h3>ملخص الأرباح لكل مركبة</h3>
+              <div class="vehicle-cards-grid">
+                @for (summary of vehicleSummaries(); track summary.vehicle.id) {
+                  <mat-card class="vehicle-summary-card">
+                    <mat-card-header>
+                      <mat-card-title>
+                        <mat-icon>local_shipping</mat-icon>
+                        {{ summary.vehicle.name }}
+                      </mat-card-title>
+                      <mat-card-subtitle>{{ summary.vehicle.plate_number }}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                      <div class="mini-summary">
+                        <div class="mini-item">
+                          <span class="mini-label">المبيعات:</span>
+                          <span class="mini-value">{{ summary.total_revenue | number:'1.2-2' }} ج</span>
+                        </div>
+                        <div class="mini-item">
+                          <span class="mini-label">المشتريات:</span>
+                          <span class="mini-value">{{ summary.total_purchases | number:'1.2-2' }} ج</span>
+                        </div>
+                        <div class="mini-item">
+                          <span class="mini-label">التكاليف:</span>
+                          <span class="mini-value">{{ summary.total_costs | number:'1.2-2' }} ج</span>
+                        </div>
+                        <div class="mini-item profit-item">
+                          <span class="mini-label">صافي الربح:</span>
+                          <span class="mini-value profit">{{ summary.net_profit | number:'1.2-2' }} ج</span>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                    <mat-card-actions>
+                      <button mat-button color="primary" (click)="onVehicleFilterChange(summary.vehicle.id)">
+                        <mat-icon>visibility</mat-icon>
+                        عرض التفاصيل
+                      </button>
+                    </mat-card-actions>
+                  </mat-card>
+                }
+              </div>
+            </div>
+          }
+
+           @if (filteredPartnerProfits().length > 0) {
+            <div class="section">
+              <h3>
+                <mat-icon>group</mat-icon>
+                توزيع الأرباح على الشركاء
+                <span class="count-badge">({{ filteredPartnerProfits().length }})</span>
+              </h3>
+
+              <table mat-table [dataSource]="filteredPartnerProfits()" class="details-table">
+
+                 @if (!selectedVehicleId() && vehicles().length > 1) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let profit">
+                      <mat-chip [class.shared-profit]="!profit.vehicle_id">
+                        {{ getVehicleName(profit.vehicle_id) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+                }
+
+                <ng-container matColumnDef="partner_name">
+                  <th mat-header-cell *matHeaderCellDef>اسم الشريك</th>
+                  <td mat-cell *matCellDef="let profit">{{ profit.partner_name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="base_share">
+                  <th mat-header-cell *matHeaderCellDef>الربح الأساسي</th>
+                  <td mat-cell *matCellDef="let profit" class="profit-amount">
+                    {{ profit.total_base_share | number:'1.2-2' }} ج
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="vehicle_cost">
+                  <th mat-header-cell *matHeaderCellDef>خصم المركبة</th>
+                  <td mat-cell *matCellDef="let profit" class="cost-amount">
+                    {{ profit.total_vehicle_cost_share | number:'1.2-2' }} ج
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="final_profit">
+                  <th mat-header-cell *matHeaderCellDef>صافي الربح</th>
+                  <td mat-cell *matCellDef="let profit" class="final-profit-amount">
+                    {{ profit.total_final_profit | number:'1.2-2' }} ج
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="(selectedVehicleId() || vehicles().length <= 1) ? partnerColumns.slice(1) : partnerColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: (selectedVehicleId() || vehicles().length <= 1) ? partnerColumns.slice(1) : partnerColumns"></tr>
+              </table>
+            </div>
+          }
+
+           @if (filteredDailyDistributions().length > 0) {
+            <div class="section">
+              <h3>
+                <mat-icon>calendar_month</mat-icon>
+                الأرباح اليومية
+                <span class="count-badge">({{ filteredDailyDistributions().length }})</span>
+              </h3>
+
+              <table mat-table [dataSource]="filteredDailyDistributions()" class="details-table">
+
+                 @if (!selectedVehicleId() && vehicles().length > 1) {
+                  <ng-container matColumnDef="vehicle">
+                    <th mat-header-cell *matHeaderCellDef>المركبة</th>
+                    <td mat-cell *matCellDef="let daily">
+                      <mat-chip [class.shared-daily]="!daily.vehicle_id">
+                        {{ getVehicleName(daily.vehicle_id) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+                }
+
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+                  <td mat-cell *matCellDef="let daily">{{ daily.operation_date }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="net_profit">
+                  <th mat-header-cell *matHeaderCellDef>صافي الربح</th>
+                  <td mat-cell *matCellDef="let daily"
+                      class="profit-amount"
+                      [class.negative]="daily.net_profit < 0"
+                      [class.positive]="daily.net_profit >= 0">
+                    {{ daily.net_profit | number:'1.2-2' }} ج
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="(selectedVehicleId() || vehicles().length <= 1) ? dailyColumns.slice(1) : dailyColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: (selectedVehicleId() || vehicles().length <= 1) ? dailyColumns.slice(1) : dailyColumns"></tr>
+              </table>
+            </div>
+          }
+
+           @if (filteredPartnerProfits().length === 0 && filteredDailyDistributions().length === 0) {
+            <div class="empty-state">
+              <mat-icon>inbox</mat-icon>
+              <h3>لا توجد بيانات</h3>
+              <p>لا توجد أرباح مسجلة في الفترة المحددة</p>
+            </div>
+          }
+
+        </div>
+      }
+
+       @else {
+        <div class="no-report-state">
+          <mat-icon>calendar_today</mat-icon>
+          <p>اختر الفترة الزمنية لعرض التقرير</p>
+        </div>
+      }
+
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<!--
+=========================
+PROFIT REPORT TEMPLATE
+=========================
+-->
+<!--
+ <div class="profit-report-container">
+   <div class="report-header">
+    <h1>📊 تحليل الأرباح المتقدم</h1>
+    <p class="subtitle">تحليل شامل لمصادر الأرباح والتسرب والتوصيات</p>
+  </div>
+
+   <div class="card date-card">
+    <h2>اختيار الفترة الزمنية</h2>
+
+    <form [formGroup]="dateForm" class="date-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="from">من تاريخ</label>
+          <input type="date" id="from" formControlName="from" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label for="to">إلى تاريخ</label>
+          <input type="date" id="to" formControlName="to" class="form-control" />
+        </div>
+      </div>
+
+       <div class="quick-dates">
+        <button type="button" class="btn btn-outline" (click)="setLastWeek()">
+          آخر أسبوع
+        </button>
+        <button type="button" class="btn btn-outline" (click)="setLastMonth()">
+          آخر 30 يوم
+        </button>
+        <button type="button" class="btn btn-outline" (click)="setCurrentMonth()">
+          الشهر الحالي
+        </button>
+        <button type="button" class="btn btn-outline" (click)="setPreviousMonth()">
+          الشهر السابق
+        </button>
+      </div>
+
+       <div class="action-buttons">
+        <button type="button" class="btn btn-primary" (click)="generateAnalysis()" [disabled]="loading()">
+          <span class="icon">📈</span> تقرير شامل
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="generateSummary()" [disabled]="loading()">
+          <span class="icon">📋</span> ملخص تنفيذي
+        </button>
+
+        <button type="button" class="btn btn-warning" (click)="generateLeakage()" [disabled]="loading()">
+          <span class="icon">🔍</span> تحليل التسرب
+        </button>
+
+        @if (hasReport()) {
+        <button type="button" class="btn btn-danger" (click)="clearReports()">
+          <span class="icon">🗑️</span> مسح
+        </button>
+        }
+      </div>
+    </form>
+  </div>
+
+   @if (loading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>جاري تحميل التقرير...</p>
+  </div>
+  }
+
+   @if (error()) {
+  <div class="alert alert-error">
+    <span class="icon">⚠️</span>
+    <div>
+      <strong>خطأ:</strong>
+      <p>{{ error() }}</p>
+    </div>
+  </div>
+  }
+
+   @if (analysisReport() && !loading()) {
+  <div class="report-content">
+     <div class="card period-card">
+      <h3>معلومات الفترة</h3>
+      <div class="period-stats">
+        <div class="stat">
+          <span class="label">من</span>
+          <span class="value">{{ analysisReport()!.period.start_date }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">إلى</span>
+          <span class="value">{{ analysisReport()!.period.end_date }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">أيام العمل</span>
+          <span class="value">{{ analysisReport()!.period.operating_days }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">إجمالي العمليات</span>
+          <span class="value">{{ analysisReport()!.period.total_operations }}</span>
+        </div>
+      </div>
+    </div>
+
+     <div class="card executive-card">
+      <h3>الملخص التنفيذي</h3>
+      <div class="executive-content">
+        <div class="health-indicator">
+          <span class="label">حالة الأرباح:</span>
+          <span
+            [class]="'health-badge ' + getHealthColorClass(analysisReport()!.executive_summary.current_profit_health)">
+            {{ analysisReport()!.executive_summary.current_profit_health }}
+          </span>
+        </div>
+
+        <div class="summary-section">
+          <h4>✅ نقاط القوة</h4>
+          <ul>
+            @for (strength of analysisReport()!.executive_summary.key_strengths; track strength) {
+            <li>{{ strength }}</li>
+            }
+          </ul>
+        </div>
+
+        <div class="summary-section">
+          <h4>⚠️ نقاط الضعف</h4>
+          <ul>
+            @for (weakness of analysisReport()!.executive_summary.key_weaknesses; track weakness) {
+            <li>{{ weakness }}</li>
+            }
+          </ul>
+        </div>
+
+        <div class="summary-section">
+          <h4>🎯 أهم 3 إجراءات</h4>
+          <ol>
+            @for (action of analysisReport()!.executive_summary.top_3_actions; track action) {
+            <li>{{ action }}</li>
+            }
+          </ol>
+        </div>
+
+        <div class="potential-increase">
+          <strong>الزيادة المحتملة:</strong>
+          <span class="amount">{{ analysisReport()!.executive_summary.potential_profit_increase }}</span>
+        </div>
+      </div>
+    </div>
+
+     <div class="tabs">
+      <button [class.active]="activeTab() === 'composition'" (click)="switchTab('composition')">
+        تكوين الأرباح
+      </button>
+      <button [class.active]="activeTab() === 'per-kg'" (click)="switchTab('per-kg')">
+        الأرباح لكل كيلو
+      </button>
+      <button [class.active]="activeTab() === 'leakage'" (click)="switchTab('leakage')">
+        التسرب
+      </button>
+      <button [class.active]="activeTab() === 'stability'" (click)="switchTab('stability')">
+        الاستقرار والمخاطر
+      </button>
+      <button [class.active]="activeTab() === 'efficiency'" (click)="switchTab('efficiency')">
+        مؤشرات الكفاءة
+      </button>
+      <button [class.active]="activeTab() === 'recommendations'" (click)="switchTab('recommendations')">
+        التوصيات
+      </button>
+    </div>
+
+     <div class="tab-content">
+       @if (activeTab() === 'composition') {
+      <div class="card">
+        <h3>📊 تحليل تكوين الأرباح</h3>
+        <p class="description">{{ analysisReport()!['1_profit_composition_analysis'].description }}</p>
+
+        <div class="total-profit">
+          <span class="label">صافي الربح الإجمالي:</span>
+          <span class="value">{{ formatNumber(analysisReport()!['1_profit_composition_analysis'].total_net_profit) }}
+            ج.م</span>
+        </div>
+
+        <div class="components-grid">
+          @for (component of profitComponents; track component.key) {
+          <div class="component-card">
+            <div class="component-header">
+              <span class="icon">{{ component.icon }}</span>
+              <span class="title">{{ component.label }}</span>
+            </div>
+            <div class="component-amount">
+              {{ formatNumber(getProfitComponent(component.key)?.amount) }} ج.م
+            </div>
+            <div class="component-percentage">
+              {{ formatPercentage(getProfitComponent(component.key)?.percentage) }}
+            </div>
+            <p class="component-desc">
+              {{ getProfitComponent(component.key)?.description }}
+            </p>
+          </div>
+          }
+        </div>
+
+        <div class="key-insight">
+          <strong>💡 الرؤية الرئيسية:</strong>
+          <p>{{ analysisReport()!['1_profit_composition_analysis'].key_insight }}</p>
+        </div>
+      </div>
+      }
+
+       @if (activeTab() === 'per-kg') {
+      <div class="card">
+        <h3>⚖️ تحليل الأرباح لكل كيلوجرام</h3>
+        <p class="description">{{ analysisReport()!['2_profit_per_kg_analysis'].description }}</p>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="label">صافي الربح / كجم مباع</span>
+            <span class="value">{{
+              formatNumber(analysisReport()!['2_profit_per_kg_analysis'].current_period.net_profit_per_sold_kg) }}
+              ج.م</span>
+          </div>
+          <div class="metric-card">
+            <span class="label">الهامش الإجمالي / كجم</span>
+            <span class="value">{{
+              formatNumber(analysisReport()!['2_profit_per_kg_analysis'].current_period.gross_margin_per_kg) }}
+              ج.م</span>
+          </div>
+          <div class="metric-card">
+            <span class="label">خسائر / كجم</span>
+            <span class="value negative">{{
+              formatNumber(analysisReport()!['2_profit_per_kg_analysis'].current_period.loss_erosion_per_kg) }}
+              ج.م</span>
+          </div>
+          <div class="metric-card">
+            <span class="label">تكاليف / كجم</span>
+            <span class="value">{{
+              formatNumber(analysisReport()!['2_profit_per_kg_analysis'].current_period.cost_burden_per_kg) }}
+              ج.م</span>
+          </div>
+        </div>
+
+        <div class="trend-section">
+          <h4>الاتجاه مقارنة بالفترة السابقة</h4>
+          <div class="trend-card">
+            <span class="trend-icon">{{
+              getTrendIcon(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.trend) }}</span>
+            <div class="trend-details">
+              <span class="trend-label">{{
+                analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.trend }}</span>
+              <span class="trend-change">{{
+                formatNumber(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.net_profit_per_sold_kg_change)
+                }} ج.م ({{
+                formatPercentage(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.net_profit_per_sold_kg_change_pct)
+                }})</span>
+              <p class="trend-explanation">{{
+                analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.explanation }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-insight">
+          <strong>💡 الرؤية الرئيسية:</strong>
+          <p>{{ analysisReport()!['2_profit_per_kg_analysis'].key_insight }}</p>
+        </div>
+      </div>
+      }
+
+       @if (activeTab() === 'leakage') {
+      <div class="card">
+        <h3>🔍 اكتشاف تسرب الأرباح</h3>
+        <p class="description">{{ analysisReport()!['3_profit_leakage_detection'].description }}</p>
+
+        <div class="leakage-summary">
+          <div class="leakage-stat">
+            <span class="label">إجمالي التسرب المحدد:</span>
+            <span class="value negative">{{
+              formatNumber(analysisReport()!['3_profit_leakage_detection'].total_identified_leakage) }} ج.م</span>
+          </div>
+          <div class="leakage-stat">
+            <span class="label">نسبة من الربح المحتمل:</span>
+            <span class="value">{{
+              formatPercentage(analysisReport()!['3_profit_leakage_detection'].leakage_as_percent_of_potential_profit)
+              }}</span>
+          </div>
+        </div>
+
+        <h4>مصادر التسرب</h4>
+        @for (source of analysisReport()!['3_profit_leakage_detection'].leakage_sources; track source.source) {
+        <div class="leakage-source">
+          <div class="source-header">
+            <span class="source-type">{{ source.source }}</span>
+            <span class="source-amount negative">-{{ formatNumber(source.leakage_amount) }} ج.م</span>
+          </div>
+          <p class="source-explanation">{{ source.explanation }}</p>
+          <div class="source-action">
+            <strong>الإجراء المطلوب:</strong> {{ source.action }}
+          </div>
+
+          @if (source.affected_farms && source.affected_farms.length > 0) {
+          <div class="affected-entities">
+            <h5>المزارع المتأثرة:</h5>
+            @for (farm of source.affected_farms; track farm.farm_id) {
+            <div class="entity-card">
+              <span class="entity-name">{{ farm.farm_name }}</span>
+              <span class="entity-impact">تسرب: {{ formatNumber(farm.total_leakage) }} ج.م</span>
+            </div>
+            }
+          </div>
+          }
+
+          @if (source.affected_buyers && source.affected_buyers.length > 0) {
+          <div class="affected-entities">
+            <h5>المشترين المتأثرين:</h5>
+            @for (buyer of source.affected_buyers; track buyer.buyer_id) {
+            <div class="entity-card">
+              <span class="entity-name">{{ buyer.buyer_name }}</span>
+              <span class="entity-impact">تسرب: {{ formatNumber(buyer.total_leakage) }} ج.م</span>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        @if (analysisReport()!['3_profit_leakage_detection'].quick_wins.length > 0) {
+        <div class="quick-wins">
+          <h4>🎯 فوز سريع (إجراءات سهلة)</h4>
+          @for (win of analysisReport()!['3_profit_leakage_detection'].quick_wins; track win.action) {
+          <div class="quick-win-card">
+            <div class="win-header">
+              <span class="difficulty" [class]="'difficulty-' + win.difficulty.toLowerCase()">
+                {{ win.difficulty }}
+              </span>
+              <span class="savings">{{ formatNumber(win.estimated_monthly_savings) }} ج.م/شهر</span>
+            </div>
+            <p class="win-action">{{ win.action }}</p>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+
+       @if (activeTab() === 'stability') {
+      <div class="card">
+        <h3>📉 استقرار الأرباح والمخاطر</h3>
+        <p class="description">{{ analysisReport()!['4_profit_stability_and_risk'].description }}</p>
+
+        <div class="volatility-section">
+          <h4>تقلب الأرباح اليومية</h4>
+          <div class="volatility-card">
+            <div class="volatility-metric">
+              <span class="label">متوسط الربح اليومي:</span>
+              <span class="value">{{
+                formatNumber(analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.mean_daily_profit)
+                }} ج.م</span>
+            </div>
+            <div class="volatility-metric">
+              <span class="label">تصنيف التقلب:</span>
+              <span
+                [class]="'volatility-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.volatility_rating)">
+                {{ analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.volatility_rating }}
+              </span>
+            </div>
+            <p class="volatility-interpretation">
+              {{ analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.interpretation }}
+            </p>
+          </div>
+        </div>
+
+        <div class="risk-section">
+          <h4>مخاطر التركيز</h4>
+          <div class="risks-grid">
+            <div class="risk-card">
+              <h5>تركيز المركبات</h5>
+              <span
+                [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.risk_level)">
+                {{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.risk_level }}
+              </span>
+              <p>{{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.explanation
+                }}</p>
+            </div>
+
+            <div class="risk-card">
+              <h5>تركيز المشترين</h5>
+              <span
+                [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.risk_level)">
+                {{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.risk_level }}
+              </span>
+              <p>{{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.explanation }}
+              </p>
+            </div>
+
+            <div class="risk-card">
+              <h5>تركيز المزارع</h5>
+              <span
+                [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.farm_concentration.risk_level)">
+                {{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.farm_concentration.risk_level }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+       @if (activeTab() === 'efficiency') {
+      <div class="card">
+        <h3>⚡ مؤشرات كفاءة الأرباح</h3>
+        <p class="description">{{ analysisReport()!['5_profit_efficiency_indicators'].description }}</p>
+
+        <div class="efficiency-metrics">
+          <div class="efficiency-card">
+            <h4>الربح لكل عملية</h4>
+            <div class="metric-value">{{
+              formatNumber(analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.average) }} ج.م
+            </div>
+            @if (analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation) {
+            <p class="metric-detail">
+              أفضل: {{
+              formatNumber(analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation!.profit)
+              }} ج.م
+              ({{ analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation!.date }})
+            </p>
+            }
+          </div>
+
+          <div class="efficiency-card">
+            <h4>الربح لكل مركبة/يوم</h4>
+            <div class="metric-value">{{
+              formatNumber(analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.average) }} ج.م
+            </div>
+            @if (analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle) {
+            <p class="metric-detail">
+              أفضل: {{
+              analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle!.vehicle_name }}
+              ({{
+              formatNumber(analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle!.avg_profit_per_day)
+              }} ج.م)
+            </p>
+            }
+          </div>
+
+          <div class="efficiency-card">
+            <h4>العائد على التكاليف</h4>
+            <div class="metric-value">{{
+              formatPercentage(analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.roi_percentage) }}
+            </div>
+            <p class="metric-detail">{{ analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.explanation
+              }}</p>
+          </div>
+        </div>
+      </div>
+      }
+
+       @if (activeTab() === 'recommendations') {
+      <div class="card">
+        <h3>🎯 التوصيات القابلة للتنفيذ</h3>
+        <p class="description">{{ analysisReport()!['6_actionable_profit_recommendations'].description }}</p>
+
+        <div class="recommendations-summary">
+          <div class="summary-card">
+            <span class="label">الزيادة الشهرية المحتملة:</span>
+            <span class="value">{{
+              formatNumber(analysisReport()!['6_actionable_profit_recommendations'].summary.total_potential_monthly_profit_increase)
+              }} ج.م</span>
+          </div>
+          <div class="summary-card">
+            <span class="label">الزيادة السنوية المحتملة:</span>
+            <span class="value">{{
+              formatNumber(analysisReport()!['6_actionable_profit_recommendations'].summary.total_potential_annual_profit_increase)
+              }} ج.م</span>
+          </div>
+          <div class="summary-card">
+            <span class="label">فوز سريع (< 30 يوم):</span>
+                <span class="value">{{
+                  analysisReport()!['6_actionable_profit_recommendations'].summary.quick_wins_under_30_days }}</span>
+          </div>
+        </div>
+
+        <div class="recommendations-list">
+          @for (rec of analysisReport()!['6_actionable_profit_recommendations'].recommendations; track rec.id) {
+          <div class="recommendation-card">
+            <div class="rec-header">
+              <span [class]="'rec-priority ' + getPriorityClass(rec.priority)">
+                {{ rec.priority }}
+              </span>
+              <span class="rec-category">{{ rec.category }}</span>
+              <span class="rec-impact">+{{ formatNumber(rec.profit_impact_monthly) }} ج.م/شهر</span>
+            </div>
+
+            <div class="rec-body">
+              <div class="rec-problem">
+                <strong>المشكلة:</strong> {{ rec.problem }}
+              </div>
+              <div class="rec-action">
+                <strong>الإجراء:</strong> {{ rec.action }}
+              </div>
+              <div class="rec-result">
+                <strong>النتيجة المتوقعة:</strong> {{ rec.expected_result }}
+              </div>
+              <div class="rec-difficulty">
+                <strong>الصعوبة:</strong>
+                <span [class]="'difficulty-badge difficulty-' + rec.implementation_difficulty.toLowerCase()">
+                  {{ rec.implementation_difficulty }}
+                </span>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+   @if (summaryReport() && !loading()) {
+  <div class="report-content">
+    <div class="card">
+      <h3>📋 الملخص التنفيذي</h3>
+
+      <div class="summary-stats">
+        <div class="stat-card">
+          <span class="label">صحة الأرباح</span>
+          <span class="value">{{ formatNumber(summaryReport()!.profit_health) }} ج.م</span>
+        </div>
+        <div class="stat-card">
+          <span class="label">الربح / كجم</span>
+          <span class="value">{{ formatNumber(summaryReport()!.profit_per_kg) }} ج.م</span>
+        </div>
+        <div class="stat-card">
+          <span class="label">إجمالي التسرب</span>
+          <span class="value negative">{{ formatNumber(summaryReport()!.total_leakage) }} ج.م</span>
+        </div>
+      </div>
+
+      <div class="executive-summary">
+        <h4>الملخص</h4>
+        <div class="health-indicator">
+          <span
+            [class]="'health-badge ' + getHealthColorClass(summaryReport()!.executive_summary.current_profit_health)">
+            {{ summaryReport()!.executive_summary.current_profit_health }}
+          </span>
+        </div>
+
+        <div class="summary-lists">
+          <div>
+            <h5>✅ نقاط القوة</h5>
+            <ul>
+              @for (strength of summaryReport()!.executive_summary.key_strengths; track strength) {
+              <li>{{ strength }}</li>
+              }
+            </ul>
+          </div>
+          <div>
+            <h5>⚠️ نقاط الضعف</h5>
+            <ul>
+              @for (weakness of summaryReport()!.executive_summary.key_weaknesses; track weakness) {
+              <li>{{ weakness }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="potential-increase">
+          <strong>الزيادة المحتملة:</strong>
+          <span class="amount">{{ summaryReport()!.executive_summary.potential_profit_increase }}</span>
+        </div>
+      </div>
+
+      <div class="top-recommendations">
+        <h4>أهم التوصيات</h4>
+        @for (rec of summaryReport()!.top_recommendations; track rec.id) {
+        <div class="recommendation-summary">
+          <span [class]="'priority-badge ' + getPriorityClass(rec.priority)">{{ rec.priority }}</span>
+          <span class="rec-action">{{ rec.action }}</span>
+          <span class="rec-impact">+{{ formatNumber(rec.profit_impact_monthly) }} ج.م</span>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+
+   @if (leakageReport() && !loading()) {
+  <div class="report-content">
+    <div class="card">
+      <h3>🔍 تحليل تسرب الأرباح</h3>
+
+      <div class="leakage-overview">
+        <div class="leakage-total">
+          <span class="label">إجمالي التسرب المحدد:</span>
+          <span class="value negative">{{ formatNumber(leakageReport()!.leakage_analysis.total_identified_leakage) }}
+            ج.م</span>
+        </div>
+        <div class="leakage-percentage">
+          <span class="label">نسبة من الربح المحتمل:</span>
+          <span class="value">{{
+            formatPercentage(leakageReport()!.leakage_analysis.leakage_as_percent_of_potential_profit) }}</span>
+        </div>
+      </div>
+
+      <h4>مصادر التسرب</h4>
+      @for (source of leakageReport()!.leakage_analysis.leakage_sources; track source.source) {
+      <div class="leakage-source">
+        <div class="source-header">
+          <span class="source-type">{{ source.source }}</span>
+          <span class="source-amount negative">-{{ formatNumber(source.leakage_amount) }} ج.م</span>
+        </div>
+        <p class="source-explanation">{{ source.explanation }}</p>
+        <div class="source-action">
+          <strong>الإجراء:</strong> {{ source.action }}
+        </div>
+      </div>
+      }
+
+      @if (leakageReport()!.leakage_analysis.quick_wins.length > 0) {
+      <div class="quick-wins">
+        <h4>🎯 فوز سريع</h4>
+        @for (win of leakageReport()!.leakage_analysis.quick_wins; track win.action) {
+        <div class="quick-win-card">
+          <div class="win-header">
+            <span [class]="'difficulty-badge difficulty-' + win.difficulty.toLowerCase()">{{ win.difficulty }}</span>
+            <span class="savings">{{ formatNumber(win.estimated_monthly_savings) }} ج.م/شهر</span>
+          </div>
+          <p class="win-action">{{ win.action }}</p>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+   @if (hasReport() && !loading()) {
+  <div class="export-section">
+    <button class="btn btn-outline" (click)="exportToJSON()">
+      <span class="icon">💾</span> تصدير JSON
+    </button>
+  </div>
+  }
+</div>   -->
+<div class="profit-report-container">
+  <!-- ========================================== -->
+  <!-- UNIFIED HEADER & DATE RANGE SELECTOR -->
+  <!-- ========================================== -->
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assessment</mat-icon>
+        تحليل الأرباح المتقدم
+      </mat-card-title>
+      <mat-card-subtitle>
+        تحليل شامل لمصادر الأرباح والتسرب والتوصيات
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="dateForm">
+        <div class="date-range-form">
+          <!-- Date Fields -->
+          <div class="date-fields">
+            <mat-form-field appearance="outline" class="form-group">
+              <mat-label>من تاريخ</mat-label>
+              <input matInput [matDatepicker]="fromPicker" formControlName="from" required>
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-group">
+              <mat-label>إلى تاريخ</mat-label>
+              <input matInput [matDatepicker]="toPicker" formControlName="to" required>
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Quick Date Buttons -->
+          <div class="quick-dates">
+            <button mat-stroked-button type="button" (click)="setLastWeek()" class="quick-btn">
+              <mat-icon>date_range</mat-icon>
+              آخر أسبوع
+            </button>
+            <button mat-stroked-button type="button" (click)="setLastMonth()" class="quick-btn">
+              <mat-icon>calendar_month</mat-icon>
+              آخر 30 يوم
+            </button>
+            <button mat-stroked-button type="button" (click)="setCurrentMonth()" class="quick-btn">
+              <mat-icon>calendar_today</mat-icon>
+              الشهر الحالي
+            </button>
+            <button mat-stroked-button type="button" (click)="setPreviousMonth()" class="quick-btn">
+              <mat-icon>history</mat-icon>
+              الشهر السابق
+            </button>
+          </div>
+
+          <!-- Report Type Buttons -->
+          <div class="report-type-buttons">
+            <button mat-raised-button color="primary" type="button" (click)="generateAnalysis()" [disabled]="loading()"
+              class="report-type-btn">
+              <mat-icon>analytics</mat-icon>
+              تقرير شامل
+            </button>
+
+            <button mat-raised-button color="accent" type="button" (click)="generateSummary()" [disabled]="loading()"
+              class="report-type-btn">
+              <mat-icon>summarize</mat-icon>
+              ملخص تنفيذي
+            </button>
+
+            <button mat-raised-button color="warn" type="button" (click)="generateLeakage()" [disabled]="loading()"
+              class="report-type-btn">
+              <mat-icon>troubleshoot</mat-icon>
+              تحليل التسرب
+            </button>
+
+            <button mat-raised-button type="button" (click)="loadPartnerDistribution()" [disabled]="loading()"
+              class="report-type-btn partners-btn">
+              <mat-icon>groups</mat-icon>
+              توزيع الأرباح
+            </button>
+          </div>
+
+          <!-- Action Buttons -->
+          @if (hasReport()) {
+          <div class="action-buttons">
+
+            <button mat-stroked-button type="button" (click)="exportToExcel()" class="action-btn" *ngIf="reportType()=='partners'">
+              <mat-icon>file_download</mat-icon>
+              تصدير Excel
+            </button>
+
+            <button mat-stroked-button type="button" (click)="printReport()" class="action-btn">
+              <mat-icon>print</mat-icon>
+              طباعة
+            </button>
+
+
+
+            <button mat-stroked-button color="warn" type="button" (click)="clearReports()" class="action-btn">
+              <mat-icon>clear</mat-icon>
+              مسح
+            </button>
+          </div>
+          }
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ========================================== -->
+  <!-- LOADING STATE -->
+  <!-- ========================================== -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p class="loading-text">جاري تحميل التقرير...</p>
+    <p class="loading-subtext">قد يستغرق هذا بضع ثوانٍ</p>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- ERROR STATE -->
+  <!-- ========================================== -->
+  @if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content class="error-content">
+      <mat-icon class="error-icon">error</mat-icon>
+      <div>
+        <h4>خطأ</h4>
+        <p>{{ error() }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- ========================================== -->
+  <!-- PROFIT ANALYSIS REPORT (COMPREHENSIVE) -->
+  <!-- ========================================== -->
+  @if (analysisReport() && !loading()) {
+  <div class="report-content" id="report-content">
+
+    <!-- Period Info Banner -->
+    <div class="period-info-banner">
+      <div class="info-item">
+        <mat-icon>date_range</mat-icon>
+        <div>
+          <span class="label">الفترة:</span>
+          <span class="value">{{ formatDateTime(analysisReport()!.period.start_date) }} - {{
+            formatDateTime(analysisReport()!.period.end_date) }}</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon>event</mat-icon>
+        <div>
+          <span class="label">أيام العمل:</span>
+          <span class="value">{{ formatNumber(analysisReport()!.period.operating_days, 0) }}</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon>local_shipping</mat-icon>
+        <div>
+          <span class="label">إجمالي العمليات:</span>
+          <span class="value">{{ formatNumber(analysisReport()!.period.total_operations, 0) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Summary Card -->
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>summarize</mat-icon>
+          الملخص التنفيذي
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="health-indicator">
+          <span class="label">حالة الأرباح:</span>
+          <span
+            [class]="'health-badge ' + getHealthColorClass(analysisReport()!.executive_summary.current_profit_health)">
+            {{ analysisReport()!.executive_summary.current_profit_health }}
+          </span>
+        </div>
+
+        <div class="summary-sections">
+          <div class="summary-section success">
+            <h4><mat-icon>check_circle</mat-icon> نقاط القوة</h4>
+            <ul>
+              @for (strength of analysisReport()!.executive_summary.key_strengths; track strength) {
+              <li>{{ strength }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="summary-section warning">
+            <h4><mat-icon>warning</mat-icon> نقاط الضعف</h4>
+            <ul>
+              @for (weakness of analysisReport()!.executive_summary.key_weaknesses; track weakness) {
+              <li>{{ weakness }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="summary-section info">
+            <h4><mat-icon>track_changes</mat-icon> أهم 3 إجراءات</h4>
+            <ol>
+              @for (action of analysisReport()!.executive_summary.top_3_actions; track action) {
+              <li>{{ action }}</li>
+              }
+            </ol>
+          </div>
+        </div>
+
+        <div class="potential-increase">
+          <strong>الزيادة المحتملة في الأرباح:</strong>
+          <span class="amount">{{ analysisReport()!.executive_summary.potential_profit_increase }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabs Navigation -->
+    <mat-card class="tabs-card">
+      <mat-tab-group [selectedIndex]="activeTabIndex()" (selectedIndexChange)="onTabChange($event)">
+
+        <!-- Tab 1: Profit Composition -->
+        <mat-tab label="تكوين الأرباح">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['1_profit_composition_analysis'].description }}</p>
+
+            <div class="total-profit-banner">
+              <span class="label">صافي الربح الإجمالي:</span>
+              <span class="value">{{ formatCurrency(analysisReport()!['1_profit_composition_analysis'].total_net_profit)
+                }} ج.م</span>
+            </div>
+
+            <div class="components-grid">
+              @for (component of profitComponents; track component.key) {
+              <div class="component-card">
+                <div class="component-header">
+                  <span class="icon">{{ component.icon }}</span>
+                  <span class="title">{{ component.label }}</span>
+                </div>
+                <div class="component-amount">
+                  {{ formatCurrency(getProfitComponent(component.key)?.amount) }} ج.م
+                </div>
+                <div class="component-percentage">
+                  {{ formatPercentage(getProfitComponent(component.key)?.percentage) }}
+                </div>
+                <p class="component-desc">
+                  {{ getProfitComponent(component.key)?.description }}
+                </p>
+              </div>
+              }
+            </div>
+
+            <div class="key-insight">
+              <strong>💡 الرؤية الرئيسية:</strong>
+              <p>{{ analysisReport()!['1_profit_composition_analysis'].key_insight }}</p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Tab 2: Profit Per KG -->
+        <mat-tab label="الأرباح لكل كيلو">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['2_profit_per_kg_analysis'].description }}</p>
+
+            <div class="metrics-grid">
+              <mat-card class="metric-card-detail">
+                <mat-card-content>
+                  <span class="metric-label">صافي الربح / كجم مباع</span>
+                  <span class="metric-value">{{
+                    formatCurrency(analysisReport()!['2_profit_per_kg_analysis'].current_period.net_profit_per_sold_kg)
+                    }} ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="metric-card-detail">
+                <mat-card-content>
+                  <span class="metric-label">الهامش الإجمالي / كجم</span>
+                  <span class="metric-value">{{
+                    formatCurrency(analysisReport()!['2_profit_per_kg_analysis'].current_period.gross_margin_per_kg) }}
+                    ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="metric-card-detail negative">
+                <mat-card-content>
+                  <span class="metric-label">خسائر / كجم</span>
+                  <span class="metric-value">{{
+                    formatCurrency(analysisReport()!['2_profit_per_kg_analysis'].current_period.loss_erosion_per_kg) }}
+                    ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="metric-card-detail">
+                <mat-card-content>
+                  <span class="metric-label">تكاليف / كجم</span>
+                  <span class="metric-value">{{
+                    formatCurrency(analysisReport()!['2_profit_per_kg_analysis'].current_period.cost_burden_per_kg) }}
+                    ج.م</span>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <mat-card class="trend-card">
+              <mat-card-header>
+                <mat-card-title>الاتجاه مقارنة بالفترة السابقة</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="trend-indicator">
+                  <span class="trend-icon">{{
+                    getTrendIcon(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.trend)
+                    }}</span>
+                  <div class="trend-details">
+                    <span class="trend-label">{{
+                      analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.trend }}</span>
+                    <span class="trend-change">
+                      {{
+                      formatCurrency(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.net_profit_per_sold_kg_change)
+                      }} ج.م
+                      ({{
+                      formatPercentage(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.net_profit_per_sold_kg_change_pct)
+                      }})
+                    </span>
+                    <p class="trend-explanation">{{
+                      analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.explanation }}</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <div class="key-insight">
+              <strong>💡 الرؤية الرئيسية:</strong>
+              <p>{{ analysisReport()!['2_profit_per_kg_analysis'].key_insight }}</p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Tab 3: Leakage Analysis -->
+        <mat-tab label="التسرب">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['3_profit_leakage_detection'].description }}</p>
+
+            <div class="leakage-summary-grid">
+              <mat-card class="leakage-stat-card negative">
+                <mat-card-content>
+                  <span class="stat-label">إجمالي التسرب المحدد:</span>
+                  <span class="stat-value">{{
+                    formatCurrency(analysisReport()!['3_profit_leakage_detection'].total_identified_leakage) }}
+                    ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="leakage-stat-card">
+                <mat-card-content>
+                  <span class="stat-label">نسبة من الربح المحتمل:</span>
+                  <span class="stat-value">{{
+                    formatPercentage(analysisReport()!['3_profit_leakage_detection'].leakage_as_percent_of_potential_profit)
+                    }}</span>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <h4 class="section-title"><mat-icon>list</mat-icon> مصادر التسرب</h4>
+            @for (source of analysisReport()!['3_profit_leakage_detection'].leakage_sources; track source.source) {
+            <mat-card class="leakage-source-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <span class="source-type">{{ source.source }}</span>
+                  <span class="source-amount negative">-{{ formatCurrency(source.leakage_amount) }} ج.م</span>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="source-explanation">{{ source.explanation }}</p>
+                <div class="source-action">
+                  <mat-icon>lightbulb</mat-icon>
+                  <strong>الإجراء المطلوب:</strong> {{ source.action }}
+                </div>
+
+                @if (source.affected_farms && source.affected_farms.length > 0) {
+                <div class="affected-entities">
+                  <h5><mat-icon>agriculture</mat-icon> المزارع المتأثرة:</h5>
+                  <div class="entities-grid">
+                    @for (farm of source.affected_farms; track farm.farm_id) {
+                    <div class="entity-chip">
+                      <span class="entity-name">{{ farm.farm_name }}</span>
+                      <span class="entity-impact">{{ formatCurrency(farm.total_leakage) }} ج.م</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+
+                @if (source.affected_buyers && source.affected_buyers.length > 0) {
+                <div class="affected-entities">
+                  <h5><mat-icon>store</mat-icon> المشترين المتأثرين:</h5>
+                  <div class="entities-grid">
+                    @for (buyer of source.affected_buyers; track buyer.buyer_id) {
+                    <div class="entity-chip">
+                      <span class="entity-name">{{ buyer.buyer_name }}</span>
+                      <span class="entity-impact">{{ formatCurrency(buyer.total_leakage) }} ج.م</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+              </mat-card-content>
+            </mat-card>
+            }
+
+            @if (analysisReport()!['3_profit_leakage_detection'].quick_wins.length > 0) {
+            <mat-card class="quick-wins-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>flash_on</mat-icon>
+                  فوز سريع (إجراءات سهلة)
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @for (win of analysisReport()!['3_profit_leakage_detection'].quick_wins; track win.action) {
+                <div class="quick-win-item">
+                  <div class="win-header">
+                    <span [class]="'difficulty-badge difficulty-' + win.difficulty.toLowerCase()">{{ win.difficulty
+                      }}</span>
+                    <span class="win-savings">{{ formatCurrency(win.estimated_monthly_savings) }} ج.م/شهر</span>
+                  </div>
+                  <p class="win-action">{{ win.action }}</p>
+                </div>
+                }
+              </mat-card-content>
+            </mat-card>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Tab 4: Stability & Risk -->
+        <mat-tab label="الاستقرار والمخاطر">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['4_profit_stability_and_risk'].description }}</p>
+
+            <mat-card class="volatility-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>show_chart</mat-icon>
+                  تقلب الأرباح اليومية
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="volatility-metrics">
+                  <div class="volatility-metric">
+                    <span class="v-label">متوسط الربح اليومي:</span>
+                    <span class="v-value">{{
+                      formatCurrency(analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.mean_daily_profit)
+                      }} ج.م</span>
+                  </div>
+                  <div class="volatility-metric">
+                    <span class="v-label">تصنيف التقلب:</span>
+                    <span
+                      [class]="'volatility-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.volatility_rating)">
+                      {{ analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.volatility_rating }}
+                    </span>
+                  </div>
+                </div>
+                <p class="volatility-interpretation">{{
+                  analysisReport()!['4_profit_stability_and_risk'].daily_profit_volatility.interpretation }}</p>
+              </mat-card-content>
+            </mat-card>
+
+            <h4 class="section-title"><mat-icon>warning</mat-icon> مخاطر التركيز</h4>
+            <div class="risks-grid">
+              <mat-card class="risk-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>local_shipping</mat-icon>
+                    تركيز المركبات
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <span
+                    [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.risk_level)">
+                    {{
+                    analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.risk_level
+                    }}
+                  </span>
+                  <p>{{
+                    analysisReport()!['4_profit_stability_and_risk'].dependency_risks.vehicle_concentration.explanation
+                    }}</p>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="risk-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>store</mat-icon>
+                    تركيز المشترين
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <span
+                    [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.risk_level)">
+                    {{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.risk_level
+                    }}
+                  </span>
+                  <p>{{
+                    analysisReport()!['4_profit_stability_and_risk'].dependency_risks.buyer_concentration.explanation }}
+                  </p>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="risk-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>agriculture</mat-icon>
+                    تركيز المزارع
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <span
+                    [class]="'risk-badge ' + getRiskClass(analysisReport()!['4_profit_stability_and_risk'].dependency_risks.farm_concentration.risk_level)">
+                    {{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.farm_concentration.risk_level
+                    }}
+                  </span>
+                  <p>{{ analysisReport()!['4_profit_stability_and_risk'].dependency_risks.farm_concentration.explanation
+                    }}</p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Tab 5: Efficiency Indicators -->
+        <mat-tab label="مؤشرات الكفاءة">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['5_profit_efficiency_indicators'].description }}</p>
+
+            <div class="efficiency-metrics-grid">
+              <mat-card class="efficiency-metric-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>receipt</mat-icon>
+                    الربح لكل عملية
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="efficiency-value">{{
+                    formatCurrency(analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.average) }}
+                    ج.م</div>
+                  @if (analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation) {
+                  <p class="efficiency-detail">
+                    <strong>أفضل عملية:</strong>
+                    {{
+                    formatCurrency(analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation!.profit)
+                    }} ج.م
+                    ({{
+                    formatDateTime(analysisReport()!['5_profit_efficiency_indicators'].profit_per_operation.best_operation!.date)
+                    }})
+                  </p>
+                  }
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="efficiency-metric-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>local_shipping</mat-icon>
+                    الربح لكل مركبة/يوم
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="efficiency-value">{{
+                    formatCurrency(analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.average)
+                    }} ج.م</div>
+                  @if (analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle) {
+                  <p class="efficiency-detail">
+                    <strong>أفضل مركبة:</strong>
+                    {{
+                    analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle!.vehicle_name
+                    }}
+                    ({{
+                    formatCurrency(analysisReport()!['5_profit_efficiency_indicators'].profit_per_vehicle_day.top_vehicle!.avg_profit_per_day)
+                    }} ج.م)
+                  </p>
+                  }
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="efficiency-metric-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>trending_up</mat-icon>
+                    العائد على التكاليف
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="efficiency-value">{{
+                    formatPercentage(analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.roi_percentage)
+                    }}</div>
+                  <p class="efficiency-detail">{{
+                    analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.explanation }}</p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Tab 6: Recommendations -->
+        <mat-tab label="التوصيات">
+          <div class="tab-content">
+            <p class="description">{{ analysisReport()!['6_actionable_profit_recommendations'].description }}</p>
+
+            <div class="recommendations-summary-grid">
+              <mat-card class="rec-summary-card">
+                <mat-card-content>
+                  <span class="rec-sum-label">الزيادة الشهرية المحتملة:</span>
+                  <span class="rec-sum-value">{{
+                    formatCurrency(analysisReport()!['6_actionable_profit_recommendations'].summary.total_potential_monthly_profit_increase)
+                    }} ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="rec-summary-card">
+                <mat-card-content>
+                  <span class="rec-sum-label">الزيادة السنوية المحتملة:</span>
+                  <span class="rec-sum-value">{{
+                    formatCurrency(analysisReport()!['6_actionable_profit_recommendations'].summary.total_potential_annual_profit_increase)
+                    }} ج.م</span>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="rec-summary-card">
+                <mat-card-content>
+                  <span class="rec-sum-label">فوز سريع (< ٣٠ يوم):</span>
+                      <span class="rec-sum-value">{{
+                        formatNumber(analysisReport()!['6_actionable_profit_recommendations'].summary.quick_wins_under_30_days,
+                        0) }}</span>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <div class="recommendations-list">
+              @for (rec of analysisReport()!['6_actionable_profit_recommendations'].recommendations; track rec.id) {
+              <mat-card class="recommendation-detail-card">
+                <mat-card-header>
+                  <div class="rec-detail-header">
+                    <span [class]="'priority-badge ' + getPriorityClass(rec.priority)">{{ rec.priority }}</span>
+                    <span class="rec-category">{{ rec.category }}</span>
+                    <span class="rec-impact-badge">+{{ formatCurrency(rec.profit_impact_monthly) }} ج.م/شهر</span>
+                  </div>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="rec-problem-section">
+                    <strong><mat-icon>error_outline</mat-icon> المشكلة:</strong>
+                    <p>{{ rec.problem }}</p>
+                  </div>
+                  <div class="rec-action-section">
+                    <strong><mat-icon>build</mat-icon> الإجراء:</strong>
+                    <p>{{ rec.action }}</p>
+                  </div>
+                  <div class="rec-result-section">
+                    <strong><mat-icon>check_circle</mat-icon> النتيجة المتوقعة:</strong>
+                    <p>{{ rec.expected_result }}</p>
+                  </div>
+                  <div class="rec-difficulty-section">
+                    <strong>الصعوبة:</strong>
+                    <span [class]="'difficulty-badge difficulty-' + rec.implementation_difficulty.toLowerCase()">
+                      {{ rec.implementation_difficulty }}
+                    </span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </mat-card>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- SUMMARY REPORT (LIGHTWEIGHT) -->
+  <!-- ========================================== -->
+  @if (summaryReport() && !loading()) {
+  <div class="report-content" id="report-content">
+    <mat-card class="summary-report-main-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>summarize</mat-icon>
+          الملخص التنفيذي
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <div class="summary-stats-grid">
+          <div class="summary-stat-item">
+            <span class="stat-item-label">صحة الأرباح</span>
+            <span class="stat-item-value">{{ formatCurrency(summaryReport()!.profit_health) }} ج.م</span>
+          </div>
+          <div class="summary-stat-item">
+            <span class="stat-item-label">الربح / كجم</span>
+            <span class="stat-item-value">{{ formatCurrency(summaryReport()!.profit_per_kg) }} ج.م</span>
+          </div>
+          <div class="summary-stat-item negative">
+            <span class="stat-item-label">إجمالي التسرب</span>
+            <span class="stat-item-value">{{ formatCurrency(summaryReport()!.total_leakage) }} ج.م</span>
+          </div>
+        </div>
+
+        <div class="executive-summary-section">
+          <div class="health-indicator">
+            <span class="label">حالة الأرباح:</span>
+            <span
+              [class]="'health-badge ' + getHealthColorClass(summaryReport()!.executive_summary.current_profit_health)">
+              {{ summaryReport()!.executive_summary.current_profit_health }}
+            </span>
+          </div>
+
+          <div class="summary-lists-grid">
+            <div class="summary-list success">
+              <h5><mat-icon>check_circle</mat-icon> نقاط القوة</h5>
+              <ul>
+                @for (strength of summaryReport()!.executive_summary.key_strengths; track strength) {
+                <li>{{ strength }}</li>
+                }
+              </ul>
+            </div>
+
+            <div class="summary-list warning">
+              <h5><mat-icon>warning</mat-icon> نقاط الضعف</h5>
+              <ul>
+                @for (weakness of summaryReport()!.executive_summary.key_weaknesses; track weakness) {
+                <li>{{ weakness }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <div class="potential-increase">
+            <strong>الزيادة المحتملة:</strong>
+            <span class="amount">{{ summaryReport()!.executive_summary.potential_profit_increase }}</span>
+          </div>
+        </div>
+
+        <div class="top-recommendations-section">
+          <h4><mat-icon>recommend</mat-icon> أهم التوصيات</h4>
+          @for (rec of summaryReport()!.top_recommendations; track rec.id) {
+          <div class="top-rec-item">
+            <span [class]="'priority-badge ' + getPriorityClass(rec.priority)">{{ rec.priority }}</span>
+            <span class="top-rec-action">{{ rec.action }}</span>
+            <span class="top-rec-impact">+{{ formatCurrency(rec.profit_impact_monthly) }} ج.م/شهر</span>
+          </div>
+          }
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- LEAKAGE REPORT -->
+  <!-- ========================================== -->
+  @if (leakageReport() && !loading()) {
+  <div class="report-content" id="report-content">
+    <mat-card class="leakage-report-main-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>troubleshoot</mat-icon>
+          تحليل تسرب الأرباح
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <div class="leakage-overview-grid">
+          <div class="leakage-total-item negative">
+            <span class="leakage-label">إجمالي التسرب المحدد:</span>
+            <span class="leakage-value">{{ formatCurrency(leakageReport()!.leakage_analysis.total_identified_leakage) }}
+              ج.م</span>
+          </div>
+          <div class="leakage-percentage-item">
+            <span class="leakage-label">نسبة من الربح المحتمل:</span>
+            <span class="leakage-value">{{
+              formatPercentage(leakageReport()!.leakage_analysis.leakage_as_percent_of_potential_profit) }}</span>
+          </div>
+        </div>
+
+        <h4 class="section-title"><mat-icon>list</mat-icon> مصادر التسرب</h4>
+        @for (source of leakageReport()!.leakage_analysis.leakage_sources; track source.source) {
+        <mat-card class="leakage-source-detail-card">
+          <mat-card-header>
+            <mat-card-title>
+              <span class="source-type-text">{{ source.source }}</span>
+              <span class="source-amount-text negative">-{{ formatCurrency(source.leakage_amount) }} ج.م</span>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="source-explanation-text">{{ source.explanation }}</p>
+            <div class="source-action-box">
+              <mat-icon>lightbulb</mat-icon>
+              <strong>الإجراء المطلوب:</strong> {{ source.action }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        @if (leakageReport()!.leakage_analysis.quick_wins.length > 0) {
+        <mat-card class="quick-wins-section-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon>
+              فوز سريع
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @for (win of leakageReport()!.leakage_analysis.quick_wins; track win.action) {
+            <div class="quick-win-detail-item">
+              <div class="win-header-detail">
+                <span [class]="'difficulty-badge difficulty-' + win.difficulty.toLowerCase()">{{ win.difficulty
+                  }}</span>
+                <span class="win-savings-detail">{{ formatCurrency(win.estimated_monthly_savings) }} ج.م/شهر</span>
+              </div>
+              <p class="win-action-text">{{ win.action }}</p>
+            </div>
+            }
+          </mat-card-content>
+        </mat-card>
+        }
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- PARTNER DISTRIBUTION REPORT -->
+  <!-- ========================================== -->
+  @if (partnerDistribution() && !loading()) {
+  <div class="report-content" id="report-content">
+
+    <!-- Summary Metrics Cards -->
+    <div class="metrics-grid">
+      <mat-card class="metric-card">
+        <mat-icon class="metric-icon">groups</mat-icon>
+        <div class="metric-content">
+          <h4>إجمالي الشركاء</h4>
+          <p class="metric-value">{{ formatNumber(partnerDistribution()!.summary.overview.total_partners, 0) }}</p>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-icon class="metric-icon">attach_money</mat-icon>
+        <div class="metric-content">
+          <h4>إجمالي الأرباح الموزعة</h4>
+          <p class="metric-value">{{ formatCurrency(partnerDistribution()!.summary.overview.total_profit_distributed) }}
+          </p>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-icon class="metric-icon">event</mat-icon>
+        <div class="metric-content">
+          <h4>عدد العمليات</h4>
+          <p class="metric-value">{{ formatNumber(partnerDistribution()!.summary.overview.total_operations, 0) }}</p>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-icon class="metric-icon">trending_up</mat-icon>
+        <div class="metric-content">
+          <h4>متوسط عائد الاستثمار</h4>
+          <p class="metric-value">{{ formatPercentage(partnerDistribution()!.summary.roi_analysis.average_roi * 100, 1)
+            }}</p>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Top Earners -->
+    @if (partnerDistribution()!.summary.top_earners.length > 0) {
+    <mat-card class="top-earners-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>emoji_events</mat-icon>
+          أعلى الأرباح
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="top-earners-list">
+          @for (earner of partnerDistribution()!.summary.top_earners; track earner.partner_name; let i = $index) {
+          <div class="top-earner-item">
+            <div class="rank">
+              @if (i === 0) {
+              <span class="medal gold">🥇</span>
+              } @else if (i === 1) {
+              <span class="medal silver">🥈</span>
+              } @else if (i === 2) {
+              <span class="medal bronze">🥉</span>
+              } @else {
+              <span class="rank-number">{{ formatNumber(i + 1, 0) }}</span>
+              }
+            </div>
+            <div class="earner-info">
+              <strong>{{ earner.partner_name }}</strong>
+              <span class="profit-amount">{{ formatCurrency(earner.total_profit) }} جنيه</span>
+              <span class="profit-percentage">({{ formatPercentage(earner.percentage_of_total, 1) }} من الإجمالي)</span>
+            </div>
+          </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Partners Table -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>table_chart</mat-icon>
+          تفاصيل توزيع الأرباح على الشركاء
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>اسم الشريك</th>
+                <th>نسبة الاستثمار</th>
+                <th>إجمالي الربح النهائي</th>
+                <th>متوسط الربح اليومي</th>
+                <th>نسبة المشاركة في المركبات</th>
+                <th>التقييم</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (partner of partnerDistribution()!.partners; track partner.partner_id) {
+              <tr>
+                <td>
+                  <div class="partner-name-cell">
+                    @if (partner.vehicles_owned_count > 0) {
+                    <mat-icon class="vehicle-icon">local_shipping</mat-icon>
+                    }
+                    <strong>{{ partner.partner_name }}</strong>
+                  </div>
+                </td>
+                <td>{{ formatPercentage(partner.investment_percentage, 1) }}</td>
+                <td class="profit-cell">
+                  <strong>{{ formatCurrency(partner.total_final_profit) }}</strong> جنيه
+                </td>
+                <td>{{ formatCurrency(partner.avg_daily_profit) }} جنيه</td>
+                <td>
+                  <div class="participation-cell">
+                    <div class="progress-bar">
+                      <div class="progress-fill" [style.width.%]="partner.vehicle_participation_rate"
+                        [class.high]="partner.vehicle_participation_rate > 50"
+                        [class.low]="partner.vehicle_participation_rate <= 50">
+                      </div>
+                    </div>
+                    <span class="percentage-label">{{ formatPercentage(partner.vehicle_participation_rate, 0) }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span [class]="'badge ' + getPerformanceBadgeClass(partner.performance_rating)">
+                    {{ partner.performance_rating }}
+                  </span>
+                </td>
+                <td>
+                  <button mat-icon-button (click)="viewPartnerDetails(partner)" title="عرض التفاصيل">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- PARTNER DETAILS MODAL -->
+  <!-- ========================================== -->
+  @if (selectedPartner() && showPartnerDetails()) {
+  <div class="modal-overlay" (click)="closePartnerDetails()">
+    <mat-card class="modal-content partner-details-modal" (click)="$event.stopPropagation()">
+      <mat-card-header class="modal-header">
+        <mat-card-title>
+          <span>تفاصيل أرباح: {{ selectedPartner()!.partner_name }}</span>
+          <button mat-icon-button class="close-button" (click)="closePartnerDetails()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content class="modal-body">
+        <!-- Partner Info -->
+        <div class="partner-info-section">
+          <h4>معلومات الشريك</h4>
+          <div class="partner-info-grid">
+            <div class="info-item">
+              <label>مبلغ الاستثمار:</label>
+              <span>{{ formatCurrency(selectedPartner()!.investment_amount) }} جنيه</span>
+            </div>
+            <div class="info-item">
+              <label>نسبة الاستثمار:</label>
+              <span>{{ formatPercentage(selectedPartner()!.investment_percentage, 1) }}</span>
+            </div>
+            <div class="info-item">
+              <label>عدد المركبات المملوكة:</label>
+              <span>{{ formatNumber(selectedPartner()!.vehicles_owned_count, 0) }}</span>
+            </div>
+            <div class="info-item">
+              <label>التقييم:</label>
+              <span [class]="'badge ' + getPerformanceBadgeClass(selectedPartner()!.performance_rating)">
+                {{ selectedPartner()!.performance_rating }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights -->
+        @if (selectedPartner()!.details?.insights && selectedPartner()!.details!.insights.length > 0) {
+        <div class="insights-section">
+          <h4><mat-icon>lightbulb</mat-icon> رؤى وتوصيات</h4>
+          @for (insight of selectedPartner()!.details!.insights; track insight.message) {
+          <div [class]="'insight-item insight-' + insight.type">
+            <span class="insight-icon">{{ getInsightIcon(insight.type) }}</span>
+            <p>{{ insight.message }}</p>
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Daily Breakdown -->
+        @if (selectedPartner()!.daily_breakdown && selectedPartner()!.daily_breakdown.length > 0) {
+        <div class="daily-breakdown-section">
+          <h4><mat-icon>calendar_today</mat-icon> التوزيع اليومي</h4>
+          <div class="table-container">
+            <table class="daily-breakdown-table">
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>الحصة الأساسية</th>
+                  <th>خصم تكاليف المركبات</th>
+                  <th>الربح النهائي</th>
+                  <th>مشارك في المركبة</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (day of selectedPartner()!.daily_breakdown; track day.date) {
+                <tr>
+                  <td>{{ formatDateTime(day.date) }}</td>
+                  <td>{{ formatCurrency(day.base_share) }} جنيه</td>
+                  <td>{{ formatCurrency(day.vehicle_cost_deduction) }} جنيه</td>
+                  <td class="profit-cell">
+                    <strong>{{ formatCurrency(day.final_profit) }}</strong> جنيه
+                  </td>
+                  <td class="text-center">
+                    @if (day.is_vehicle_partner) {
+                    <mat-icon class="status-icon-success">check_circle</mat-icon>
+                    } @else {
+                    <mat-icon class="status-icon-error">cancel</mat-icon>
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+  }
+
 </div>

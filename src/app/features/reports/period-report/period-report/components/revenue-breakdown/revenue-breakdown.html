@@ -1,0 +1,24 @@
+<mat-card>
+  <mat-card-header>
+    <mat-icon>trending_up</mat-icon>
+    <mat-card-title>تحليل الإيرادات</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="info-row">
+      <span class="label">إجمالي المبيعات:</span>
+      <span class="value bold-number">{{ formatCurrency(breakdown().total_sales) }} ج</span>
+    </div>
+    <div class="info-row">
+      <span class="label">الحجم الكلي:</span>
+      <span class="value bold-number">{{ formatNumber(breakdown().total_volume_kg, 0) }} كجم</span>
+    </div>
+    <div class="info-row">
+      <span class="label">متوسط السعر:</span>
+      <span class="value bold-number">{{ formatCurrency(breakdown().avg_sale_price_per_kg) }} ج/كجم</span>
+    </div>
+    <div class="info-row">
+      <span class="label">عدد المشترين:</span>
+      <span class="value bold-number">{{ formatNumber(breakdown().buyers_served, 0) }}</span>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -12,7 +12,8 @@ export class StatusArabicPipe implements PipeTransform {
       'ADMIN': 'مدير',
       'USER': 'مستخدم',
       'ACTIVE': 'نشط',
-      'INACTIVE': 'غير نشط'
+      'INACTIVE': 'غير نشط',
+      'COMPLETED': 'مكتملة'
     };
 
     return statusMap[value] || value;

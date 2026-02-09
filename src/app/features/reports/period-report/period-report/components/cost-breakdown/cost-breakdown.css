@@ -1,0 +1,342 @@
+/* ==========================================================================
+   MOBILE-FIRST COSTS CARD STYLES
+   Base styles for mobile (default), then tablet (≥768px), then desktop (≥1024px)
+   ========================================================================== */
+
+/* ==========================================================================
+   BASE MOBILE STYLES (Default - No Media Query)
+   ========================================================================== */
+
+.costs-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* لضمان border-radius على الـ header */
+}
+
+/* --------------------------------------------------------------------------
+   Card Header - Mobile
+   -------------------------------------------------------------------------- */
+
+.costs-card mat-card-header {
+  background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
+  color: white;
+  padding: 14px 16px;
+  margin: -16px -16px 16px -16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px; /* Touch-friendly header height */
+}
+
+.costs-card mat-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.costs-card mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Card Content - Mobile
+   -------------------------------------------------------------------------- */
+
+.costs-card mat-card-content {
+  padding: 16px;
+}
+
+.costs-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 48px; /* Touch-friendly row height */
+}
+
+.costs-card .info-row:first-child {
+  padding-top: 0;
+}
+
+.costs-card .info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.costs-card .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  line-height: 1.4;
+  flex: 0 0 auto;
+  max-width: 50%; /* منع النص من أخذ مساحة كبيرة */
+}
+
+.costs-card .value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c62828;
+  direction: ltr;
+  text-align: left;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.3;
+  flex-shrink: 0;
+  white-space: nowrap; /* منع كسر الأرقام */
+}
+
+.costs-card .bold-number {
+  font-weight: 800 !important;
+  letter-spacing: 0.3px;
+}
+
+/* First row (إجمالي التكاليف) - Highlighted on mobile */
+.costs-card .info-row:first-child {
+  background: linear-gradient(90deg, rgba(198, 40, 40, 0.05) 0%, rgba(229, 57, 53, 0.05) 100%);
+  margin: -16px -16px 0 -16px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #c62828;
+}
+
+.costs-card .info-row:first-child .label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.costs-card .info-row:first-child .value {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* ==========================================================================
+   TABLET STYLES (≥768px)
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .costs-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Header */
+  .costs-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 18px -16px;
+    border-radius: 10px 10px 0 0;
+    gap: 12px;
+    min-height: 60px;
+  }
+
+  .costs-card mat-card-title {
+    font-size: 18px;
+  }
+
+  .costs-card mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Content */
+  .costs-card mat-card-content {
+    padding: 18px 20px;
+  }
+
+  .costs-card .info-row {
+    padding: 13px 0;
+  }
+
+  .costs-card .label {
+    font-size: 16px;
+    max-width: 60%;
+  }
+
+  .costs-card .value {
+    font-size: 20px;
+  }
+
+  .costs-card .bold-number {
+    letter-spacing: 0.4px;
+  }
+
+  /* First row */
+  .costs-card .info-row:first-child {
+    margin: -18px -20px 0 -20px;
+    padding: 14px 20px;
+  }
+
+  .costs-card .info-row:first-child .label {
+    font-size: 16px;
+  }
+
+  .costs-card .info-row:first-child .value {
+    font-size: 22px;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP STYLES (≥1024px)
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  .costs-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .costs-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Header */
+  .costs-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 20px -16px;
+    border-radius: 12px 12px 0 0;
+    gap: 12px;
+    min-height: 64px;
+  }
+
+  .costs-card mat-card-title {
+    font-size: 20px;
+  }
+
+  .costs-card mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Content */
+  .costs-card mat-card-content {
+    padding: 20px;
+  }
+
+  .costs-card .info-row {
+    padding: 14px 0;
+    transition: background-color 0.2s ease;
+  }
+
+  .costs-card .info-row:hover {
+    background-color: rgba(198, 40, 40, 0.03);
+    margin: 0 -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .costs-card .label {
+    font-size: 17px;
+    max-width: 65%;
+  }
+
+  .costs-card .value {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .costs-card .bold-number {
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+  }
+
+  /* First row */
+  .costs-card .info-row:first-child {
+    margin: -20px -20px 0 -20px;
+    padding: 14px 20px;
+  }
+
+  .costs-card .info-row:first-child:hover {
+    background: linear-gradient(90deg, rgba(198, 40, 40, 0.08) 0%, rgba(229, 57, 53, 0.08) 100%);
+  }
+
+  .costs-card .info-row:first-child .label {
+    font-size: 17px;
+  }
+
+  .costs-card .info-row:first-child .value {
+    font-size: 24px;
+  }
+}
+
+/* ==========================================================================
+   RTL SUPPORT
+   ========================================================================== */
+
+[dir="rtl"] .costs-card mat-card-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .costs-card .value {
+  direction: ltr;
+  text-align: right;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY & PERFORMANCE ENHANCEMENTS
+   ========================================================================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .costs-card,
+  .costs-card .info-row {
+    transition: none;
+  }
+
+  .costs-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .costs-card {
+    border: 2px solid #c62828;
+  }
+
+  .costs-card .info-row {
+    border-bottom-width: 2px;
+  }
+
+  .costs-card .value {
+    font-weight: 900 !important;
+  }
+}
+
+/* Focus states for accessibility */
+.costs-card:focus-within {
+  outline: 3px solid #c62828;
+  outline-offset: 2px;
+}
+
+/* Ensure text readability on gradient background */
+.costs-card mat-card-header {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Print styles - ensure costs are visible when printed */
+@media print {
+  .costs-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .costs-card mat-card-header {
+    background: #c62828 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .costs-card .value {
+    color: #000 !important;
+  }
+}

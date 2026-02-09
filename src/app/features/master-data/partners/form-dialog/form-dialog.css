@@ -1,17 +1,370 @@
+/* ============================================================
+   PARTNER FORM DIALOG & MOBILE-FIRST RESPONSIVE STYLES
+   ============================================================ */
+
+/* ===============================
+   Dialog Content
+================================ */
+mat-dialog-content {
+  width: 100%;
+  max-width: 800px; /* desktop max */
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+@media (max-width: 768px) {
   mat-dialog-content {
-      min-width: 500px;
-      padding: 24px;
-    }
+    max-width: 100%;
+    padding: 16px;
+  }
+}
 
-    .form-row {
-      display: flex;
-      gap: 16px;
-    }
+@media (max-width: 360px) {
+  mat-dialog-content {
+    padding: 12px;
+  }
+}
 
-    .form-field {
-      flex: 1;
-    }
+/* ===============================
+   Form Sections & Titles
+================================ */
+.form-section {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
 
-    .full-width {
-      width: 100%;
-    }
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #666;
+  cursor: help;
+}
+
+/* ===============================
+   Form Layout
+================================ */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field, .full-width {
+  width: 100%;
+}
+
+/* ===============================
+   Vehicle Partnerships Section
+================================ */
+.vehicle-partnerships-section {
+  background-color: #f0f7ff;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.partnerships-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #1565c0;
+}
+
+.partnerships-hint mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+/* ===============================
+   Partnership Entries
+================================ */
+.partnerships-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partnership-entry {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  transition: box-shadow 0.2s ease;
+  animation: slideIn 0.2s ease-out;
+}
+
+.partnership-entry:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.partnership-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.vehicle-select {
+  flex: 2;
+}
+
+.share-input {
+  flex: 1;
+}
+
+.delete-button {
+  min-width: 40px;
+  min-height: 40px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .partnership-row {
+    grid-template-columns: 1fr;
+  }
+  .delete-button {
+    margin-top: 0;
+    align-self: flex-start;
+  }
+}
+
+/* ===============================
+   Share Warning
+================================ */
+.share-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-top: 8px;
+  background-color: #fff3e0;
+  border-left: 3px solid #ff9800;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #e65100;
+}
+
+.share-warning mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ===============================
+   Empty State
+================================ */
+.empty-partnerships {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  color: #999;
+}
+
+.empty-partnerships mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.empty-partnerships p {
+  margin: 4px 0;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: #666;
+  max-width: 400px;
+}
+
+/* ===============================
+   Add Partnership Button
+================================ */
+.add-partnership-button {
+  width: 100%;
+  margin-top: 8px;
+  height: 48px;
+  border: 2px dashed rgba(0,0,0,0.26);
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.add-partnership-button:hover:not([disabled]) {
+  background-color: #f5f5f5;
+  border-color: rgba(0,0,0,0.54);
+}
+
+.add-partnership-button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   No Vehicles Warning
+================================ */
+.no-vehicles-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  background-color: #fff9c4;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #f57f17;
+}
+
+.no-vehicles-warning mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* ===============================
+   Partnerships Summary
+================================ */
+.partnerships-summary {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #e8f5e9;
+}
+
+.partnerships-summary h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+mat-chip {
+  background-color: white;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+/* ===============================
+   Dialog Actions
+================================ */
+mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+}
+
+mat-dialog-actions button {
+  min-width: 100px;
+}
+
+/* ===============================
+   Angular Material Form Overrides
+================================ */
+mat-form-field {
+  font-size: 14px;
+}
+
+mat-label {
+  font-weight: 500;
+}
+
+mat-error {
+  font-size: 12px;
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] .partnerships-hint {
+  border-left: none;
+  border-right: 4px solid #2196f3;
+}
+
+[dir="rtl"] .share-warning {
+  border-left: none;
+  border-right: 3px solid #ff9800;
+}
+
+[dir="rtl"] .partnership-row {
+  flex-direction: row-reverse;
+}
+
+/* ===============================
+   Animations
+================================ */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   MDC Chips Fix (prevent text collapsing)
+================================ */
+.mat-mdc-chip {
+  max-width: 100%;
+  height: auto;
+}
+
+.mat-mdc-chip-text {
+  white-space: normal;
+  overflow: visible;
+}
+
+.chip-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-inline-end: 6px;
+}
+
+.chip-text {
+  display: inline;
+  line-height: 1.4;
+}

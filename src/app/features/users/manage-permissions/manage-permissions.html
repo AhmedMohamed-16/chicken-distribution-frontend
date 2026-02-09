@@ -1,0 +1,80 @@
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold">
+      ادارة الصلاحيات ل {{ user()?.full_name }}
+    </h2>
+    <button (click)="close()" class="btn-icon" aria-label="Close">
+      ×
+    </button>
+  </div>
+
+  @if (loading()) {
+  <div class="flex justify-center py-8">
+    <div class="spinner"></div>
+    <span class="ml-2">تحميل...</span>
+  </div>
+  } @else {
+  <div class="space-y-6">
+    <!-- Summary -->
+    <div class="bg-blue-50 p-4 rounded">
+      <p class="text-sm">
+        <strong>تم اختيار:</strong> {{ selectedPermissions().length }} صلاحيات
+      </p>
+    </div>
+
+    <!-- Permissions by Category -->
+    @for (category of Object.keys(groupedPermissions()); track category) {
+    <div class="border rounded-lg p-4">
+      <!-- Category Header -->
+      <div class="flex items-center gap-3 mb-3 pb-3 border-b">
+        <input type="checkbox" [id]="'category-' + category" [checked]="isCategoryFullySelected(category)"
+          [indeterminate]="isCategoryPartiallySelected(category)" (change)="toggleCategory(category, $event)"
+          class="w-5 h-5 cursor-pointer">
+        <label [for]="'category-' + category" class="font-semibold text-lg cursor-pointer">
+          {{ category }}
+        </label>
+        <span class="text-sm text-gray-500 ml-auto">
+          {{ getCategorySelectedCount(category) }} / {{ groupedPermissions()[category].length }}
+        </span>
+      </div>
+
+      <!-- Permissions List -->
+      <div class="grid grid-cols-1 gap-2 ml-8">
+        @for (permission of groupedPermissions()[category]; track permission.id) {
+        <label class="flex items-start gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+          <input type="checkbox" [checked]="selectedPermissions().includes(permission.id)"
+            (change)="togglePermission(permission.id, $event)" class="w-4 h-4 mt-1 cursor-pointer">
+          <div class="flex-1">
+            <div class="font-medium">{{ permission.name }}</div>
+            @if (permission.description) {
+            <div class="text-sm text-gray-600 mt-1">
+              {{ permission.description }}
+            </div>
+            }
+            <div class="text-xs text-gray-500 mt-1">
+              Key: <code>{{ permission.key }}</code>
+            </div>
+          </div>
+        </label>
+        }
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Actions -->
+  <div class="flex gap-4 justify-end mt-6 pt-6 border-t">
+    <button (click)="close()" [disabled]="saving()" class="btn btn-secondary">
+      الغاء
+    </button>
+    <button (click)="save()" [disabled]="saving()" class="btn btn-primary">
+      @if (saving()) {
+      <span class="spinner-small"></span>
+      <span>Saving...</span>
+      } @else {
+      <span>حفظ الصلاحيات</span>
+      }
+    </button>
+  </div>
+  }
+</div>

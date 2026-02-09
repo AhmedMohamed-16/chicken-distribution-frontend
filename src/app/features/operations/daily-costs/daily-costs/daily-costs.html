@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>تسجيل تكاليف يومية</mat-card-title>
@@ -46,4 +46,172 @@
       </form>
     </mat-card-content>
   </mat-card>
+</div> -->
+<!-- <div class="costs-container">
+  <h2>تسجيل التكاليف اليومية</h2>
+
+  <form [formGroup]="costForm" (ngSubmit)="onSubmit()">
+
+
+    <mat-form-field>
+      <mat-label>فئة التكلفة</mat-label>
+      <mat-select formControlName="cost_category_id">
+        <mat-option *ngFor="let cat of costCategories()" [value]="cat.id">
+          {{ cat.name }}
+          <span *ngIf="cat.is_vehicle_cost" class="vehicle-badge">(تكلفة مركبة)</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+     <mat-form-field *ngIf="selectedCategory()?.is_vehicle_cost">
+      <mat-label>المركبة</mat-label>
+      <mat-select formControlName="vehicle_id">
+        <mat-option *ngFor="let v of operation()?.vehicle_operations" [value]="v.vehicle?.id">
+          {{ v.vehicle?.name }} - {{ v.vehicle?.plate_number }}-{{v.vehicle?.id}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="costForm.get('vehicle_id')?.hasError('required')">
+        يجب اختيار المركبة لتكاليف المركبات
+      </mat-error>
+    </mat-form-field>
+
+     <mat-form-field>
+      <mat-label>المبلغ (جنيه)</mat-label>
+      <input matInput type="number" formControlName="amount" step="0.01">
+    </mat-form-field>
+
+     <mat-form-field>
+      <mat-label>الوصف (اختياري)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+    <div class="button-group">
+      <button mat-raised-button color="primary" type="submit" [disabled]="costForm.invalid || submitting()">
+        @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+        تسجيل التكلفة
+        }
+      </button>
+      <button mat-button type="button" (click)="cancel()">
+        إلغاء
+      </button>
+    </div>
+   </form>
+
+   <div class="costs-list">
+    <h3>التكاليف المسجلة</h3>
+    <table mat-table [dataSource]="costs()">
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>الفئة</th>
+        <td mat-cell *matCellDef="let cost">
+          {{ cost.category?.name }}
+        </td>
+      </ng-container>
+
+       <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>المركبة</th>
+        <td mat-cell *matCellDef="let cost">
+          <span *ngIf="cost.vehicle_id">{{ cost.vehicle?.name }}</span>
+          <span *ngIf="!cost.vehicle_id" class="shared-cost">لا توجد</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+        <td mat-cell *matCellDef="let cost">{{ cost.amount }} ج</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['category', 'vehicle', 'amount']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['category', 'vehicle', 'amount']"></tr>
+    </table>
+  </div>
+</div> -->
+<div class="costs-container">
+  <h2>تسجيل التكاليف اليومية</h2>
+
+  <form [formGroup]="costForm" (ngSubmit)="onSubmit()">
+
+    <!-- Cost Category -->
+    <mat-form-field>
+      <mat-label>فئة التكلفة</mat-label>
+      <mat-select formControlName="cost_category_id">
+        <mat-option *ngFor="let cat of costCategories()" [value]="cat.id">
+          {{ cat.name }}
+          <span *ngIf="cat.is_vehicle_cost" class="vehicle-badge">(تكلفة مركبة)</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- ✅ VEHICLE SELECTOR (shown only for vehicle costs) -->
+    <mat-form-field *ngIf="selectedCategory()?.is_vehicle_cost">
+      <mat-label>المركبة</mat-label>
+      <mat-select formControlName="vehicle_id">
+        <mat-option *ngFor="let v of operation()?.vehicle_operations" [value]="v.vehicle?.id">
+          {{ v.vehicle?.name }} - {{ formatNumber(v.vehicle?.plate_number) }}-{{v.vehicle?.id}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="costForm.get('vehicle_id')?.hasError('required')">
+        يجب اختيار المركبة لتكاليف المركبات
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Amount -->
+    <mat-form-field>
+      <mat-label>المبلغ (جنيه)</mat-label>
+      <input matInput type="number" formControlName="amount" step="0.01">
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field>
+      <mat-label>الوصف (اختياري)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+    <div class="button-group">
+      <button mat-raised-button color="primary" type="submit" [disabled]="costForm.invalid || submitting()">
+        @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+        تسجيل التكلفة
+        }
+      </button>
+      <button mat-button type="button" (click)="cancel()">
+        إلغاء
+      </button>
+    </div>
+    <!-- <button mat-raised-button color="primary" type="submit" [disabled]="!costForm.valid">
+      تسجيل التكلفة
+    </button> -->
+  </form>
+
+  <!-- Costs List -->
+  <div class="costs-list">
+    <h3>التكاليف المسجلة</h3>
+    <table mat-table [dataSource]="costs()">
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>الفئة</th>
+        <td mat-cell *matCellDef="let cost">
+          {{ cost.category?.name }}
+        </td>
+      </ng-container>
+
+      <!-- ✅ VEHICLE COLUMN -->
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>المركبة</th>
+        <td mat-cell *matCellDef="let cost">
+          <span *ngIf="cost.vehicle_id">{{ cost.vehicle?.name }}</span>
+          <span *ngIf="!cost.vehicle_id" class="shared-cost">لا توجد</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+        <td mat-cell *matCellDef="let cost">{{ cost.amount }} ج</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['category', 'vehicle', 'amount']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['category', 'vehicle', 'amount']"></tr>
+    </table>
+  </div>
 </div>

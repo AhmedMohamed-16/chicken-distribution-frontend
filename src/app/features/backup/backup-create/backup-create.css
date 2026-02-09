@@ -1,0 +1,145 @@
+.backup-create-container {
+  background-color: white;
+  border-radius: 4px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.create-section h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.description {
+  color: #6c757d;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-create {
+  background-color: #28a745;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-create:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.success-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  border-radius: 4px;
+  background-color: #d4edda;
+  border-left: 4px solid #28a745;
+  animation: slideIn 0.3s ease-out;
+}
+
+.success-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.success-icon {
+  font-size: 1.5rem;
+}
+
+.success-text {
+  flex: 1;
+}
+
+.success-text strong {
+  color: #155724;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.backup-details {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.backup-details p {
+  margin: 0.25rem 0;
+  color: #155724;
+  font-size: 0.9rem;
+}
+
+.backup-details strong {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.dismiss-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  color: #155724;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.dismiss-btn:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .backup-create-container {
+    padding: 1rem;
+  }
+
+  .btn-create {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .success-message {
+    flex-direction: column;
+  }
+
+  .dismiss-btn {
+    align-self: flex-end;
+  }
+}

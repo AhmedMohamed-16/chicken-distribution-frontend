@@ -1,0 +1,132 @@
+<div class="executive-summary">
+
+  <!-- KPI Cards Grid -->
+  <div class="kpi-grid">
+
+    <!-- Total Revenue -->
+    <mat-card class="kpi-card revenue">
+      <div class="kpi-icon-wrapper">
+        <mat-icon class="kpi-icon">attach_money</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-label">إجمالي الإيرادات</h3>
+        <p class="kpi-value">{{ formatCurrency(summary().financial.total_revenue) }} ج</p>
+        @if (hasTrend()) {
+          <div class="kpi-trend" [class]="getTrendClass()">
+            <mat-icon>{{ getTrendIcon() }}</mat-icon>
+            <span>{{ formatPercentage(summary().financial.trend_vs_previous.revenue_change_pct, 1) }}%</span>
+          </div>
+        }
+      </div>
+    </mat-card>
+
+    <!-- Net Profit -->
+    <mat-card class="kpi-card profit">
+      <div class="kpi-icon-wrapper">
+        <mat-icon class="kpi-icon">account_balance_wallet</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-label">صافي الربح</h3>
+        <p class="kpi-value">{{ formatCurrency(summary().financial.net_profit) }} ج</p>
+        @if (hasTrend()) {
+          <div class="kpi-trend" [class]="getTrendClass()">
+            <mat-icon>{{ getTrendIcon() }}</mat-icon>
+            <span>{{ formatPercentage(summary().financial.trend_vs_previous.profit_change_pct, 1) }}%</span>
+          </div>
+        }
+      </div>
+    </mat-card>
+
+    <!-- Profit Margin -->
+    <mat-card class="kpi-card margin">
+      <div class="kpi-icon-wrapper">
+        <mat-icon class="kpi-icon">percent</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-label">هامش الربح</h3>
+        <p class="kpi-value">{{ formatPercentage(summary().financial.profit_margin_percentage) }}%</p>
+        <p class="kpi-subtext">من الإيرادات</p>
+      </div>
+    </mat-card>
+
+    <!-- Average Daily Profit -->
+    <mat-card class="kpi-card daily">
+      <div class="kpi-icon-wrapper">
+        <mat-icon class="kpi-icon">calendar_today</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-label">متوسط الربح اليومي</h3>
+        <p class="kpi-value">{{ formatCurrency(summary().financial.avg_daily_profit) }} ج</p>
+        <p class="kpi-subtext">لـ {{ formatNumber(periodInfo().operating_days, 0) }} يوم</p>
+      </div>
+    </mat-card>
+
+  </div>
+
+  <!-- Operational Stats -->
+  <mat-card class="operational-card">
+    <mat-card-header>
+      <mat-icon class="section-icon">business_center</mat-icon>
+      <mat-card-title>المؤشرات التشغيلية</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="operational-grid">
+
+        <div class="stat-item">
+          <mat-icon>scale</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">إجمالي الحجم</span>
+            <span class="stat-value">{{ formatNumber(summary().operational.total_volume_kg, 0) }} كجم</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>sell</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">متوسط السعر</span>
+            <span class="stat-value">{{ formatCurrency(summary().operational.avg_price_per_kg) }} ج/كجم</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>local_shipping</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">المركبات المستخدمة</span>
+            <span class="stat-value">{{ formatNumber(summary().operational.vehicles_used, 0) }}</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>receipt</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">إجمالي المعاملات</span>
+            <span class="stat-value">{{ formatNumber(summary().operational.total_transactions, 0) }}</span>
+          </div>
+        </div>
+
+        <div class="stat-item" [class.warning]="summary().operational.loss_percentage > 3">
+          <mat-icon>warning</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">نسبة الخسائر</span>
+            <span class="stat-value">{{ formatPercentage(summary().operational.loss_percentage) }}%</span>
+          </div>
+        </div>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Performance Indicator -->
+  @if (hasTrend()) {
+    <mat-card class="performance-card" [class]="getPerformanceClass()">
+      <div class="performance-content">
+        <mat-icon class="performance-icon">{{ getPerformanceIcon() }}</mat-icon>
+        <div class="performance-text">
+          <h3>{{ getPerformanceTitle() }}</h3>
+          <p>{{ getPerformanceMessage() }}</p>
+        </div>
+      </div>
+    </mat-card>
+  }
+
+</div>

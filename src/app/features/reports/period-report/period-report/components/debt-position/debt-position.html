@@ -1,0 +1,52 @@
+<mat-card class="finance-card">
+  <mat-card-header>
+    <mat-icon>account_balance</mat-icon>
+    <mat-card-title>المركز المالي</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- المزارع -->
+    <div class="section-title">المزارع</div>
+
+    <div class="info-row">
+      <span class="label">المستحقات:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().farms.total_receivables) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">المدفوعات:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().farms.total_payables) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">صافي المركز:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().farms.net_position) }} ج
+      </span>
+    </div>
+
+    <!-- المشترين -->
+    <div class="section-title">المشترين</div>
+
+    <div class="info-row">
+      <span class="label">الديون المستحقة:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().buyers.total_outstanding) }} ج
+      </span>
+    </div>
+
+    <!-- الملخص -->
+    <div class="section-title">الملخص</div>
+
+    <div class="info-row summary-row">
+      <span class="label">رأس المال العامل الصافي:</span>
+      <span class="value bold-number highlight">
+        {{ formatCurrency(debtPosition().summary.net_working_capital) }} ج
+      </span>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,31 +1,197 @@
-   h2 {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+/* ============================================
+   MOBILE-FIRST CONFIRMATION DIALOG STYLES
+   Base: Mobile (default)
+   Breakpoints: Tablet (≥768px), Desktop (≥1024px)
+   ============================================ */
 
-    .dialog-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-    }
+/* ============================================
+   MOBILE BASE STYLES (Default)
+   ============================================ */
 
-    .dialog-icon.warning {
-      color: #ff9800;
-    }
+/* Dialog Header */
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Reduced gap for mobile */
+  font-size: 18px; /* Smaller title on mobile */
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+}
 
-    .dialog-icon.danger {
-      color: #f44336;
-    }
+/* Dialog Icon */
+.dialog-icon {
+  font-size: 28px; /* Slightly smaller icon for mobile */
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
 
-    .dialog-icon.info {
-      color: #2196f3;
-    }
+/* Icon Color Variants */
+.dialog-icon.warning {
+  color: #ff9800;
+}
 
-    mat-dialog-content {
-      padding: 20px 0;
-    }
+.dialog-icon.danger {
+  color: #f44336;
+}
 
-    mat-dialog-actions {
-      padding: 12px 0;
-    }
+.dialog-icon.info {
+  color: #2196f3;
+}
+
+.dialog-icon.success {
+  color: #4caf50; /* Additional variant */
+}
+
+/* Dialog Content */
+mat-dialog-content {
+  padding: 16px 0; /* Reduced padding for mobile */
+  font-size: 14px; /* Readable font size on mobile */
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+mat-dialog-content p {
+  margin: 0;
+  word-wrap: break-word; /* Handle long text */
+  overflow-wrap: break-word;
+}
+
+/* Dialog Actions */
+mat-dialog-actions {
+  padding: 16px 0 0 0; /* Top padding only for mobile */
+  gap: 8px; /* Space between buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap on very small screens */
+}
+
+/* Action Buttons - Mobile Optimized */
+mat-dialog-actions button {
+  min-height: 44px; /* Minimum touch target size */
+  min-width: 88px; /* Adequate button width */
+  font-size: 14px;
+  padding: 0 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* RTL Support */
+[dir="rtl"] h2 {
+  flex-direction: row-reverse; /* Icon on the right in RTL */
+}
+
+[dir="rtl"] mat-dialog-actions {
+  flex-direction: row-reverse; /* Buttons order reversed in RTL */
+}
+
+
+/* ============================================
+   TABLET STYLES (≥768px)
+   ============================================ */
+
+@media (min-width: 768px) {
+  /* Dialog Header */
+  h2 {
+    gap: 10px; /* Slightly larger gap */
+    font-size: 20px; /* Larger title on tablet */
+  }
+
+  /* Dialog Icon */
+  .dialog-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Dialog Content */
+  mat-dialog-content {
+    padding: 18px 0;
+    font-size: 15px; /* Slightly larger text */
+  }
+
+  /* Dialog Actions */
+  mat-dialog-actions {
+    padding: 14px 0;
+    gap: 10px;
+  }
+
+  /* Action Buttons */
+  mat-dialog-actions button {
+    min-width: 100px; /* Wider buttons on tablet */
+    font-size: 14px;
+  }
+}
+
+
+/* ============================================
+   DESKTOP STYLES (≥1024px)
+   ============================================ */
+
+@media (min-width: 1024px) {
+  /* Dialog Header */
+  h2 {
+    gap: 12px; /* Original desktop gap */
+    font-size: 22px; /* Larger title on desktop */
+  }
+
+  /* Dialog Icon */
+  .dialog-icon {
+    font-size: 32px; /* Original desktop size */
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Dialog Content */
+  mat-dialog-content {
+    padding: 20px 0; /* Original desktop padding */
+    font-size: 16px; /* Comfortable reading size */
+  }
+
+  /* Dialog Actions */
+  mat-dialog-actions {
+    padding: 12px 0;
+    gap: 12px; /* More space between buttons */
+  }
+
+  /* Action Buttons */
+  mat-dialog-actions button {
+    min-width: 110px; /* Even wider on desktop */
+    padding: 0 20px; /* More horizontal padding */
+    font-size: 14px;
+  }
+
+  /* Hover Effects (Desktop Only) */
+  mat-dialog-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+}
+
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Focus States */
+mat-dialog-actions button:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .dialog-icon {
+    filter: contrast(1.2);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  mat-dialog-actions button:hover {
+    transform: none;
+    transition: none;
+  }
+}

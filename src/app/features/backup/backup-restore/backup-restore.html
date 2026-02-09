@@ -1,0 +1,163 @@
+<div class="backup-restore-container">
+  <h3>استعادة قاعدة البيانات من نسخة احتياطية</h3>
+  <p class="description">
+    قم برفع ملف نسخة احتياطية (ZIP) لاستعادة قاعدة البيانات. اختر طريقة الاستعادة بعناية.
+  </p>
+
+  <!-- رسالة خطأ -->
+  @if (error()) {
+    <app-error-message
+      [message]="error()"
+      (dismiss)="dismissError()">
+    </app-error-message>
+  }
+
+  <!-- نموذج الاستعادة -->
+  <div class="restore-form">
+    <!-- رفع الملف -->
+    <div class="form-group">
+      <label for="backupFile" class="form-label">
+        اختر ملف النسخة الاحتياطية (ZIP فقط):
+      </label>
+      <input
+        type="file"
+        id="backupFile"
+        accept=".zip"
+        (change)="onFileSelected($event)"
+        [disabled]="restoring()"
+        class="file-input"
+        aria-label="اختيار ملف النسخة الاحتياطية">
+      @if (selectedFile()) {
+        <div class="file-info">
+          <span class="file-name">{{ selectedFile()!.name }}</span>
+          <span class="file-size">({{ getFileSize() }})</span>
+        </div>
+      }
+    </div>
+
+    <!-- اختيار طريقة الاستعادة -->
+    <div class="form-group">
+      <label class="form-label">طريقة الاستعادة:</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input
+            type="radio"
+            name="strategy"
+            [value]="'append'"
+            [(ngModel)]="strategy"
+            [disabled]="restoring()">
+          <span class="radio-text">
+            <strong>إضافة / تحديث البيانات</strong>
+            <span class="radio-description">
+              إضافة السجلات الجديدة وتحديث السجلات الحالية. الخيار الأكثر أمانًا.
+            </span>
+          </span>
+        </label>
+
+        <label class="radio-label">
+          <input
+            type="radio"
+            name="strategy"
+            [value]="'replace'"
+            [(ngModel)]="strategy"
+            [disabled]="restoring()">
+          <span class="radio-text">
+            <strong>استبدال جميع البيانات</strong>
+            <span class="radio-description danger">
+              ⚠️ سيتم حذف جميع البيانات الحالية أولًا. استخدم هذا الخيار بحذر شديد!
+            </span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- زر الاستعادة -->
+    <button
+      class="btn btn-restore"
+      (click)="initiateRestore()"
+      [disabled]="!selectedFile() || restoring()"
+      aria-label="بدء الاستعادة">
+      @if (restoring()) {
+        <app-loading-spinner [inline]="true"></app-loading-spinner>
+        <span>جاري الاستعادة... {{ uploadProgress() }}%</span>
+      } @else {
+        <span>🔄 استعادة قاعدة البيانات</span>
+      }
+    </button>
+  </div>
+
+  <!-- نافذة التأكيد -->
+  @if (showConfirmation()) {
+    <div class="modal-overlay" (click)="cancelRestore()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4>تأكيد استعادة قاعدة البيانات</h4>
+        </div>
+        <div class="modal-body">
+          <div class="warning-box">
+            <p>{{ getWarningMessage() }}</p>
+          </div>
+          <p><strong>الملف:</strong> {{ selectedFile()!.name }}</p>
+          <p>
+            <strong>الطريقة:</strong>
+            {{ strategy() === 'replace' ? 'استبدال جميع البيانات' : 'إضافة / تحديث البيانات' }}
+          </p>
+
+          <div class="confirmation-checkbox">
+            <label>
+              <input type="checkbox" #confirmCheck>
+              أقر بأنني أفهم أن هذا الإجراء سيعدل قاعدة البيانات ولا يمكن التراجع عنه
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-cancel" (click)="cancelRestore()">
+            إلغاء
+          </button>
+          <button
+            class="btn btn-confirm"
+            [class.btn-danger]="strategy() === 'replace'"
+            [disabled]="!confirmCheck.checked"
+            (click)="confirmRestore()">
+            {{ strategy() === 'replace' ? 'نعم، حذف واستبدال' : 'نعم، تنفيذ الاستعادة' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- نتائج الاستعادة -->
+  @if (restoreResult(); as result) {
+    <div class="restore-results">
+      <h4>✅ تمت الاستعادة بنجاح</h4>
+      <div class="results-grid">
+        <div class="result-item">
+          <span class="result-label">الطريقة:</span>
+          <span class="result-value">{{ result.strategy }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">المدة:</span>
+          <span class="result-value">{{ result.duration }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">عدد الجداول التي تمت معالجتها:</span>
+          <span class="result-value">{{ result.tablesProcessed }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">عدد السجلات المضافة:</span>
+          <span class="result-value success">{{ result.totalInserted }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">عدد السجلات المحدثة:</span>
+          <span class="result-value success">{{ result.totalUpdated }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">عدد الأخطاء:</span>
+          <span class="result-value" [class.error]="result.totalErrors > 0">
+            {{ result.totalErrors }}
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

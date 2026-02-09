@@ -1,0 +1,84 @@
+ <mat-card class="main-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>{{ icon() }}</mat-icon>
+          {{ title() }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          {{ subtitle() }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="dateForm" (ngSubmit)="onLoad()" class="date-range-form">
+          <div class="date-fields">
+            <mat-form-field appearance="outline" class="form-group">
+              <mat-label>من تاريخ</mat-label>
+              <input matInput [matDatepicker]="fromPicker" formControlName="from" required>
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-group">
+              <mat-label>إلى تاريخ</mat-label>
+              <input matInput [matDatepicker]="toPicker" formControlName="to" required>
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" type="submit"
+                    [disabled]="loading() || dateForm.invalid" class="load-btn">
+              <mat-icon>search</mat-icon>
+              تحميل التقرير
+            </button>
+          </div>
+
+          <!-- Quick Date Buttons (Optional) -->
+          @if (showQuickDates()) {
+            <div class="quick-dates">
+              <button mat-stroked-button type="button" (click)="setQuickDate('week')" class="quick-btn">
+                <mat-icon>date_range</mat-icon>
+                آخر أسبوع
+              </button>
+              <button mat-stroked-button type="button" (click)="setQuickDate('month')" class="quick-btn">
+                <mat-icon>calendar_month</mat-icon>
+                آخر 30 يوم
+              </button>
+              <button mat-stroked-button type="button" (click)="setQuickDate('currentMonth')" class="quick-btn">
+                <mat-icon>calendar_today</mat-icon>
+                الشهر الحالي
+              </button>
+              <button mat-stroked-button type="button" (click)="setQuickDate('previousMonth')" class="quick-btn">
+                <mat-icon>history</mat-icon>
+                الشهر السابق
+              </button>
+            </div>
+          }
+
+          <!-- Action Buttons (shown when report is loaded) -->
+          @if (hasReport()) {
+            <div class="action-buttons">
+              <button mat-stroked-button type="button" (click)="onExportExcel()" class="action-btn">
+                <mat-icon>file_download</mat-icon>
+                تصدير Excel
+              </button>
+
+              <button mat-stroked-button type="button" (click)="onExportPDF()" class="action-btn">
+                <mat-icon>picture_as_pdf</mat-icon>
+                تصدير PDF
+              </button>
+
+              <button mat-stroked-button type="button" (click)="onPrint()" class="action-btn">
+                <mat-icon>print</mat-icon>
+                طباعة
+              </button>
+
+              <button mat-stroked-button color="warn" type="button" (click)="onClear()" class="action-btn">
+                <mat-icon>clear</mat-icon>
+                مسح
+              </button>
+            </div>
+          }
+        </form>
+      </mat-card-content>
+    </mat-card>

@@ -1,0 +1,570 @@
+/* ========================================
+   UNIFIED REPORT STYLES
+   Shared across all reports for consistency
+   ======================================== */
+
+/* ==================== Container ==================== */
+.period-report-container,
+.debt-report-container,
+.profit-report-container,
+.daily-report-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 24px;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  direction: rtl;
+}
+
+/* ==================== Main Card ==================== */
+.main-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.main-card mat-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  margin: -16px -16px 24px -16px;
+  border-radius: 12px 12px 0 0;
+}
+
+.main-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.main-card mat-card-title mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.main-card mat-card-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 8px;
+}
+
+/* ==================== Date Range Form ==================== */
+.date-range-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.date-fields {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.load-btn {
+  height: 56px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==================== Quick Date Buttons ==================== */
+.quick-dates {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+}
+
+/* ==================== Action Buttons ==================== */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 24px;
+}
+
+/* ==================== Loading State ==================== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 60px 20px;
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.loading-subtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* ==================== Period Info Banner ==================== */
+.period-info-banner {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.period-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.period-label mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #667eea;
+}
+
+.period-text {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+.period-info-banner mat-chip-set {
+  display: flex;
+  gap: 8px;
+}
+
+.alert-chip {
+  background-color: #ff5252 !important;
+  color: white !important;
+}
+
+.alert-badge {
+  background: #ff5252;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+/* ==================== Tabs Navigation ==================== */
+.report-tabs {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.report-tabs ::ng-deep .mat-mdc-tab-label {
+  min-width: 120px;
+  padding: 0 24px;
+  height: 64px;
+}
+
+.report-tabs ::ng-deep .mat-mdc-tab-label mat-icon {
+  margin-left: 8px;
+}
+
+.tab-content {
+  padding: 24px;
+  min-height: 400px;
+}
+
+/* ==================== Cards ==================== */
+.metrics-card,
+.summary-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.metrics-card mat-card-header,
+.summary-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+}
+
+/* ==================== Metrics Grid ==================== */
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-item {
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s;
+}
+
+.metric-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.metric-label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.metric-value.profit {
+  color: #4caf50;
+}
+
+.metric-value.loss,
+.metric-value.negative {
+  color: #f44336;
+}
+
+.metric-value.warning {
+  color: #ff9800;
+}
+
+/* ==================== Empty State ==================== */
+.empty-state {
+  background: white;
+  border-radius: 8px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 100px;
+  width: 100px;
+  height: 100px;
+  color: #667eea;
+  opacity: 0.5;
+  margin-bottom: 24px;
+}
+
+.empty-state h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 32px;
+}
+
+.empty-state mat-divider {
+  margin: 32px 0;
+}
+
+.empty-state-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.feature mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #667eea;
+}
+
+.feature span {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ==================== Tables ==================== */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+th {
+  padding: 16px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 15px;
+}
+
+tbody tr:hover {
+  background: #f7fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==================== Badges & Chips ==================== */
+.status-chip,
+.health-badge,
+.risk-badge {
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+.health-excellent,
+.status-success {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.health-good {
+  background: #bee3f8;
+  color: #2c5282;
+}
+
+.health-fair {
+  background: #feebc8;
+  color: #7c2d12;
+}
+
+.health-poor,
+.status-error {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.risk-high {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.risk-medium {
+  background: #feebc8;
+  color: #7c2d12;
+}
+
+.risk-low {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 768px) {
+  .period-report-container,
+  .debt-report-container,
+  .profit-report-container,
+  .daily-report-container {
+    padding: 16px;
+  }
+
+  .main-card mat-card-title {
+    font-size: 20px;
+  }
+
+  .main-card mat-card-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .date-fields {
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .load-btn,
+  .action-btn {
+    width: 100%;
+  }
+
+  .quick-dates {
+    flex-direction: column;
+  }
+
+  .quick-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .period-info-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state-features {
+    grid-template-columns: 1fr;
+  }
+
+  .report-tabs ::ng-deep .mat-mdc-tab-label {
+    min-width: 100px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .table-container {
+    font-size: 13px;
+  }
+
+  th,
+  td {
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .period-text {
+    font-size: 18px;
+  }
+
+  .empty-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+  }
+
+  .empty-state h2 {
+    font-size: 22px;
+  }
+}
+
+/* ==================== Print Styles ==================== */
+@media print {
+  .main-card mat-card-header,
+  .action-buttons,
+  .quick-dates,
+  .report-tabs ::ng-deep .mat-mdc-tab-labels {
+    display: none !important;
+  }
+
+  .period-report-container,
+  .debt-report-container,
+  .profit-report-container,
+  .daily-report-container {
+    background: white;
+    padding: 0;
+  }
+
+  .tab-content {
+    padding: 0;
+  }
+
+  .main-card {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+/* ==================== Animation ==================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.report-content {
+  animation: fadeIn 0.3s ease-in-out;
+}

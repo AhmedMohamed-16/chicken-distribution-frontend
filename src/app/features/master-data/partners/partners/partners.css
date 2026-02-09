@@ -1,15 +1,251 @@
+/* ==========================================
+   Partners Table - Mobile First
+   ========================================== */
+
+/* ===============================
+   Container & Card
+================================ */
+.container {
+  padding: 16px; /* Mobile padding */
+  width: 100%;
+  margin: 0 auto;
+}
+
+mat-card {
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* ===============================
+   Card Header
+================================ */
+mat-card-header {
+  margin-bottom: 16px;
+}
+
+mat-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+mat-card-subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ===============================
+   Actions Bar
+================================ */
 .actions-bar {
-      margin-bottom: 20px;
-    }
+  display: flex;
+  flex-direction: column; /* stacked on mobile */
+  gap: 8px;
+  margin-bottom: 16px;
+}
 
-    .table-container {
-      overflow-x: auto;
-    }
+.actions-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* touch-friendly */
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    .success-icon {
-      color: #4caf50;
-    }
+/* ===============================
+   Loading Spinner & Empty State
+================================ */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 0;
+}
 
-    .error-icon {
-      color: #f44336;
-    }
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #999;
+  text-align: center;
+}
+
+.no-data mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+}
+
+.no-data p {
+  margin: 8px 0 16px 0;
+  font-size: 16px;
+}
+
+/* ===============================
+   Table Container
+================================ */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* allow horizontal scroll */
+  font-size: 14px;
+}
+
+th.mat-header-cell,
+td.mat-cell {
+  white-space: nowrap;
+  padding: 8px 12px;
+  text-align: start;
+  vertical-align: middle;
+}
+
+th.mat-header-cell {
+  font-weight: 600;
+  background-color: #f5f5f5;
+}
+
+/* ===============================
+   Vehicle Investments Chips
+================================ */
+.vehicle-investments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+mat-chip {
+  font-size: 12px;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 16px;
+}
+
+.investment-total {
+  font-size: 11px;
+  color: #666;
+}
+
+/* No Vehicle State */
+.no-vehicles {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #999;
+}
+
+.no-vehicles mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ===============================
+   Icon Buttons
+================================ */
+button.mat-icon-button {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* ===============================
+   MDC Chips Fix
+================================ */
+.mat-mdc-chip {
+  max-width: 100%;
+  height: auto;
+}
+
+.mat-mdc-chip-text {
+  white-space: normal;
+  overflow: visible;
+}
+
+.chip-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-inline-end: 6px;
+}
+
+.chip-text {
+  display: inline;
+  line-height: 1.4;
+}
+
+/* ===============================
+   Mobile Responsiveness (≤768px)
+================================ */
+@media (max-width: 768px) {
+  .actions-bar {
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  .vehicle-investments {
+    align-items: flex-start;
+  }
+}
+
+/* ===============================
+   Small Mobile Adjustments (≤480px)
+================================ */
+@media (max-width: 480px) {
+  th.mat-header-cell,
+  td.mat-cell {
+    padding: 8px 4px;
+  }
+
+  mat-chip {
+    max-width: 100px;
+  }
+
+  .actions-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .actions-bar {
+    justify-content: stretch;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] .vehicle-investments {
+  align-items: flex-end;
+}
+
+[dir="rtl"] .no-vehicles {
+  flex-direction: row-reverse;
+}

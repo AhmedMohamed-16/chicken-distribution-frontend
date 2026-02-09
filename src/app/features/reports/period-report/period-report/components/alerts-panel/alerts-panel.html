@@ -1,0 +1,162 @@
+<div class="alerts-panel">
+
+  <!-- Highlights Section -->
+  <div class="highlights-section">
+    <h2 class="section-title">
+      <mat-icon>star</mat-icon>
+      أبرز الإنجازات
+    </h2>
+
+    <div class="highlights-grid">
+
+      <!-- Best Profit Day -->
+      @if (highlightsAndAlerts().top_performers.best_profit_day) {
+      <mat-card class="highlight-card success">
+        <mat-icon class="highlight-icon">emoji_events</mat-icon>
+        <div class="highlight-content">
+          <h3>أفضل يوم ربح</h3>
+          <p class="highlight-date">
+            {{ formatDateTime(highlightsAndAlerts().top_performers.best_profit_day?.date) }}
+          </p>
+          <p class="highlight-value">
+            {{ formatCurrency(highlightsAndAlerts().top_performers.best_profit_day?.net_profit) }} ج
+          </p>
+        </div>
+      </mat-card>
+      }
+
+      <!-- Best Margin Day -->
+      @if (highlightsAndAlerts().top_performers.best_margin_day) {
+      <mat-card class="highlight-card success">
+        <mat-icon class="highlight-icon">trending_up</mat-icon>
+        <div class="highlight-content">
+          <h3>أفضل هامش ربح</h3>
+          <p class="highlight-date">
+            {{ formatDateTime(highlightsAndAlerts().top_performers.best_margin_day?.date) }}
+          </p>
+          <p class="highlight-value">
+            {{ formatCurrency(highlightsAndAlerts().top_performers.best_margin_day?.net_profit) }} ج
+          </p>
+        </div>
+      </mat-card>
+      }
+
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Concerns Section -->
+  <div class="concerns-section">
+    <h2 class="section-title">
+      <mat-icon>priority_high</mat-icon>
+      نقاط تحتاج انتباه
+    </h2>
+
+    <div class="concerns-grid">
+
+      <!-- Worst Profit Day -->
+      @if (highlightsAndAlerts().concerns.worst_profit_day) {
+      <mat-card class="concern-card">
+        <mat-icon class="concern-icon">trending_down</mat-icon>
+        <div class="concern-content">
+          <h3>أضعف يوم ربح</h3>
+          <p class="concern-date">
+            {{ formatDateTime(highlightsAndAlerts().concerns.worst_profit_day?.date) }}
+          </p>
+          <p class="concern-value">
+            {{ formatCurrency(highlightsAndAlerts().concerns.worst_profit_day?.net_profit) }} ج
+          </p>
+        </div>
+      </mat-card>
+      }
+
+      <!-- Highest Loss Event -->
+      @if (highlightsAndAlerts().concerns.highest_loss_event) {
+      <mat-card class="concern-card">
+        <mat-icon class="concern-icon">error_outline</mat-icon>
+        <div class="concern-content">
+          <h3>أكبر حدث خسارة</h3>
+          <p class="concern-date">
+            {{ formatDateTime(highlightsAndAlerts().concerns.highest_loss_event?.date) }}
+          </p>
+          <p class="concern-detail">
+            {{ formatNumber(highlightsAndAlerts().concerns.highest_loss_event?.dead_weight_kg, 1) }} كجم
+          </p>
+          <p class="concern-value">
+            {{ formatCurrency(highlightsAndAlerts().concerns.highest_loss_event?.loss_amount) }} ج
+          </p>
+        </div>
+      </mat-card>
+      }
+
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Alerts Section -->
+  <div class="alerts-section">
+    <h2 class="section-title">
+      <mat-icon>notifications_active</mat-icon>
+      التنبيهات النشطة
+      <mat-chip class="alert-count" highlighted>{{ englishToArabicNumbers(highlightsAndAlerts().alerts.length + '') }}</mat-chip>
+    </h2>
+
+    @if (highlightsAndAlerts().alerts.length === 0) {
+    <div class="no-alerts">
+      <mat-icon>check_circle</mat-icon>
+      <p>لا توجد تنبيهات! كل شيء يعمل بشكل جيد</p>
+    </div>
+    } @else {
+    <div class="alerts-list">
+      @for (alert of highlightsAndAlerts().alerts; track alert.type + alert.message) {
+      <mat-card class="alert-card" [class]="'severity-' + alert.severity.toLowerCase()">
+        <div class="alert-header">
+          <div class="alert-icon-wrapper">
+            <mat-icon class="alert-icon">{{ getAlertIcon(alert.type) }}</mat-icon>
+          </div>
+          <div class="alert-title-wrapper">
+            <h4 class="alert-title">{{ alert.message }}</h4>
+            <mat-chip [class]="'severity-chip ' + alert.severity.toLowerCase()">
+              {{ getSeverityLabel(alert.severity) }}
+            </mat-chip>
+          </div>
+        </div>
+
+        <p class="alert-action">
+          <mat-icon>lightbulb</mat-icon>
+          <strong>الإجراء المطلوب:</strong> {{ alert.action_required }}
+        </p>
+
+        @if (alert.loss_rate) {
+        <p class="alert-detail">
+          <mat-icon>info</mat-icon>
+          نسبة الخسارة: <strong>{{ formatPercentage(alert.loss_rate) }}</strong>
+        </p>
+        }
+
+        @if (alert.amount) {
+        <p class="alert-detail">
+          <mat-icon>attach_money</mat-icon>
+          المبلغ: <strong>{{ formatCurrency(alert.amount) }} ج</strong>
+        </p>
+        }
+
+        <div class="alert-actions">
+          <button mat-stroked-button color="primary">
+            <mat-icon>visibility</mat-icon>
+            عرض التفاصيل
+          </button>
+          <button mat-stroked-button>
+            <mat-icon>done</mat-icon>
+            تم المعالجة
+          </button>
+        </div>
+      </mat-card>
+      }
+    </div>
+    }
+  </div>
+
+</div>

@@ -1,0 +1,455 @@
+/* ==========================================================================
+   MOBILE-FIRST FINANCE CARD STYLES
+   Base styles for mobile (default), then tablet (≥768px), then desktop (≥1024px)
+   ========================================================================== */
+
+/* ==========================================================================
+   BASE MOBILE STYLES (Default - No Media Query)
+   ========================================================================== */
+
+.finance-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* لضمان border-radius على الـ header */
+}
+
+/* --------------------------------------------------------------------------
+   Card Header - Mobile
+   -------------------------------------------------------------------------- */
+
+.finance-card mat-card-header {
+  background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+  color: white;
+  padding: 14px 16px;
+  margin: -16px -16px 16px -16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px; /* Touch-friendly header height */
+}
+
+.finance-card mat-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.finance-card mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Card Content - Mobile
+   -------------------------------------------------------------------------- */
+
+.finance-card mat-card-content {
+  padding: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Section Titles - Mobile
+   -------------------------------------------------------------------------- */
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1565c0;
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #1565c0;
+  line-height: 1.3;
+}
+
+/* First section - remove top margin */
+.section-title:first-child {
+  margin-top: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Info Rows - Mobile
+   -------------------------------------------------------------------------- */
+
+.finance-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 48px; /* Touch-friendly row height */
+}
+
+.finance-card .info-row:last-of-type {
+  border-bottom: none;
+}
+
+.finance-card .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  line-height: 1.4;
+  flex: 0 0 auto;
+  max-width: 55%; /* منع النص من أخذ مساحة كبيرة */
+}
+
+.finance-card .value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1565c0;
+  direction: ltr;
+  text-align: left;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.3;
+  flex-shrink: 0;
+  white-space: nowrap; /* منع كسر الأرقام */
+}
+
+.finance-card .bold-number {
+  font-weight: 800 !important;
+  letter-spacing: 0.3px;
+}
+
+/* --------------------------------------------------------------------------
+   Summary Section - Mobile (تمييز الملخص)
+   -------------------------------------------------------------------------- */
+
+.finance-card .summary-row {
+  margin-top: 6px;
+  background: linear-gradient(90deg, rgba(21, 101, 192, 0.05) 0%, rgba(25, 118, 210, 0.05) 100%);
+  padding: 14px 12px;
+  margin-left: -16px;
+  margin-right: -16px;
+  margin-bottom: -16px;
+  border-bottom: none;
+  border-top: 2px solid #1565c0;
+}
+
+.finance-card .summary-row .label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d47a1;
+}
+
+.finance-card .summary-row .value {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.finance-card .highlight {
+  color: #0d47a1;
+}
+
+/* ==========================================================================
+   TABLET STYLES (≥768px)
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .finance-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Header */
+  .finance-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 18px -16px;
+    border-radius: 10px 10px 0 0;
+    gap: 12px;
+    min-height: 60px;
+  }
+
+  .finance-card mat-card-title {
+    font-size: 18px;
+  }
+
+  .finance-card mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Content */
+  .finance-card mat-card-content {
+    padding: 18px 20px;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 16px;
+    margin: 24px 0 11px;
+    padding-bottom: 7px;
+  }
+
+  .section-title:first-child {
+    margin-top: 0;
+  }
+
+  /* Info Rows */
+  .finance-card .info-row {
+    padding: 13px 0;
+  }
+
+  .finance-card .label {
+    font-size: 15px;
+    max-width: 60%;
+  }
+
+  .finance-card .value {
+    font-size: 20px;
+  }
+
+  .finance-card .bold-number {
+    letter-spacing: 0.4px;
+  }
+
+  /* Summary Section */
+  .finance-card .summary-row {
+    margin-top: 8px;
+    padding: 14px 16px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: -18px;
+  }
+
+  .finance-card .summary-row .label {
+    font-size: 16px;
+  }
+
+  .finance-card .summary-row .value {
+    font-size: 22px;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP STYLES (≥1024px)
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  .finance-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .finance-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Header */
+  .finance-card mat-card-header {
+    padding: 16px 20px;
+    margin: -16px -16px 20px -16px;
+    border-radius: 12px 12px 0 0;
+    gap: 12px;
+    min-height: 64px;
+  }
+
+  .finance-card mat-card-title {
+    font-size: 20px;
+  }
+
+  .finance-card mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Content */
+  .finance-card mat-card-content {
+    padding: 20px;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 18px;
+    margin: 28px 0 12px;
+    padding-bottom: 8px;
+  }
+
+  .section-title:first-child {
+    margin-top: 0;
+  }
+
+  /* Info Rows */
+  .finance-card .info-row {
+    padding: 14px 0;
+    transition: background-color 0.2s ease;
+  }
+
+  .finance-card .info-row:hover {
+    background-color: rgba(21, 101, 192, 0.03);
+    margin: 0 -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .finance-card .label {
+    font-size: 17px;
+    max-width: 65%;
+  }
+
+  .finance-card .value {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .finance-card .bold-number {
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+  }
+
+  /* Summary Section */
+  .finance-card .summary-row {
+    margin-top: 8px;
+    padding: 14px 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: -20px;
+  }
+
+  .finance-card .summary-row:hover {
+    background: linear-gradient(90deg, rgba(21, 101, 192, 0.08) 0%, rgba(25, 118, 210, 0.08) 100%);
+  }
+
+  .finance-card .summary-row .label {
+    font-size: 17px;
+  }
+
+  .finance-card .summary-row .value {
+    font-size: 24px;
+  }
+}
+
+/* ==========================================================================
+   RTL SUPPORT
+   ========================================================================== */
+
+[dir="rtl"] .finance-card mat-card-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .finance-card .value {
+  direction: ltr;
+  text-align: right;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY & PERFORMANCE ENHANCEMENTS
+   ========================================================================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .finance-card,
+  .finance-card .info-row {
+    transition: none;
+  }
+
+  .finance-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .finance-card {
+    border: 2px solid #1565c0;
+  }
+
+  .finance-card .info-row,
+  .section-title {
+    border-bottom-width: 2px;
+  }
+
+  .finance-card .value {
+    font-weight: 900 !important;
+  }
+
+  .finance-card .summary-row {
+    border-top-width: 3px;
+  }
+}
+
+/* Focus states for accessibility */
+.finance-card:focus-within {
+  outline: 3px solid #1565c0;
+  outline-offset: 2px;
+}
+
+/* Ensure text readability on gradient background */
+.finance-card mat-card-header {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Print styles */
+@media print {
+  .finance-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .finance-card mat-card-header {
+    background: #1565c0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .section-title {
+    page-break-after: avoid;
+  }
+
+  .finance-card .info-row {
+    page-break-inside: avoid;
+  }
+
+  .finance-card .value,
+  .finance-card .highlight {
+    color: #000 !important;
+  }
+
+  .finance-card .summary-row {
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Dark mode support (optional - if your app supports it) */
+@media (prefers-color-scheme: dark) {
+  .finance-card {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .section-title {
+    color: #64b5f6;
+    border-bottom-color: #64b5f6;
+  }
+
+  .finance-card .label {
+    color: #bdbdbd;
+  }
+
+  .finance-card .value {
+    color: #64b5f6;
+  }
+
+  .finance-card .highlight {
+    color: #90caf9;
+  }
+
+  .finance-card .info-row {
+    border-bottom-color: #333;
+  }
+
+  .finance-card .summary-row {
+    background: linear-gradient(90deg, rgba(100, 181, 246, 0.1) 0%, rgba(144, 202, 249, 0.1) 100%);
+    border-top-color: #64b5f6;
+  }
+}

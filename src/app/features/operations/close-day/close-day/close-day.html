@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
   <mat-card>
     <mat-card-header>
       <mat-card-title>إغلاق اليوم وحساب الأرباح</mat-card-title>
@@ -115,6 +115,246 @@
       </div>
       }
       }
+    </mat-card-content>
+  </mat-card>
+</div> -->
+
+<!-- <div class="close-day-container">
+  <h2>Close Daily Operation</h2>
+
+  <mat-card *ngIf="currentOperation">
+    <mat-card-header>
+      <mat-card-title>
+        Operation Date: {{ currentOperation.operation_date | date:'fullDate' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+       <h3>Vehicle Operation Status</h3>
+      <table mat-table [dataSource]="vehicleOperations" class="status-table">
+        <ng-container matColumnDef="vehicle">
+          <th mat-header-cell *matHeaderCellDef>Vehicle</th>
+          <td mat-cell *matCellDef="let vo">
+            {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let vo">
+            <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
+              {{ vo.status | uppercase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="sales">
+          <th mat-header-cell *matHeaderCellDef>Sales</th>
+          <td mat-cell *matCellDef="let vo">{{ vo.sales_count }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="costs">
+          <th mat-header-cell *matHeaderCellDef>Costs</th>
+          <td mat-cell *matCellDef="let vo">{{ vo.costs_count }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="revenue">
+          <th mat-header-cell *matHeaderCellDef>Revenue</th>
+          <td mat-cell *matCellDef="let vo">{{ vo.total_revenue | currency }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let vo">
+            <button mat-icon-button color="primary" *ngIf="vo.status !== 'completed'"
+              (click)="markVehicleComplete(vo.id)" matTooltip="Mark as complete">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'"></tr>
+      </table>
+
+       <mat-card class="warning-card" *ngIf="!canCloseDay()">
+        <mat-card-content>
+          <mat-icon color="warn">warning</mat-icon>
+          <p><strong>Cannot close day:</strong></p>
+          <ul>
+            <li *ngFor="let warning of getValidationWarnings()">
+              {{ warning }}
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+       <div class="summary-section" *ngIf="canCloseDay()">
+        <h3>Daily Summary (All Vehicles)</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="label">Total Revenue:</span>
+            <span class="value">{{ getTotalRevenue() | currency }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Total Costs:</span>
+            <span class="value">{{ getTotalCosts() | currency }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Net Profit:</span>
+            <span class="value" [class.profit]="getNetProfit() > 0">
+              {{ getNetProfit() | currency }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+       <div class="actions">
+        <button mat-raised-button color="warn" (click)="closeDay()" [disabled]="!canCloseDay() || isClosing">
+          <mat-icon>lock</mat-icon>
+          Close Day
+        </button>
+        <button mat-button (click)="cancel()">Cancel</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+   <mat-card *ngIf="!currentOperation && !isLoading">
+    <mat-card-content>
+      <p>No active daily operation found.</p>
+      <button mat-raised-button color="primary" routerLink="/daily-operations/start">
+        Start New Operation
+      </button>
+    </mat-card-content>
+  </mat-card>
+</div> -->
+<div class="close-day-container">
+  <h2>إغلاق اليوم و الرحلات التوزيعية</h2>
+
+  <mat-card *ngIf="currentOperation">
+    <mat-card-header>
+      <mat-card-title>
+        تاريخ العملية: {{formatDateTime( currentOperation.operation_date )}}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- جدول حالة المركبات -->
+      <h3>حالة تشغيل المركبات</h3>
+      <div class="status-table-wrapper">
+        <table mat-table [dataSource]="vehicleOperations" class="status-table">
+          <ng-container matColumnDef="vehicle">
+            <th mat-header-cell *matHeaderCellDef>المركبة</th>
+            <td mat-cell *matCellDef="let vo">
+              {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>الحالة</th>
+            <td mat-cell *matCellDef="let vo">
+              <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
+                {{ vo.status | statusArabic }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="sales">
+            <th mat-header-cell *matHeaderCellDef>عدد المبيعات</th>
+            <td mat-cell *matCellDef="let vo">{{ formatNumber(vo.sales_count) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="costs">
+            <th mat-header-cell *matHeaderCellDef>عدد تكاليف المركبه</th>
+            <td mat-cell *matCellDef="let vo">{{formatNumber( vo.costs_count) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="revenue">
+            <th mat-header-cell *matHeaderCellDef>الإيرادات</th>
+            <td mat-cell *matCellDef="let vo">{{ formatCurrency(vo.total_revenue ) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let vo">
+              <button mat-icon-button color="primary" *ngIf="vo.status !== 'COMPLETED' && !isDayClosed()"
+                (click)="markVehicleComplete(vo.id)" matTooltip="تحديد كمكتمل">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'">
+          </tr>
+        </table>
+      </div>
+      <!-- تحذيرات التحقق -->
+      <mat-card class="warning-card" *ngIf="!canCloseDay()">
+        <mat-card-content>
+          <mat-icon color="warn">warning</mat-icon>
+          <p><strong>لا يمكن إغلاق اليوم و الرحلات التوزيعية:</strong></p>
+          <ul>
+            <li *ngFor="let warning of getValidationWarnings()">
+              {{ warning }}
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- الملخص -->
+      <!-- <div class="summary-section" *ngIf="canCloseDay()"> -->
+      <div class="summary-section" *ngIf="summary() && isDayClosed()">
+        <h3>ملخص رحله التوزيع (جميع المركبات)</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="label">إجمالي الشراء:</span>
+            <span class="value">{{ formatCurrency(totalPurchases() ) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">إجمالي المبيعات:</span>
+            <span class="value">{{formatCurrency( totalRevenue() ) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">إجمالي التكاليف:</span>
+            <span class="value">{{ formatCurrency(totalCosts() ) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">إجمالي الفقد علينا:</span>
+            <span class="value">{{ formatCurrency(lossesWithoutFarm() ) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">إجمالي الفقد علي المزارع:</span>
+            <span class="value">{{ formatCurrency(lossesWithFarm() ) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">صافي الربح:</span>
+            <span class="value" [class.profit]="netProfit() > 0">
+              {{ formatCurrency(netProfit()) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- زر الإغلاق -->
+      <div class="actions">
+        <button mat-raised-button color="warn" (click)="closeDay()"
+          [disabled]="isDayClosed() || !canCloseDay() || isClosing">
+          <mat-icon>lock</mat-icon>
+          إغلاق اليوم و الرحلات التوزيعية
+        </button>
+        <button mat-button (click)="cancel()">إلغاء</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- لا توجد عملية نشطة -->
+  <mat-card *ngIf="!currentOperation && !isLoading">
+    <mat-card-content>
+      <p>لم يتم العثور على رحلات توزيع نشطة.</p>
+      <button mat-raised-button color="primary" routerLink="/operations/start-day">
+        بدء رحله جديدة
+      </button>
     </mat-card-content>
   </mat-card>
 </div>

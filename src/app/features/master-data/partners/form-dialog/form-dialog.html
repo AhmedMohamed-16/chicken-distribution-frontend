@@ -1,48 +1,427 @@
-  <h2 mat-dialog-title>{{ data ? 'تعديل شريك' : 'إضافة شريك' }}</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form">
-        <div class="form-row">
-          <mat-form-field class="form-field" appearance="outline">
-            <mat-label>الاسم</mat-label>
-            <input matInput formControlName="name">
-            <mat-error>الاسم مطلوب</mat-error>
-          </mat-form-field>
+<!-- <h2 mat-dialog-title>{{ data ? 'تعديل شريك' : 'إضافة شريك' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <div class="form-row">
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>الاسم</mat-label>
+        <input matInput formControlName="name">
+        <mat-error>الاسم مطلوب</mat-error>
+      </mat-form-field>
 
-          <mat-form-field class="form-field" appearance="outline">
-            <mat-label>رقم الهاتف</mat-label>
-            <input matInput formControlName="phone">
-          </mat-form-field>
-        </div>
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>رقم الهاتف</mat-label>
+        <input matInput formControlName="phone">
+      </mat-form-field>
+    </div>
 
-        <mat-form-field class="full-width" appearance="outline">
-          <mat-label>العنوان</mat-label>
-          <textarea matInput formControlName="address" rows="2"></textarea>
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>العنوان</mat-label>
+      <textarea matInput formControlName="address" rows="2"></textarea>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>مبلغ الاستثمار (جنيه)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="investment_amount">
+        <mat-error>مبلغ الاستثمار مطلوب</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>نسبة الاستثمار (%)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="investment_percentage">
+        <mat-error>النسبة مطلوبة (0-100)</mat-error>
+      </mat-form-field>
+    </div>
+
+
+    <div formArrayName="vehicle_partnerships">
+      <h3>الاستثمار في المركبات</h3>
+
+      <div *ngFor="let vp of vehiclePartnerships.controls; let i = index" [formGroupName]="i">
+        <mat-form-field>
+          <mat-label>المركبة</mat-label>
+          <mat-select formControlName="vehicle_id">
+            <mat-option *ngFor="let v of vehicles()" [value]="v.id">
+              {{v.name}}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
 
-        <div class="form-row">
-          <mat-form-field class="form-field" appearance="outline">
-            <mat-label>مبلغ الاستثمار (جنيه)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="investment_amount">
-            <mat-error>مبلغ الاستثمار مطلوب</mat-error>
-          </mat-form-field>
+        <mat-form-field>
+          <mat-label>نسبة المشاركة (%)</mat-label>
+          <input matInput type="number" formControlName="share_percentage">
+        </mat-form-field>
 
-          <mat-form-field class="form-field" appearance="outline">
-            <mat-label>نسبة الاستثمار (%)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="investment_percentage">
-            <mat-error>النسبة مطلوبة (0-100)</mat-error>
-          </mat-form-field>
+        <button mat-icon-button (click)="removeVehiclePartnership(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <button mat-button (click)="addVehiclePartnership()">
+        <mat-icon>add</mat-icon> إضافة استثمار في مركبة
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>إلغاء</button>
+  <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSave()">
+    حفظ
+  </button>
+</mat-dialog-actions> -->
+<!-- ============================================================================ -->
+<!-- PARTNER FORM DIALOG TEMPLATE - COMPLETE MULTI-VEHICLE REFACTORING -->
+<!-- ============================================================================ -->
+<!-- File: src/app/features/master-data/partners/partner-form-dialog.html -->
+
+<!-- <h2 mat-dialog-title>{{ data ? 'تعديل شريك' : 'إضافة شريك' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+
+     <div class="form-section">
+      <h3 class="section-title">المعلومات الأساسية</h3>
+
+      <div class="form-row">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>الاسم</mat-label>
+          <input matInput formControlName="name">
+          <mat-error *ngIf="form.get('name')?.hasError('required')">
+            الاسم مطلوب
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>رقم الهاتف</mat-label>
+          <input matInput formControlName="phone">
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>العنوان</mat-label>
+        <textarea matInput formControlName="address" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+     <div class="form-section">
+      <h3 class="section-title">معلومات الاستثمار</h3>
+
+      <div class="form-row">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>مبلغ الاستثمار (جنيه)</mat-label>
+          <input matInput type="number" step="0.01" formControlName="investment_amount">
+          <mat-error *ngIf="form.get('investment_amount')?.hasError('required')">
+            مبلغ الاستثمار مطلوب
+          </mat-error>
+          <mat-error *ngIf="form.get('investment_amount')?.hasError('min')">
+            المبلغ يجب أن يكون أكبر من أو يساوي صفر
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>نسبة الاستثمار (%)</mat-label>
+          <input matInput type="number" step="0.01" formControlName="investment_percentage">
+          <mat-error *ngIf="form.get('investment_percentage')?.hasError('required')">
+            النسبة مطلوبة
+          </mat-error>
+          <mat-error *ngIf="form.get('investment_percentage')?.hasError('min') ||
+                            form.get('investment_percentage')?.hasError('max')">
+            النسبة يجب أن تكون بين 0 و 100
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+     <div class="form-section vehicle-partnerships-section">
+      <h3 class="section-title">
+        الاستثمار في المركبات
+        <mat-icon class="info-icon" matTooltip="حدد المركبات التي يستثمر فيها هذا الشريك ونسبة مشاركته في كل مركبة">
+          info
+        </mat-icon>
+      </h3>
+
+      <div class="partnerships-hint">
+        <mat-icon>lightbulb</mat-icon>
+        <span>
+          الشريك الذي يستثمر في مركبة لا يدفع تكاليف تلك المركبة من أرباحه.
+          الشركاء غير المستثمرين في المركبة يدفعون حصتهم من تكاليف المركبة.
+        </span>
+      </div>
+
+       <div formArrayName="vehicle_partnerships" class="partnerships-container">
+
+         <div *ngFor="let vp of vehiclePartnerships.controls; let i = index" [formGroupName]="i"
+          class="partnership-entry">
+
+          <div class="partnership-row">
+             <mat-form-field class="vehicle-select" appearance="outline">
+              <mat-label>المركبة</mat-label>
+              <mat-select formControlName="vehicle_id">
+                 <mat-option
+                  *ngFor="let v of availableVehicles()"
+                  [value]="v.id"
+                  [disabled]="isVehicleFullyInvested(v.id, i)">
+                  {{ v.name }} - {{ v.plate_number }}
+                  <span *ngIf="isVehicleFullyInvested(v.id, i)" style="color: #999;"> (مكتمل الاستثمار)</span>
+                </mat-option>
+              </mat-select>
+              <mat-error>يجب اختيار المركبة</mat-error>
+            </mat-form-field>
+
+             <mat-form-field class="share-input" appearance="outline">
+              <mat-label>نسبة المشاركة (%)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="share_percentage" min="0" max="100">
+              <mat-error *ngIf="vp.get('share_percentage')?.hasError('required')">
+                النسبة مطلوبة
+              </mat-error>
+              <mat-error *ngIf="vp.get('share_percentage')?.hasError('min') ||
+                                vp.get('share_percentage')?.hasError('max')">
+                النسبة يجب أن تكون بين 0 و 100
+              </mat-error>
+            </mat-form-field>
+
+             <button mat-icon-button color="warn" type="button" (click)="removeVehiclePartnership(i)"
+              class="delete-button">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+           <div *ngIf="vp.get('vehicle_id')?.value &&
+                      getVehicleShareWarning(vp.get('vehicle_id')?.value)" class="share-warning">
+            <mat-icon>warning</mat-icon>
+            <span>{{ getVehicleShareWarning(vp.get('vehicle_id')?.value) }}</span>
+          </div>
         </div>
 
-        <mat-checkbox formControlName="is_vehicle_partner">
-          شريك في المركبة
-        </mat-checkbox>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>إلغاء</button>
-      <button mat-raised-button color="primary"
-              [disabled]="form.invalid"
-              (click)="onSave()">
-        حفظ
-      </button>
-    </mat-dialog-actions>
+         <div *ngIf="vehiclePartnerships.length === 0" class="empty-partnerships">
+          <mat-icon>directions_car_filled</mat-icon>
+          <p>لم يتم تحديد أي استثمار في المركبات</p>
+          <p class="empty-hint">
+            إذا لم يستثمر هذا الشريك في أي مركبة، سيدفع حصته من تكاليف جميع المركبات
+          </p>
+        </div>
+
+         <button mat-stroked-button color="primary" type="button" (click)="addVehiclePartnership()"
+          [disabled]="selectedVehicleIds().length >= vehicles().length && vehicles().length > 0" class="add-partnership-button">
+          <mat-icon>add</mat-icon>
+          إضافة استثمار في مركبة
+        </button>
+
+         <div *ngIf="selectedVehicleIds().length >= vehicles().length && vehicles().length > 0" class="no-vehicles-warning">
+          <mat-icon>info</mat-icon>
+          <span>تم اختيار جميع المركبات المتاحة</span>
+        </div>
+      </div>
+    </div>
+
+     <div *ngIf="vehiclePartnerships.length > 0" class="partnerships-summary">
+      <h4>ملخص الاستثمار في المركبات:</h4>
+      <mat-chip-set>
+        <mat-chip *ngFor="let vp of vehiclePartnerships.controls">
+          <mat-icon matChipAvatar>directions_car</mat-icon>
+          {{ getVehicleName(vp.get('vehicle_id')?.value) }}:
+          {{ vp.get('share_percentage')?.value }}%
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+ <mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">
+    إلغاء
+  </button>
+  <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="onSave()" type="button">
+    <mat-icon>save</mat-icon>
+    حفظ
+  </button>
+</mat-dialog-actions> -->
+<h2 mat-dialog-title>{{ data ? 'تعديل شريك' : 'إضافة شريك' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+
+    <!-- ========== BASIC INFORMATION ========== -->
+    <div class="form-section">
+      <h3 class="section-title">المعلومات الأساسية</h3>
+
+      <div class="form-row">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>الاسم</mat-label>
+          <input matInput formControlName="name">
+          @if (form.get('name')?.hasError('required')) {
+          <mat-error>الاسم مطلوب</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>رقم الهاتف</mat-label>
+          <input matInput formControlName="phone">
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>العنوان</mat-label>
+        <textarea matInput formControlName="address" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- ========== INVESTMENT INFORMATION ========== -->
+    <div class="form-section">
+      <h3 class="section-title">معلومات الاستثمار</h3>
+
+      <div class="form-row">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>مبلغ الاستثمار (جنيه)</mat-label>
+          <input matInput type="number" step="0.01" formControlName="investment_amount">
+          @if (form.get('investment_amount')?.hasError('required')) {
+          <mat-error>مبلغ الاستثمار مطلوب</mat-error>
+          }
+          @if (form.get('investment_amount')?.hasError('min')) {
+          <mat-error>المبلغ يجب أن يكون أكبر من أو يساوي صفر</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>نسبة الاستثمار (%)</mat-label>
+          <input matInput type="number" step="0.01" formControlName="investment_percentage">
+          @if (form.get('investment_percentage')?.hasError('required')) {
+          <mat-error>النسبة مطلوبة</mat-error>
+          }
+          @if (form.get('investment_percentage')?.hasError('min') ||
+          form.get('investment_percentage')?.hasError('max')) {
+          <mat-error>النسبة يجب أن تكون بين 0 و 100</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- ========== VEHICLE SHARES (UPDATED) ========== -->
+    <div class="form-section vehicle-partnerships-section">
+      <h3 class="section-title">
+        الاستثمار في المركبات
+        <mat-icon class="info-icon" matTooltip="حدد المركبات التي يستثمر فيها هذا الشريك ونسبة مشاركته في كل مركبة">
+          info
+        </mat-icon>
+      </h3>
+
+      <div class="partnerships-hint">
+        <mat-icon>lightbulb</mat-icon>
+        <span>
+          الشريك الذي يستثمر في مركبة لا يدفع تكاليف تلك المركبة من أرباحه.
+          الشركاء غير المستثمرين في المركبة يدفعون حصتهم من تكاليف المركبة.
+        </span>
+      </div>
+
+      <!-- Vehicle Shares FormArray -->
+      <div formArrayName="vehicle_shares" class="partnerships-container">
+
+        <!-- Share Entry -->
+        @for (vs of vehicleShares.controls; track $index) {
+        <div [formGroupName]="$index" class="partnership-entry">
+          <div class="partnership-row">
+            <!-- Vehicle Selector -->
+            <mat-form-field class="vehicle-select" appearance="outline">
+              <mat-label>المركبة</mat-label>
+              <mat-select formControlName="vehicle_id">
+                @for (v of availableVehicles(); track v.id) {
+                <mat-option [value]="v.id" [disabled]="isVehicleFullyInvested(v.id, $index)">
+                  {{ v.name }} - {{ v.plate_number }}
+                  @if (isVehicleFullyInvested(v.id, $index)) {
+                  <span style="color: #999;"> (مكتمل الاستثمار)</span>
+                  }
+                </mat-option>
+                }
+              </mat-select>
+              <mat-error>يجب اختيار المركبة</mat-error>
+            </mat-form-field>
+
+            <!-- Share Percentage -->
+            <mat-form-field class="share-input" appearance="outline">
+              <mat-label>نسبة المشاركة (%)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="share_percentage" min="0" max="100">
+              @if (vs.get('share_percentage')?.hasError('required')) {
+              <mat-error>النسبة مطلوبة</mat-error>
+              }
+              @if (vs.get('share_percentage')?.hasError('min') ||
+              vs.get('share_percentage')?.hasError('max')) {
+              <mat-error>النسبة يجب أن تكون بين 0 و 100</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Delete Button -->
+            <button mat-icon-button color="warn" type="button" (click)="removeVehicleShare($index)"
+              class="delete-button">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <!-- Warning if vehicle shares exceed 100% -->
+          @if (vs.get('vehicle_id')?.value && getVehicleShareWarning(vs.get('vehicle_id')?.value)) {
+          <div class="share-warning">
+            <mat-icon>warning</mat-icon>
+            <span>{{ getVehicleShareWarning(vs.get('vehicle_id')?.value) }}</span>
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Empty State -->
+        @if (vehicleShares.length === 0) {
+        <div class="empty-partnerships">
+          <mat-icon>directions_car_filled</mat-icon>
+          <p>لم يتم تحديد أي استثمار في المركبات</p>
+          <p class="empty-hint">
+            إذا لم يستثمر هذا الشريك في أي مركبة، سيدفع حصته من تكاليف جميع المركبات
+          </p>
+        </div>
+        }
+
+        <!-- Add Share Button -->
+        <button mat-stroked-button color="primary" type="button" (click)="addVehicleShare()"
+          [disabled]="selectedVehicleIds().length >= vehicles().length && vehicles().length > 0"
+          class="add-partnership-button">
+          <mat-icon>add</mat-icon>
+          إضافة استثمار في مركبة
+        </button>
+
+        <!-- No Available Vehicles Warning -->
+        @if (selectedVehicleIds().length >= vehicles().length && vehicles().length > 0) {
+        <div class="no-vehicles-warning">
+          <mat-icon>info</mat-icon>
+          <span>تم اختيار جميع المركبات المتاحة</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- ========== VEHICLE SHARES SUMMARY ========== -->
+    @if (vehicleShares.length > 0) {
+    <div class="partnerships-summary">
+      <h4>ملخص الاستثمار في المركبات:</h4>
+      <mat-chip-set>
+        @for (vs of vehicleShares.controls; track $index) {
+        <mat-chip>
+          <mat-icon matChipAvatar>directions_car</mat-icon>
+          {{ getVehicleName(vs.get('vehicle_id')?.value) }}:
+          {{ vs.get('share_percentage')?.value }}%
+        </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+    }
+
+  </form>
+</mat-dialog-content>
+
+<!-- ========== DIALOG ACTIONS ========== -->
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">
+    إلغاء
+  </button>
+  <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="onSave()" type="button">
+    <mat-icon>save</mat-icon>
+    حفظ
+  </button>
+</mat-dialog-actions>

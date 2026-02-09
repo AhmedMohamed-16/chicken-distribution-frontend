@@ -7,12 +7,15 @@
       padding: 20px;
     }
 
-    .login-card {
+    /* .login-card {
       width: 100%;
       max-width: 450px;
       padding: 40px 30px;
-    }
-
+    } */
+.login-card {
+  width: 100%;
+  padding: 24px 16px;
+}
     mat-card-header {
       text-align: center;
       margin-bottom: 30px;
@@ -54,3 +57,43 @@
     mat-spinner {
       margin: 0 auto;
     }
+
+    @media (min-width: 600px) {
+  .login-card {
+    max-width: 450px;
+    padding: 32px 24px;
+  }
+}
+
+/* LARGE SCREENS */
+@media (min-width: 1024px) {
+  .login-card {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  h1 {
+    font-size: 1.5rem;
+  }
+    mat-card-header {
+    margin-bottom: 20px;
+  }
+
+}
+@media (max-height: 500px) {
+  .login-container {
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+}
+
+
+:host {
+      display: block;
+      direction: rtl;
+    }
+mat-form-field {
+  --mat-form-field-container-height: 56px;
+}

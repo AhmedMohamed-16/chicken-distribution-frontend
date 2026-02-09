@@ -1,0 +1,28 @@
+    <div class="app-container">
+      <!-- Monthly Backup Download Prompt -->
+      <app-monthly-backup-prompt
+        [show]="showMonthlyPrompt()"
+        [backup]="monthlyBackup()"
+        [formattedDate]="monthlyBackupDate()"
+        [downloading]="monthlyPromptService.isProcessing()"
+        (confirm)="handleMonthlyDownload()"
+        (dismiss)="dismissMonthlyPrompt()">
+      </app-monthly-backup-prompt>
+
+      <main class="app-main">
+        <div class="content-wrapper">
+          <!-- Backup Creation Section -->
+          <app-backup-create
+            (backupCreated)="onBackupCreated()">
+          </app-backup-create>
+
+          <!-- Backup Restore Section -->
+          <app-backup-restore
+            (restoreCompleted)="onRestoreCompleted()">
+          </app-backup-restore>
+
+          <!-- Backup List Section -->
+          <app-backup-list #backupList></app-backup-list>
+        </div>
+      </main>
+    </div>

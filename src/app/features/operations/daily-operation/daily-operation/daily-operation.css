@@ -1,15 +1,123 @@
-    .operations-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 20px 0;
-    }
+/* ============================================================================
+   OPERATIONS GRID – Mobile-First Responsive CSS (RTL Ready)
+   Strategy:
+   - Mobile default (no media queries)
+   - Tablet ≥ 768px
+   - Desktop ≥ 1024px
+   - Touch friendly (44px+)
+   - Clean grid, readable typography
+============================================================================ */
 
-    .operations-grid button {
-      height: 80px;
-      font-size: 1.1rem;
-    }
+/* =========================
+   Base / Mobile (Default)
+========================= */
 
-    .operations-grid mat-icon {
-      margin-left: 8px;
-    }
+.operations-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: single column */
+  gap: 12px;
+  padding: 12px 0;
+}
+
+/* ===== Buttons (Mobile) ===== */
+.operations-grid button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: 100%;
+  min-height: 56px; /* ✅ Touch-friendly */
+  padding: 0 16px;
+
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ===== Icons ===== */
+.operations-grid mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0; /* prevent cutting */
+}
+
+/* =========================
+   Tablet ≥ 768px
+========================= */
+
+@media (min-width: 768px) {
+  .operations-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .operations-grid button {
+    min-height: 64px;
+    font-size: 1rem;
+  }
+
+  .operations-grid mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+}
+
+/* =========================
+   Desktop ≥ 1024px
+========================= */
+
+@media (min-width: 1024px) {
+  .operations-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .operations-grid button {
+    min-height: 72px;
+    font-size: 1.05rem;
+  }
+
+  .operations-grid mat-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+  }
+}
+
+/* =========================
+   Large Desktop ≥ 1400px
+========================= */
+
+@media (min-width: 1400px) {
+  .operations-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .operations-grid button {
+    min-height: 80px;
+    font-size: 1.1rem;
+  }
+
+  .operations-grid mat-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 26px;
+  }
+}
+
+/* =========================
+   RTL Support
+========================= */
+
+[dir="rtl"] .operations-grid button {
+  direction: rtl;
+}

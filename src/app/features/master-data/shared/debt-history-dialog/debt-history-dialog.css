@@ -1,0 +1,120 @@
+/* ============================================================================
+   DEBT HISTORY DIALOG - MOBILE-FIRST RESPONSIVE STYLES
+============================================================================ */
+
+/* ===============================
+   Dialog Content
+================================ */
+mat-dialog-content.dialog-content {
+  width: 100%;
+  max-width: 800px; /* desktop max */
+  padding: 24px;
+  overflow-y: auto;
+  max-height: 80vh;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  mat-dialog-content.dialog-content {
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  mat-dialog-content.dialog-content {
+    padding: 12px;
+  }
+}
+
+/* ===============================
+   Loading Spinner
+================================ */
+.text-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 0;
+}
+
+/* ===============================
+   Current Debt Chip
+================================ */
+mat-chip[color="warn"] {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+@media (max-width: 768px) {
+  mat-chip[color="warn"] {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+}
+
+/* ===============================
+   Table Styles
+================================ */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+table.full-width {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* ensures horizontal scroll on mobile */
+}
+
+th.mat-header-cell {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 8px;
+  background-color: #f5f5f5;
+}
+
+td.mat-cell {
+  font-size: 14px;
+  padding: 8px;
+}
+
+tr.mat-header-row {
+  position: sticky;
+  top: 0;
+  background-color: #f5f5f5;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  table.full-width {
+    min-width: auto;
+  }
+  th.mat-header-cell,
+  td.mat-cell {
+    font-size: 12px;
+    padding: 6px 4px;
+  }
+}
+
+/* ===============================
+   Dialog Actions
+================================ */
+mat-dialog-actions {
+  padding: 16px 24px;
+  gap: 8px;
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] .table-container {
+  direction: rtl;
+}
+
+[dir="rtl"] th.mat-header-cell,
+[dir="rtl"] td.mat-cell {
+  text-align: right;
+}

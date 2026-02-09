@@ -1,0 +1,63 @@
+@if (show()) {
+  <div class="modal-overlay" (click)="onDismiss()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📅 نسخة احتياطية شهرية متاحة</h3>
+        <button
+          class="close-btn"
+          (click)="onDismiss()"
+          [disabled]="downloading()"
+          aria-label="إغلاق النافذة">
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="message">
+          تم إنشاء نسخة احتياطية اليوم. هل ترغب في تحميلها للاحتفاظ بها بأمان؟
+        </p>
+
+        @if (backup(); as b) {
+          <div class="backup-info">
+            <div class="info-row">
+              <span class="label">اسم الملف:</span>
+              <span class="value">{{ b.filename }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">تاريخ الإنشاء:</span>
+              <span class="value">{{ formattedDate() }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">الحجم:</span>
+              <span class="value">{{ b.fileSizeMB }}</span>
+            </div>
+          </div>
+        }
+
+        <p class="note">
+          💡 تظهر هذه الرسالة مرة واحدة شهريًا لمساعدتك على الاحتفاظ بنسخ احتياطية محلية.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-secondary"
+          (click)="onDismiss()"
+          [disabled]="downloading()">
+          ليس الآن
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="onConfirm()"
+          [disabled]="downloading()">
+          @if (downloading()) {
+            <app-loading-spinner [inline]="true"></app-loading-spinner>
+            <span>جاري التحميل...</span>
+          } @else {
+            <span>📥 تحميل النسخة الاحتياطية</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

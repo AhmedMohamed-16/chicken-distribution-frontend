@@ -1,0 +1,38 @@
+<div class="unauthorized-container">
+  <mat-card class="unauthorized-card">
+    <mat-card-content>
+      <div class="icon-container">
+        <mat-icon class="warning-icon">warning</mat-icon>
+      </div>
+
+      <h1 class="title">غير مصرح لك بالدخول</h1>
+
+      <p class="description">
+        عذراً، ليس لديك الصلاحيات اللازمة للوصول إلى هذه الصفحة.
+        <br>
+        يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.
+      </p>
+
+      <div class="actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="goBack()"
+          class="action-button">
+          العودة للخلف
+        </button>
+
+        <button
+          mat-raised-button
+          routerLink="/dashboard"
+          class="action-button secondary">
+          الذهاب للوحة التحكم
+        </button>
+      </div>
+
+      <div class="error-code">
+        <p>رمز الخطأ: 403 - Forbidden</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

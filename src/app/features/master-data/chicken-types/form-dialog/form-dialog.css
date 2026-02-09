@@ -1,8 +1,92 @@
+/* ===============================
+   Mat Dialog Content (Mobile-First)
+================================ */
 mat-dialog-content {
-  min-width: 500px;
-  padding: 24px;
+  width: 100%;            /* Full width on mobile */
+  padding: 16px;          /* Comfortable padding for mobile */
+  box-sizing: border-box;
 }
 
+/* Form Fields */
 .full-width {
   width: 100%;
+}
+
+mat-form-field {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;   /* Spacing between fields */
+}
+
+/* Inputs & Textarea */
+mat-form-field input,
+mat-form-field textarea {
+  min-height: 44px;       /* Easy touch target */
+  font-size: 1rem;        /* Readable on mobile */
+}
+
+/* Dialog Actions */
+mat-dialog-actions {
+  display: flex;
+  flex-direction: column; /* Stack buttons on mobile */
+  gap: 10px;
+  padding: 0 16px 16px 16px;
+}
+
+mat-dialog-actions button {
+  min-height: 44px;       /* Touch target */
+  font-size: 1rem;
+  width: 100%;            /* Full width on mobile */
+}
+
+/* ===============================
+   Tablet Styles (≥600px)
+================================ */
+@media (min-width: 600px) {
+  mat-dialog-content {
+    max-width: 500px;     /* Constrain dialog width */
+    padding: 24px;
+  }
+
+  mat-dialog-actions {
+    flex-direction: row;   /* Horizontal buttons */
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  mat-dialog-actions button {
+    width: auto;           /* Auto width on larger screens */
+  }
+}
+
+/* ===============================
+   Desktop Styles (≥1024px)
+================================ */
+@media (min-width: 1024px) {
+  mat-dialog-content {
+    padding: 32px;
+  }
+
+  mat-form-field {
+    margin-bottom: 20px;
+  }
+
+  mat-dialog-actions button {
+    font-size: 1.05rem;
+    padding: 0 20px;
+  }
+}
+
+/* ===============================
+   RTL Support
+================================ */
+[dir="rtl"] mat-dialog-actions {
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  [dir="rtl"] mat-dialog-actions {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
 }

@@ -1,0 +1,55 @@
+<div class="backup-create-container">
+  <div class="create-section">
+    <h3>إنشاء نسخة احتياطية جديدة</h3>
+    <p class="description">
+      إنشاء نسخة احتياطية يدوية من قاعدة البيانات بالكامل. سيتم إنشاء ملف ZIP يحتوي على جميع البيانات.
+    </p>
+
+    <button
+      class="btn btn-create"
+      (click)="createBackup()"
+      [disabled]="creating()"
+      aria-label="إنشاء نسخة احتياطية جديدة">
+      @if (creating()) {
+        <app-loading-spinner [inline]="true"></app-loading-spinner>
+        <span>جاري إنشاء النسخة الاحتياطية...</span>
+      } @else {
+        <span>💾 إنشاء نسخة احتياطية جديدة</span>
+      }
+    </button>
+  </div>
+
+  <!-- رسالة خطأ -->
+  @if (error()) {
+    <app-error-message
+      [message]="error()"
+      (dismiss)="dismissError()">
+    </app-error-message>
+  }
+
+  <!-- رسالة نجاح -->
+  @if (successMessage()) {
+    <div class="success-message">
+      <div class="success-content">
+        <span class="success-icon">✅</span>
+        <div class="success-text">
+          <strong>{{ successMessage() }}</strong>
+          @if (lastBackupDetails(); as details) {
+            <div class="backup-details">
+              <p><strong>اسم الملف:</strong> {{ details.filename }}</p>
+              <p><strong>الحجم:</strong> {{ details.fileSizeMB }}</p>
+              <p><strong>عدد الجداول التي تم نسخها:</strong> {{ details.tableCount }}</p>
+              <p><strong>المدة:</strong> {{ details.duration }}</p>
+            </div>
+          }
+        </div>
+      </div>
+      <button
+        class="dismiss-btn"
+        (click)="dismissSuccess()"
+        aria-label="إغلاق رسالة النجاح">
+        ✕
+      </button>
+    </div>
+  }
+</div>

@@ -1,18 +1,314 @@
- .form-section {
-      margin: 24px 0;
-    }
+/* =========================================================
+   SALES COMPONENT – FINAL PRODUCTION CSS
+   ========================================================= */
 
-    .form-section h3 {
-      font-size: 1.3rem;
-      color: #3f51b5;
-      margin-bottom: 16px;
-    }
+/* ===============================
+   LAYOUT
+   =============================== */
 
-    .debt-warning {
-      background-color: #fff3e0;
-      color: #e65100;
-      padding: 16px;
-      border-radius: 4px;
-      margin-top: 16px;
-      border-right: 4px solid #ff9800;
-    }
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+mat-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+  background-color: #f5f5f5;
+  padding: 1.5rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+mat-card-subtitle {
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* ===============================
+   MODE TOGGLE SECTION
+   =============================== */
+
+.mode-toggle-section {
+  padding: 1.5rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.mode-toggle-section mat-slide-toggle {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.mode-hint {
+  margin: 0.5rem 0 0 2rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* ===============================
+   FORM SECTIONS
+   =============================== */
+
+.form-section {
+  margin: 1.5rem 0;
+}
+
+.form-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+/* ===============================
+   DEBT WARNING
+   =============================== */
+
+.debt-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  margin-top: 0.5rem;
+}
+
+.debt-warning mat-icon {
+  color: #ffc107;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.debt-warning strong {
+  font-size: 0.95rem;
+}
+
+/* ===============================
+   DEBT INDICATOR (SELECT OPTION)
+   =============================== */
+
+.debt-indicator {
+  font-size: 0.85rem;
+  color: #f44336;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+/* ===============================
+   CALCULATED VALUES (CARDS)
+   =============================== */
+
+.calculated-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  min-height: 56px;
+  background-color: #e3f2fd;
+  border-left: 4px solid #1976d2;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  font-size: 1.05rem;
+}
+
+.calculated-value mat-icon {
+  color: #1976d2;
+  flex-shrink: 0;
+}
+
+/* Success */
+.calculated-value.success {
+  background-color: #e8f5e9;
+  border-left-color: #4caf50;
+}
+
+.calculated-value.success mat-icon {
+  color: #4caf50;
+}
+
+/* Info */
+.calculated-value.info {
+  background-color: #e1f5fe;
+  border-left-color: #03a9f4;
+}
+
+.calculated-value.info mat-icon {
+  color: #03a9f4;
+}
+
+/* Warning */
+.calculated-value.warning {
+  background-color: #fff3e0;
+  border-left-color: #ff9800;
+}
+
+.calculated-value.warning mat-icon {
+  color: #ff9800;
+}
+
+/* ===============================
+   TEXT UTILITIES
+   =============================== */
+
+.text-green-600 {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.text-red-600 {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.text-gray-600 {
+  color: #757575;
+}
+
+/* Numbers should always be LTR */
+.amount {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  font-weight: 600;
+}
+
+/* ===============================
+   HINT TEXT
+   =============================== */
+
+.hint-text {
+  font-size: 0.85rem;
+  color: #666;
+  margin-right: 0.5rem;
+  font-weight: normal;
+}
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.button-group button {
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.button-group mat-icon {
+  flex-shrink: 0;
+}
+
+button[mat-raised-button][disabled] {
+  background-color: #e0e0e0;
+  color: #9e9e9e;
+}
+
+/* ===============================
+   LOADING STATE
+   =============================== */
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* ===============================
+   DIVIDERS
+   =============================== */
+
+mat-divider {
+  margin: 2rem 0;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+
+  mat-card-header {
+    margin: -1rem -0.5rem 1rem -0.5rem;
+  }
+
+  .mode-hint {
+    margin-left: 0;
+  }
+}
+
+/* ===============================
+   RTL SUPPORT (Arabic)
+   =============================== */
+
+[dir="rtl"] .calculated-value {
+  border-left: none;
+  border-right: 4px solid #1976d2;
+}
+
+[dir="rtl"] .calculated-value.success {
+  border-right-color: #4caf50;
+}
+
+[dir="rtl"] .calculated-value.info {
+  border-right-color: #03a9f4;
+}
+
+[dir="rtl"] .calculated-value.warning {
+  border-right-color: #ff9800;
+}
+
+[dir="rtl"] .debt-indicator {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
