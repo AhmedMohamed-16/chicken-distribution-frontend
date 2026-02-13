@@ -118,7 +118,7 @@
 
       <!-- إجمالي البيع -->
       <ng-container matColumnDef="total_amount">
-        <th mat-header-cell *matHeaderCellDef>إجمالي البيع من {{this.data.entityType !=='buyer'? 'المزرعه':'عندنا'}}</th>
+        <th mat-header-cell *matHeaderCellDef>إجمالي الشراء من {{this.data.entityType !=='buyer'? 'المزرعه':'عندنا'}}</th>
         <td mat-cell *matCellDef="let row">
           {{ row.total_amount !== '-' ? (formatCurrency(row.total_amount )) + ' ج' : '-' }}
         </td>

@@ -50,11 +50,11 @@ export class SharedReportHeaderComponent {
   // Form
   dateForm = new FormGroup({
     from: new FormControl<Date>(this.getDefaultStartDate(), { nonNullable: true }),
-    to: new FormControl<Date>(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })), { nonNullable: true })
+    to: new FormControl<Date>(new Date(), { nonNullable: true })
   });
 
   private getDefaultStartDate(): Date {
-    const date = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const date = new Date();
     date.setDate(date.getDate() - 30);
     return date;
   }
@@ -67,7 +67,7 @@ export class SharedReportHeaderComponent {
   }
 
   setQuickDate(type: 'week' | 'month' | 'currentMonth' | 'previousMonth'): void {
-    const today = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const today = new Date();
     let from: Date;
     let to: Date = new Date(today);
 

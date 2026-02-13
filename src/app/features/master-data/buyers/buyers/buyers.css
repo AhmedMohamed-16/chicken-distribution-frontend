@@ -402,15 +402,7 @@ button:disabled {
     gap: 12px;
   }
 
-  /* Hide desktop pagination */
-  .hidden {
-    display: none;
-  }
 
-  /* Show mobile pagination */
-  .sm\:hidden {
-    display: block;
-  }
 }
 
 @media (max-width: 480px) {
@@ -450,20 +442,6 @@ button:disabled {
 }
 
 /* ===============================
-   Utility Classes
-================================ */
-
-.hidden {
-  display: none;
-}
-
-@media (min-width: 640px) {
-  .sm\:hidden {
-    display: none;
-  }
-}
-
-/* ===============================
    RTL Support
 ================================ */
 
@@ -494,4 +472,45 @@ button:disabled {
 [dir="rtl"] .mx-1 {
   margin-right: 4px;
   margin-left: 4px;
+}
+/* Add to your CSS file */
+
+/* Show on small screens and above */
+@media (min-width: 640px) {
+  .sm\:block {
+    display: block;
+  }
+
+  .sm\:hidden {
+    display: none;
+  }
+}
+/* ===============================
+   Utility Classes
+================================ */
+
+.hidden {
+  display: none;
+}
+
+/* Add this block */
+@media (min-width: 640px) {
+  .sm\:hidden {
+    display: none;
+  }
+
+  .sm\:flex {
+    display: flex !important;
+  }
+
+  .sm\:block {
+    display: block !important;
+  }
+}
+
+/* For screens BELOW 640px, sm:hidden elements should be visible */
+@media (max-width: 639px) {
+  .sm\:hidden {
+    display: block; /* or flex, depending on the element */
+  }
 }

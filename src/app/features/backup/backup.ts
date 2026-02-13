@@ -9,6 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { BackupService } from '../../core/services/backup.service';
 import { MonthlyBackupPromptService } from '../../core/services/monthlyBackupPrompt.service';
 import { Backup as  BackupModel} from '../../core/models';
+import { ReportUtilitiesService } from '../../core/services/ReportUtilitiesService';
 
 @Component({
   selector: 'app-backup',
@@ -26,12 +27,19 @@ export class Backup implements OnInit {
   private backupService = inject(BackupService);
   monthlyPromptService = inject(MonthlyBackupPromptService);
 
+private utils = inject(ReportUtilitiesService);
+ formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
+formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
+formatPercentage = (value: number | undefined | null|string, decimals?: number) => this.utils.formatPercentage(value, decimals);
+formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
+
+
   // Monthly prompt state
   showMonthlyPrompt = signal<boolean>(false);
   monthlyBackup = signal<BackupModel | null>(null);
   monthlyBackupDate = computed(() => {
     const backup = this.monthlyBackup();
-    return backup ? this.monthlyPromptService.formatDate(backup.date) : '';
+    return backup ? this.utils.formatDate(backup.date) : '';
   });
 
   ngOnInit(): void {

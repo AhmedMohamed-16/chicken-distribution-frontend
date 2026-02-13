@@ -274,6 +274,7 @@ export class DebtReport implements OnInit {
   buyerColumns = ['name', 'phone', 'debt', 'actions'];
  formatNumber = (num: number | undefined | null |string, decimals?: number) => this.utils.formatNumber(num, decimals);
 formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
+formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
 
   ngOnInit(): void {
     this.loadFarmDebts();
@@ -406,7 +407,7 @@ openBuyerStatement(buyer: Buyer): void {
     // ===== Sheet 1: الملخص العام =====
     const summaryData: any[][] = [
       ['تقرير ديون المزارع'],
-      ['التاريخ: ' + this.formatDateTime(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))],
+      ['التاريخ: ' + this.formatDateTime(new Date())],
       [],
       ['الملخص المالي'],
       [],
@@ -488,7 +489,7 @@ openBuyerStatement(buyer: Buyer): void {
     }
 
     // حفظ الملف
-    const fileName = `تقرير_ديون_المزارع_${this.formatDateForFileName(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))}.xlsx`;
+    const fileName = `تقرير_ديون_المزارع_${this.formatDateForFileName(new Date())}.xlsx`;
     XLSX.writeFile(wb, fileName);
   }
 
@@ -510,7 +511,7 @@ openBuyerStatement(buyer: Buyer): void {
     // ===== Sheet 1: الملخص =====
     const summaryData: any[][] = [
       ['تقرير ديون المشترين'],
-      ['التاريخ: ' + this.formatDateTime(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))],
+      ['التاريخ: ' + this.formatDateTime(new Date())],
       [],
       ['الملخص'],
       [],
@@ -555,22 +556,11 @@ openBuyerStatement(buyer: Buyer): void {
     XLSX.utils.book_append_sheet(wb, wsBuyers, 'المشترين');
 
     // حفظ الملف
-    const fileName = `تقرير_ديون_المشترين_${this.formatDateForFileName(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))}.xlsx`;
+    const fileName = `تقرير_ديون_المشترين_${this.formatDateForFileName(new Date())}.xlsx`;
     XLSX.writeFile(wb, fileName);
   }
 
-  /**
-   * تنسيق التاريخ والوقت
-   */
-  private formatDateTime(date: Date): string {
-    return new Intl.DateTimeFormat('ar-EG', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  }
+
 
   /**
    * تنسيق التاريخ لاسم الملف

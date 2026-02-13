@@ -87,6 +87,8 @@ currentPage = signal(1);
         this.loading.set(false);
                   this.totalBuyers.set(res.data.pagination.total);
           this.totalPages.set(res.data.pagination.total_pages);
+console.log("totalPages",this.totalPages());
+console.log("totalBuyers",this.totalBuyers());
 
       },
       error: () => {

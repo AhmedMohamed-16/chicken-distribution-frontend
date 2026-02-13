@@ -2,52 +2,38 @@ import { Injectable, inject, signal } from '@angular/core';
 import { BackupService } from './backup.service';
 import { Backup } from '../models';
 
-/**
- * Service to handle monthly backup download prompts
- *
- * Purpose: Prompt user to download a backup on the 1st day of each month
- * - Checks if today is the 1st day of the month
- * - Checks if prompt was already shown this month (localStorage)
- * - Finds today's backup if it exists
- * - Shows confirmation dialog (user must consent)
- * - Downloads backup only after user confirmation
- */
 @Injectable({
   providedIn: 'root'
 })
 export class MonthlyBackupPromptService {
+
   private backupService = inject(BackupService);
 
-  // Storage key for tracking shown prompts
   private readonly STORAGE_KEY = 'last_monthly_backup_prompt';
 
-  // Signal to track if prompt is currently being processed
   readonly isProcessing = signal<boolean>(false);
 
   /**
    * Check if we should show the monthly prompt
-   * Returns true only if:
-   * 1. Today is the 1st day of the month
-   * 2. Prompt hasn't been shown this month yet
    */
   shouldShowPrompt(): boolean {
-    const today = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-    const dayOfMonth = today.getDate();
+    const now = new Date();
 
-    // Only on the 1st day of the month
-    if (dayOfMonth !== 1) {
-      return false;
+    // نجيب اليوم بتوقيت القاهرة
+    const cairoDay = this.getCairoDayOfMonth(now);
+
+    // يظهر فقط يوم 1
+    if (cairoDay !== 1 && cairoDay !== 2) {
+    return false;
     }
 
-    // Check if we already showed prompt this month
-    const lastPromptDate = localStorage.getItem(this.STORAGE_KEY);
-    if (lastPromptDate) {
-      const lastDate = new Date(new Date(lastPromptDate).toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-      const isSameMonth =
-        lastDate.getFullYear() === today.getFullYear() &&
-        lastDate.getMonth() === today.getMonth();
+    const lastPrompt = localStorage.getItem(this.STORAGE_KEY);
 
-      // Don't show again if already shown this month
+    if (lastPrompt) {
+      const lastDate = new Date(Number(lastPrompt));
+
+      const isSameMonth = this.isSameCairoMonth(lastDate, now);
+
       if (isSameMonth) {
         return false;
       }
@@ -57,51 +43,50 @@ export class MonthlyBackupPromptService {
   }
 
   /**
-   * Find today's backup from the list of backups
-   * Returns the most recent backup created today, or null
+   * Find today's completed backup (Cairo date)
    */
   findTodaysBackup(backups: Backup[]): Backup | null {
 
-
-
-     const today = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-    today.setHours(0, 0, 0, 0); // Start of day
+    const now = new Date();
 
     const todaysBackups = backups.filter(backup => {
-      const backupDate = new Date(new Date(backup.date).toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-      backupDate.setHours(0, 0, 0, 0);
-      return backupDate.getTime() === today.getTime() && backup.status === 'COMPLETED';
+      if (!backup?.date) return false;
+
+      const backupDate = new Date(backup.date);
+
+      if (isNaN(backupDate.getTime())) return false;
+
+      return (
+        this.isSameCairoDay(backupDate, now) &&
+        backup.status === 'COMPLETED'
+      );
     });
 
-    if (todaysBackups.length === 0) {
-      return null;
-    }
+    if (!todaysBackups.length) return null;
 
-    // Return the most recent one
-    return todaysBackups.sort((a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    // الأحدث أولاً
+    return todaysBackups.sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
     )[0];
   }
 
   /**
-   * Mark that we showed the prompt this month
-   * Stores current date to prevent duplicate prompts
+   * Mark prompt as shown
    */
   markPromptAsShown(): void {
-   const today = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-    localStorage.setItem(this.STORAGE_KEY, String(today.getTime()));
+    localStorage.setItem(this.STORAGE_KEY, String(Date.now()));
   }
 
   /**
-   * Download a backup after user confirmation
-   * This respects browser security - user interaction required
+   * Download backup
    */
   downloadBackup(backup: Backup): void {
     this.isProcessing.set(true);
 
     this.backupService.downloadBackup(backup.filename).subscribe({
       next: (blob) => {
-        // Trigger browser download
         this.backupService.triggerBrowserDownload(blob, backup.filename);
         this.isProcessing.set(false);
       },
@@ -112,17 +97,37 @@ export class MonthlyBackupPromptService {
     });
   }
 
-  /**
-   * Format date for display in prompt
-   */
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  // ================================
+  // 🔥 Cairo-safe date utilities
+  // ================================
+
+  private getCairoDayOfMonth(date: Date): number {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Cairo',
+      day: '2-digit'
     });
+
+    return Number(formatter.format(date));
+  }
+
+  private isSameCairoMonth(d1: Date, d2: Date): boolean {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric',
+      month: '2-digit'
+    });
+
+    return formatter.format(d1) === formatter.format(d2);
+  }
+
+  private isSameCairoDay(d1: Date, d2: Date): boolean {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    return formatter.format(d1) === formatter.format(d2);
   }
 }

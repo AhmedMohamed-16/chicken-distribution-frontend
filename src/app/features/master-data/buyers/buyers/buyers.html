@@ -81,7 +81,7 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="actions" >
+          <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
             <td mat-cell *matCellDef="let buyer">
               <button mat-icon-button (click)="viewDebtHistory(buyer)">
@@ -101,8 +101,10 @@
         </table>
       </div>
       <!-- Pagination -->
+      <!-- Pagination -->
       <div
         class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow">
+        <!-- Mobile pagination - show ONLY on small screens -->
         <div class="flex-1 flex justify-between sm:hidden">
           <button (click)="previousPage()" [disabled]="currentPage() === 1"
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
@@ -113,7 +115,9 @@
             التالي
           </button>
         </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+
+        <!-- Desktop pagination - hide on mobile, show on sm and above -->
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
               عرض
@@ -122,7 +126,7 @@
               <span class="font-medium mx-1">{{ Math.min(currentPage() * pageSize(), totalBuyers()) }}</span>
               من
               <span class="font-medium mx-1">{{ totalBuyers() }}</span>
-              مستخدم
+              محل
             </p>
           </div>
           <div>
@@ -153,6 +157,7 @@
           </div>
         </div>
       </div>
+
       }
 
     </mat-card-content>

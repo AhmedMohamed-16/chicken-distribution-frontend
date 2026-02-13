@@ -184,7 +184,7 @@ export class CostCategories implements OnInit {
     readonly Math = Math;
    currentPage = signal(1);
   pageSize = signal(10);
-  totalUsers = signal(0);
+  totalItems = signal(0);
   totalPages = signal(0);
 
   searchTermModel = '';
@@ -216,6 +216,10 @@ export class CostCategories implements OnInit {
 
 
           this.categories.set(response.data.items);
+          this.totalItems.set(response.data.pagination.total || 0);
+          this.totalPages.set(response.data.pagination.total_pages || 0);
+
+
         }
         this.loading.set(false);
       },

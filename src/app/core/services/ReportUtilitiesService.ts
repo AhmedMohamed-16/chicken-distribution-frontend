@@ -39,19 +39,19 @@ formatPercentage(
   decimals: number = 2
 ): string {
   if (value === null || value === undefined || value === '') {
-    return '٠.٠٠٪';
+    return '٠.٠٠';
   }
 
   const num = Number(value);
 
   if (isNaN(num)) {
-    return '٠.٠٠٪';
+    return '٠.٠٠';
   }
 
   const formatted = num.toFixed(decimals);
   const arabic = this.englishToArabicNumbers(formatted);
 
-  return `${arabic}٪`;
+  return `${arabic}`;
 }
 
   /**
@@ -59,9 +59,12 @@ formatPercentage(
    * @param dateStr - Date string or Date object
    */
   formatDateTime(dateStr: string | Date | null | undefined): string {
+    console.log("formatDateTime ====",dateStr);
+
   if (!dateStr) return ''; // أو أي قيمة افتراضية
   const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
   return new Intl.DateTimeFormat('ar-EG', {
+  timeZone: 'Africa/Cairo',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -78,6 +81,7 @@ formatPercentage(
   formatDate(dateStr: string | Date): string {
     const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
     return new Intl.DateTimeFormat('ar-EG', {
+      timeZone: 'Africa/Cairo',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
@@ -215,7 +219,7 @@ formatNumber(
 
       // Add date
       doc.setFontSize(12);
-      doc.text(`Date: ${this.formatDate(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))}`, 20, 30);
+      doc.text(`Date: ${this.formatDate(new Date())}`, 20, 30);
 
       // Note: For full HTML to PDF conversion, you would need html2canvas
       // This is a basic implementation
@@ -239,8 +243,8 @@ formatNumber(
    * @param days - Number of days
    */
   getLastNDays(days: number): { from: Date; to: Date } {
-    const to = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-    const from = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const to = new Date();
+    const from = new Date();
     from.setDate(to.getDate() - days);
     return { from, to };
   }
@@ -249,7 +253,7 @@ formatNumber(
    * Get current month date range
    */
   getCurrentMonth(): { from: Date; to: Date } {
-    const today = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const today = new Date();
     const from = new Date(today.getFullYear(), today.getMonth(), 1);
     const to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     return { from, to };
@@ -259,7 +263,7 @@ formatNumber(
    * Get previous month date range
    */
   getPreviousMonth(): { from: Date; to: Date } {
-    const today =new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const today =new Date();
     const from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const to = new Date(today.getFullYear(), today.getMonth(), 0);
     return { from, to };

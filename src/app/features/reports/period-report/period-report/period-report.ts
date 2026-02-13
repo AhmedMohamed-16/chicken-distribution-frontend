@@ -587,14 +587,14 @@ export class PeriodReport {
   // Form setup
   periodForm = this.fb.nonNullable.group({
     from: [this.getDefaultStartDate(), Validators.required],
-    to: [new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })), Validators.required]
+    to: [new Date(), Validators.required]
   });
 
   /**
    * Default start date: 30 days ago
    */
   private getDefaultStartDate(): Date {
-    const date =new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const date =new Date();
     date.setDate(date.getDate() - 30);
     return date;
   }

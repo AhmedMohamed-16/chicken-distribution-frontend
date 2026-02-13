@@ -19,6 +19,7 @@ import * as XLSX from 'xlsx';
 import { BuyerStatementSummary, DateRange, FarmStatementSummary, StatementDialogData, StatementTransaction } from '../../../../core/models';
 import { Observable } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
+import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
 
 @Component({
   selector: 'app-statement-dialog',
@@ -45,12 +46,18 @@ export class StatementDialog implements OnInit {
   private dialogRef = inject(MatDialogRef<StatementDialog>);
   private debtService = inject(DebtReportService);
   public data = inject<StatementDialogData>(MAT_DIALOG_DATA);
+  public utils = inject(ReportUtilitiesService);
 
   // Signals for reactive state
   loading = signal(false);
   error = signal<string | null>(null);
   transactions = signal<StatementTransaction[]>([]);
   summary = signal<FarmStatementSummary | BuyerStatementSummary | null>(null);
+
+  formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
+formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
+formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
+formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
 
   // Date range form
   dateRangeForm = new FormGroup({
@@ -120,24 +127,7 @@ export class StatementDialog implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('ar-EG', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  }
 
-  formatDateTime(dateString: string): string {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-EG', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  }
 
   getTransactionTypeLabel(type: string): string {
     const labels: { [key: string]: string } = {
@@ -169,7 +159,7 @@ export class StatementDialog implements OnInit {
     // ===== إعداد بيانات الملخص =====
     const summaryData: any[][] = [
       ['كشف حساب: ' + this.data.entityName],
-      ['التاريخ: ' + this.formatDateTime(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }))+'')],
+      ['التاريخ: ' + this.formatDateTime(new Date())],
       []
     ];
 
@@ -249,7 +239,7 @@ export class StatementDialog implements OnInit {
     XLSX.utils.book_append_sheet(wb, ws, 'كشف الحساب');
 
     // حفظ الملف
-    const fileName = `كشف_حساب_${this.data.entityName}_${this.formatDateForFileName(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })))}.xlsx`;
+    const fileName = `كشف_حساب_${this.data.entityName}_${this.formatDateForFileName(new Date())}.xlsx`;
     XLSX.writeFile(wb, fileName);
   }
 

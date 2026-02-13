@@ -50,7 +50,7 @@ export class StartDay implements OnInit{
   loading = signal(false);
   submitting = signal(false);
   vehicles = signal<Vehicle[]>([]);
-  maxDate = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+  maxDate = new Date();
 
   // startDayForm = this.fb.nonNullable.group({
   //   operation_date: [new Date(), Validators.required],
@@ -67,7 +67,7 @@ private utils = inject(ReportUtilitiesService);
   selectedVehicleIds = signal<number[]>([]);
 
   startForm = this.fb.group({
-    operation_date: [new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })), Validators.required],
+    operation_date: [new Date(), Validators.required],
     vehicle_ids: [[] as number[], [Validators.required, Validators.minLength(1)]]
   });
 

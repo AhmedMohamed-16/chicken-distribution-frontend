@@ -1556,7 +1556,7 @@ export class DailyReport implements OnInit {
   // 🎨 FORM
   // ========================================
   dateForm = this.fb.nonNullable.group({
-    date: [new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })), Validators.required]
+    date: [new Date(), Validators.required]
   });
 
   ngOnInit(): void {
@@ -1682,7 +1682,7 @@ export class DailyReport implements OnInit {
   clearReport(): void {
     this.report.set(null);
     this.selectedVehicleId.set(null);
-    this.dateForm.reset({ date: new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })) });
+    this.dateForm.reset({ date: new Date() });
   }
 
   hasReport = computed(() => this.report() !== null);

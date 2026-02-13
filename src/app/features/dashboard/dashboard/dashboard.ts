@@ -28,7 +28,7 @@ import { HasPermissionDirective } from '../../../core/directives/hasPermission.d
 })
 export class Dashboard {
   authService = inject(AuthService);
-  currentDate = signal(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })));
+  currentDate = signal(new Date());
 private utils = inject(ReportUtilitiesService);
   PERMISSIONS = PERMISSIONS;
  operationsPermissions = [
@@ -40,10 +40,13 @@ private utils = inject(ReportUtilitiesService);
 ];
 formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
 
-  ngOnInit(): void {
-    setInterval(() => {
-      this.currentDate.set(new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' })));
-    }, 60000);
-  }
+ngOnInit(): void {
+  setInterval(() => {
+    const now = new Date();
+    this.currentDate.set(now);
+  }, 60000)
+
+}
+
 
 }

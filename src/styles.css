@@ -1,14 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 /* src/styles.css */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+/* @import '@angular/material/prebuilt-themes/purple-green.css'; */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  direction: rtl;
-  text-align: right;
+  /* direction: rtl;
+  text-align: right; */
 }
+
+
 body {
   font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   direction: rtl;

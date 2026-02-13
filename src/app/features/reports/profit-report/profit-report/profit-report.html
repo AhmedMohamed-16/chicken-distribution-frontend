@@ -1134,7 +1134,8 @@ PROFIT REPORT TEMPLATE
           @if (hasReport()) {
           <div class="action-buttons">
 
-            <button mat-stroked-button type="button" (click)="exportToExcel()" class="action-btn" *ngIf="reportType()=='partners'">
+            <button mat-stroked-button type="button" (click)="exportToExcel()" class="action-btn"
+              *ngIf="reportType()=='partners'">
               <mat-icon>file_download</mat-icon>
               تصدير Excel
             </button>
@@ -1294,7 +1295,7 @@ PROFIT REPORT TEMPLATE
                   {{ formatCurrency(getProfitComponent(component.key)?.amount) }} ج.م
                 </div>
                 <div class="component-percentage">
-                  {{ formatPercentage(getProfitComponent(component.key)?.percentage) }}
+                  {{ formatPercentage(getProfitComponent(component.key)?.percentage) }}%
                 </div>
                 <p class="component-desc">
                   {{ getProfitComponent(component.key)?.description }}
@@ -1371,7 +1372,7 @@ PROFIT REPORT TEMPLATE
                       }} ج.م
                       ({{
                       formatPercentage(analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.net_profit_per_sold_kg_change_pct)
-                      }})
+                      }}%)
                     </span>
                     <p class="trend-explanation">{{
                       analysisReport()!['2_profit_per_kg_analysis'].previous_period_comparison.explanation }}</p>
@@ -1407,7 +1408,7 @@ PROFIT REPORT TEMPLATE
                   <span class="stat-label">نسبة من الربح المحتمل:</span>
                   <span class="stat-value">{{
                     formatPercentage(analysisReport()!['3_profit_leakage_detection'].leakage_as_percent_of_potential_profit)
-                    }}</span>
+                    }}%</span>
                 </mat-card-content>
               </mat-card>
             </div>
@@ -1645,7 +1646,7 @@ PROFIT REPORT TEMPLATE
                 <mat-card-content>
                   <div class="efficiency-value">{{
                     formatPercentage(analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.roi_percentage)
-                    }}</div>
+                    }}%</div>
                   <p class="efficiency-detail">{{
                     analysisReport()!['5_profit_efficiency_indicators'].return_on_costs.explanation }}</p>
                 </mat-card-content>
@@ -1832,7 +1833,7 @@ PROFIT REPORT TEMPLATE
           <div class="leakage-percentage-item">
             <span class="leakage-label">نسبة من الربح المحتمل:</span>
             <span class="leakage-value">{{
-              formatPercentage(leakageReport()!.leakage_analysis.leakage_as_percent_of_potential_profit) }}</span>
+              formatPercentage(leakageReport()!.leakage_analysis.leakage_as_percent_of_potential_profit) }}%</span>
           </div>
         </div>
 
@@ -1921,7 +1922,7 @@ PROFIT REPORT TEMPLATE
         <div class="metric-content">
           <h4>متوسط عائد الاستثمار</h4>
           <p class="metric-value">{{ formatPercentage(partnerDistribution()!.summary.roi_analysis.average_roi * 100, 1)
-            }}</p>
+            }}%</p>
         </div>
       </mat-card>
     </div>
@@ -1953,7 +1954,8 @@ PROFIT REPORT TEMPLATE
             <div class="earner-info">
               <strong>{{ earner.partner_name }}</strong>
               <span class="profit-amount">{{ formatCurrency(earner.total_profit) }} جنيه</span>
-              <span class="profit-percentage">({{ formatPercentage(earner.percentage_of_total, 1) }} من الإجمالي)</span>
+              <span class="profit-percentage">({{ formatPercentage(earner.percentage_of_total, 1) }}% من
+                الإجمالي)</span>
             </div>
           </div>
           }
@@ -1995,7 +1997,7 @@ PROFIT REPORT TEMPLATE
                     <strong>{{ partner.partner_name }}</strong>
                   </div>
                 </td>
-                <td>{{ formatPercentage(partner.investment_percentage, 1) }}</td>
+                <td>{{ formatPercentage(partner.investment_percentage, 1) }}%</td>
                 <td class="profit-cell">
                   <strong>{{ formatCurrency(partner.total_final_profit) }}</strong> جنيه
                 </td>
@@ -2008,7 +2010,7 @@ PROFIT REPORT TEMPLATE
                         [class.low]="partner.vehicle_participation_rate <= 50">
                       </div>
                     </div>
-                    <span class="percentage-label">{{ formatPercentage(partner.vehicle_participation_rate, 0) }}</span>
+                    <span class="percentage-label">{{ formatPercentage(partner.vehicle_participation_rate, 0) }}%</span>
                   </div>
                 </td>
                 <td>
@@ -2057,7 +2059,7 @@ PROFIT REPORT TEMPLATE
             </div>
             <div class="info-item">
               <label>نسبة الاستثمار:</label>
-              <span>{{ formatPercentage(selectedPartner()!.investment_percentage, 1) }}</span>
+              <span>{{ formatPercentage(selectedPartner()!.investment_percentage, 1) }}%</span>
             </div>
             <div class="info-item">
               <label>عدد المركبات المملوكة:</label>

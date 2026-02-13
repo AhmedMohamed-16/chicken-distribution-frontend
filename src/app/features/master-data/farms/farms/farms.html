@@ -77,7 +77,7 @@
             <th mat-header-cell *matHeaderCellDef>الدين</th>
             <td mat-cell *matCellDef="let farm">
               <mat-chip [ngClass]="farm.current_balance > 0 ? 'debt-chip green' : 'debt-chip red'">
-                {{ formatCurrency(farm.current_balance) }}
+                {{ formatCurrency(Math.abs(farm.current_balance)) }}
                 {{ farm.current_balance > 0 ? '' : 'ج عليا' }}
               </mat-chip>
             </td>
@@ -125,7 +125,7 @@
               <span class="font-medium mx-1">{{ Math.min(currentPage() * pageSize(), totalFarms()) }}</span>
               من
               <span class="font-medium mx-1">{{ totalFarms() }}</span>
-              مستخدم
+              مزرعه
             </p>
           </div>
           <div>

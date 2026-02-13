@@ -18,7 +18,7 @@ import {
   ProfitSummaryReport,
   ProfitSummaryResponse
 } from '../models';
-import { environment } from '../../../environments/environment.prod';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -133,8 +133,8 @@ export class ProfitReportService {
    * آخر عدد محدد من الأيام
    */
   getLastNDays(days: number): { from: string; to: string } {
-    const to =new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
-    const from =new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const to =new Date();
+    const from =new Date();
     from.setDate(from.getDate() - days);
 
     return {
@@ -147,7 +147,7 @@ export class ProfitReportService {
    * الشهر الحالي
    */
   getCurrentMonth(): { from: string; to: string } {
-    const now = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const now = new Date();
     return {
       from: this.formatDate(new Date(now.getFullYear(), now.getMonth(), 1)),
       to: this.formatDate(new Date(now.getFullYear(), now.getMonth() + 1, 0))
@@ -158,7 +158,7 @@ export class ProfitReportService {
    * الشهر السابق
    */
   getPreviousMonth(): { from: string; to: string } {
-    const now = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' }));
+    const now = new Date();
     return {
       from: this.formatDate(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
       to: this.formatDate(new Date(now.getFullYear(), now.getMonth(), 0))

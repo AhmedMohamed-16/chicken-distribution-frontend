@@ -510,3 +510,32 @@ button:disabled {
   margin-right: 4px;
   margin-left: 4px;
 }
+/* ===============================
+   Utility Classes
+================================ */
+
+.hidden {
+  display: none;
+}
+
+/* Add this block */
+@media (min-width: 640px) {
+  .sm\:hidden {
+    display: none;
+  }
+
+  .sm\:flex {
+    display: flex !important;
+  }
+
+  .sm\:block {
+    display: block !important;
+  }
+}
+
+/* For screens BELOW 640px, sm:hidden elements should be visible */
+@media (max-width: 639px) {
+  .sm\:hidden {
+    display: block; /* or flex, depending on the element */
+  }
+}
