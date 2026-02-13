@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 import {
   Backup,
   BackupListResponse,

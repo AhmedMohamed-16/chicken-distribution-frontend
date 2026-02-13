@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Permission, CreatePermissionRequest, UpdatePermissionRequest, GroupedPermissions } from '../models/index';
 import { ApiResponse } from '../models';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 
 export interface GetPermissionsParams {
