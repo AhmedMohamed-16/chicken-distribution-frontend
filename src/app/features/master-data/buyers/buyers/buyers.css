@@ -203,12 +203,30 @@ td.mat-cell {
 ================================ */
 
 .debt-chip {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 12px;
   display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+
+.debt-chip.red {
+  background-color: #dc3545;
+}
+
+.debt-chip.green {
+  background-color: #28a745;
+}
+
+.debt-chip.gray {
+  background-color: #6c757d;
+}
+
+.debt-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .success-indicator {

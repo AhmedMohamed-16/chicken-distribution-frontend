@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'تعديل بيانات موظف' : 'إضافة موظف جديد' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="employee-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>الاسم بالكامل</mat-label>
+      <input matInput formControlName="name" placeholder="أدخل اسم الموظف" required>
+      <mat-error *ngIf="form.get('name')?.hasError('required')">الاسم مطلوب</mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('minlength')">يجب أن يكون الاسم 3 أحرف على الأقل</mat-error>
+    </mat-form-field>
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>رقم الهاتف</mat-label>
+        <input matInput formControlName="phone" placeholder="أدخل رقم الهاتف">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>الدور الوظيفي</mat-label>
+        <input matInput formControlName="role" placeholder="مثال: سائق، عامل، شريك">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>الرقم القومي</mat-label>
+      <input matInput formControlName="national_id" placeholder="أدخل 14 رقماً">
+      <mat-error *ngIf="form.get('national_id')?.hasError('pattern')">يجب إدخال 14 رقماً بشكل صحيح</mat-error>
+    </mat-form-field>
+
+    <div class="status-toggle" *ngIf="isEditMode">
+      <mat-slide-toggle formControlName="is_active">
+        حالة الموظف ({{ form.get('is_active')?.value ? 'نشط' : 'غير نشط' }})
+      </mat-slide-toggle>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">إلغاء</button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="form.invalid">
+    {{ isEditMode ? 'حفظ التعديلات' : 'إضافة الموظف' }}
+  </button>
+</mat-dialog-actions>

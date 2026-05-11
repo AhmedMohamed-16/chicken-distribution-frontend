@@ -33,9 +33,23 @@
     <div class="section-title">المشترين</div>
 
     <div class="info-row">
-      <span class="label">الديون المستحقة:</span>
+      <span class="label">المستحقات (عليهم):</span>
       <span class="value bold-number">
         {{ formatCurrency(debtPosition().buyers.total_outstanding) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">الدائنون (لهم):</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().buyers.total_credits) }} ج
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="label">صافي المركز:</span>
+      <span class="value bold-number">
+        {{ formatCurrency(debtPosition().buyers.net_position) }} ج
       </span>
     </div>
 

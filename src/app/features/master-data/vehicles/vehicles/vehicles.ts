@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,10 +32,11 @@ export class Vehicles implements OnInit {
   private vehicleService = inject(VehicleService);
   private snackBar = inject(MatSnackBar);
 private dialog = inject(MatDialog);
+  private router = inject(Router);
 
   vehicles = signal<Vehicle[]>([]);
   loading = signal(false);
-  displayedColumns = ['name', 'plate_number', 'purchase_price', 'empty_weight'];
+  displayedColumns = ['name', 'plate_number', 'purchase_price', 'empty_weight', 'status'];
 private utils = inject(ReportUtilitiesService);
  formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
 formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
@@ -74,9 +76,12 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
         next: () => {
           this.snackBar.open('تم إضافة المركبة بنجاح', 'حسناً', { duration: 3000 });
           this.loadVehicles();
+          if (result.navigate_to_partners) {
+             this.router.navigate(['/master-data/partners']);
+          }
         },
-        error: () => {
-          this.snackBar.open('فشل إضافة المركبة', 'حسناً', { duration: 3000 });
+        error: (err) => {
+          this.snackBar.open(err?.error?.message || 'فشل إضافة المركبة', 'حسناً', { duration: 3000 });
         }
       });
     }
@@ -95,9 +100,12 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
         next: () => {
           this.snackBar.open('تم تحديث المركبة بنجاح', 'حسناً', { duration: 3000 });
           this.loadVehicles();
+          if (result.navigate_to_partners) {
+             this.router.navigate(['/master-data/partners']);
+          }
         },
-        error: () => {
-          this.snackBar.open('فشل تحديث المركبة', 'حسناً', { duration: 3000 });
+        error: (err) => {
+          this.snackBar.open(err?.error?.message || 'فشل تحديث المركبة', 'حسناً', { duration: 3000 });
         }
       });
     }

@@ -1,0 +1,414 @@
+<div class="account-statement-container">
+
+  <mat-card class="statement-card print-friendly">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <mat-card-header class="statement-header">
+
+      <div class="statement-header__content">
+
+        <div class="statement-header__title-section">
+
+          <div class="statement-header__icon">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+
+          <div class="statement-header__titles">
+            <mat-card-title>
+              كشف حساب: {{ entityName || entityType }}
+            </mat-card-title>
+
+            <div class="statement-header__subtitle">
+              عرض تفصيلي لجميع الحركات المالية والأرصدة
+            </div>
+          </div>
+
+        </div>
+
+        <div class="header-actions no-print">
+
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            (click)="printStatement()"
+            title="طباعة">
+
+            <mat-icon>print</mat-icon>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </mat-card-header>
+
+    <mat-card-content class="statement-content">
+
+      <!-- =====================================================
+           FILTER SECTION
+      ====================================================== -->
+
+      <section class="filter-section no-print">
+
+        <div class="filter-grid">
+
+          <!-- Start Date -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>من تاريخ</mat-label>
+
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              [(ngModel)]="startDate"
+              (dateChange)="loadStatement()">
+
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startPicker">
+            </mat-datepicker-toggle>
+
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- End Date -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>إلى تاريخ</mat-label>
+
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              [(ngModel)]="endDate"
+              (dateChange)="loadStatement()">
+
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endPicker">
+            </mat-datepicker-toggle>
+
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Reset -->
+          <div class="filter-action">
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="reset-button"
+              (click)="startDate = null; endDate = null; loadStatement()">
+
+              <mat-icon>restart_alt</mat-icon>
+              <span>إعادة ضبط</span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================================
+           LOADING
+      ====================================================== -->
+
+      @if (isLoading) {
+
+        <div class="loading-shade">
+          <div class="loading-content">
+            <mat-spinner diameter="42"></mat-spinner>
+            <p>جاري تحميل كشف الحساب...</p>
+          </div>
+        </div>
+
+      }
+
+      <!-- =====================================================
+           SUMMARY
+      ====================================================== -->
+
+      @if (statementData && !isLoading) {
+
+        <section class="summary-section">
+
+          <!-- Opening -->
+          <div class="summary-box">
+
+            <div class="summary-box__header">
+              <mat-icon>history</mat-icon>
+              <span>الرصيد الافتتاحي</span>
+            </div>
+
+            <div class="summary-label">
+              رصيد بداية الفترة المحددة
+            </div>
+
+            <div
+              class="summary-value"
+              [class.text-danger]="statementData.opening_balance > 0"
+              [class.text-success]="statementData.opening_balance < 0">
+
+              {{ formatMoney(statementData.opening_balance) }}
+              <span class="currency">ج.م</span>
+
+            </div>
+
+          </div>
+
+          <!-- Closing -->
+          <div class="summary-box summary-box--highlight">
+
+            <div class="summary-box__header">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <span>الرصيد الختامي</span>
+            </div>
+
+            <div class="summary-label">
+              الرصيد الحالي بعد جميع الحركات
+            </div>
+
+            <div
+              class="summary-value summary-value--large"
+              [class.text-danger]="statementData.closing_balance > 0"
+              [class.text-success]="statementData.closing_balance < 0">
+
+              {{ formatMoney(statementData.closing_balance) }}
+              <span class="currency">ج.م</span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      }
+
+      <!-- =====================================================
+           TABLE
+      ====================================================== -->
+
+      <section
+        class="table-section"
+        [hidden]="isLoading || !statementData?.transactions?.length">
+
+        <div class="table-container">
+
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            class="statement-table">
+
+            <!-- DATE -->
+            <ng-container matColumnDef="date">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header>
+
+                التاريخ
+
+              </th>
+
+              <td mat-cell *matCellDef="let element">
+
+                <div class="cell-primary">
+                  {{ element.date | date:'yyyy/MM/dd' }}
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- REFERENCE -->
+            <ng-container matColumnDef="reference">
+
+              <th mat-header-cell *matHeaderCellDef>
+                البيان
+              </th>
+
+              <td mat-cell *matCellDef="let element">
+
+                <div class="reference-cell">
+                  {{ element.reference }}
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- TYPE -->
+            <ng-container matColumnDef="type">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header>
+
+                نوع الحركة
+
+              </th>
+
+              <td mat-cell *matCellDef="let element">
+
+                <div class="type-badge">
+                  {{ getTypeLabel(element.type) }}
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- AMOUNT -->
+            <ng-container matColumnDef="amount">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header>
+
+                المبلغ
+
+              </th>
+
+              <td mat-cell *matCellDef="let element">
+
+                <div class="amount-cell">
+                  {{ formatMoney(element.amount) }}
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- BALANCE IMPACT -->
+            <ng-container matColumnDef="balanceImpact">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header>
+
+                تأثير الرصيد
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let element"
+                [class.text-success]="element.balanceImpact > 0"
+                [class.text-danger]="element.balanceImpact < 0">
+
+                <div class="impact-value">
+
+                  @if (element.balanceImpact > 0) {
+                    <span>+</span>
+                  }
+
+                  {{ formatMoney(element.balanceImpact) }}
+
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- BALANCE AFTER -->
+            <ng-container matColumnDef="balance_after">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header>
+
+                الرصيد بعد الحركة
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let element"
+                class="balance-cell"
+                [class.direction-change]="element.direction_change"
+                [class.text-danger]="element.balance_after > 0"
+                [class.text-success]="element.balance_after < 0">
+
+                <div class="balance-content">
+
+                  <span>
+                    {{ formatMoney(element.balance_after) }}
+                  </span>
+
+                  @if (element.direction_change) {
+
+                    <mat-icon
+                      class="change-icon"
+                      title="تغير اتجاه الرصيد">
+
+                      swap_horiz
+
+                    </mat-icon>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </ng-container>
+
+            <!-- ROWS -->
+            <tr
+              mat-header-row
+              *matHeaderRowDef="displayedColumns">
+            </tr>
+
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns;">
+            </tr>
+
+          </table>
+
+        </div>
+
+        <mat-paginator
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          class="statement-paginator no-print">
+        </mat-paginator>
+
+      </section>
+
+      <!-- =====================================================
+           EMPTY STATE
+      ====================================================== -->
+
+      @if (!isLoading && statementData?.transactions?.length === 0) {
+
+        <div class="no-data">
+
+          <div class="no-data__icon">
+            <mat-icon>inbox</mat-icon>
+          </div>
+
+          <h3>لا توجد حركات</h3>
+
+          <p>
+            لا توجد حركات مسجلة لهذه الجهة خلال الفترة المحددة.
+          </p>
+
+        </div>
+
+      }
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>

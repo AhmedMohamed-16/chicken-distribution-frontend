@@ -45,7 +45,7 @@ export class Buyers implements OnInit {
   buyers = signal<Buyer[]>([]);
   loading = signal(false);
  PERMISSIONS = PERMISSIONS;
- displayedColumns: string[] = ['name', 'phone', 'address', 'total_debt'];
+ displayedColumns: string[] = ['name', 'phone', 'address', 'current_balance'];
 
 
   private utils = inject(ReportUtilitiesService);

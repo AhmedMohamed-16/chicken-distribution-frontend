@@ -630,7 +630,7 @@
 
     <mat-card-content>
       <form [formGroup]="periodForm" (ngSubmit)="loadReport()">
-        
+
         <div class="date-range-form">
           <mat-form-field appearance="outline" class="date-field">
             <mat-label>من تاريخ</mat-label>
@@ -697,22 +697,22 @@
         <div class="period-label">
           <mat-icon>date_range</mat-icon>
           <span class="period-text">
-            من {{ formatDateTime(report()!.period.start_date) }} إلى {{ formatDateTime(report()!.period.end_date) }}
+            من {{ formatDateTime(report()?.period?.start_date) }} إلى {{ formatDateTime(report()?.period?.end_date) }}
           </span>
         </div>
 
         <mat-chip-set>
           <mat-chip>
             <mat-icon matChipAvatar>calendar_today</mat-icon>
-            {{ formatNumber(report()!.period.operating_days,0) }} يوم عمل
+            {{ formatNumber(report()?.period?.operating_days,0) }} يوم عمل
           </mat-chip>
           <mat-chip>
             <mat-icon matChipAvatar>local_shipping</mat-icon>
-            {{formatNumber( report()!.period.vehicles_used ,0)}} مركبة
+            {{formatNumber( report()?.period?.vehicles_used ,0)}} مركبة
           </mat-chip>
           <mat-chip>
             <mat-icon matChipAvatar>receipt</mat-icon>
-            {{ formatNumber(report()!.period.total_operations,0) }} عملية
+            {{ formatNumber(report()?.period?.total_operations,0) }} عملية
           </mat-chip>
         </mat-chip-set>
 

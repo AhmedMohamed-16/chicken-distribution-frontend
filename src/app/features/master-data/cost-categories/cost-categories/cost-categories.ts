@@ -154,6 +154,8 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
+import { CostLedgerDialog } from '../cost-ledger-dialog/cost-ledger-dialog';
+
 @Component({
   selector: 'app-cost-categories',
   imports: [
@@ -172,14 +174,15 @@ export class CostCategories implements OnInit {
   private snackBar = inject(MatSnackBar);
   private costCategoryService = inject(CostCategoryService);
   private dialog = inject(MatDialog);
-
+  
+  // ... rest of the code is unchanged up to viewLedger
+  
   categories = signal<CostCategory[]>([]);
   loading = signal(false);
-  displayedColumns = ['name', 'description', 'is_vehicle_cost', 'usage_count'];
+  displayedColumns = ['name', 'description', 'is_vehicle_cost', 'current_balance', 'usage_count'];
   private utils = inject(ReportUtilitiesService);
 
   formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
-
 
     readonly Math = Math;
    currentPage = signal(1);
@@ -214,11 +217,9 @@ export class CostCategories implements OnInit {
         if (response.success) {
           const data = Array.isArray(response.data) ? response.data : [response.data];
 
-
           this.categories.set(response.data.items);
           this.totalItems.set(response.data.pagination.total || 0);
           this.totalPages.set(response.data.pagination.total_pages || 0);
-
 
         }
         this.loading.set(false);
@@ -266,6 +267,13 @@ onSearchChange(value: string): void {
       this.loadCategories();
     }
   }
+  viewLedger(category: CostCategory): void {
+    this.dialog.open(CostLedgerDialog, {
+      width: '900px',
+      data: { id: category.id, category }
+    });
+  }
+
   delete(cat: CostCategory): void {
     const dialogRef = this.dialog.open(ConfirmationDialog, {
       data: {

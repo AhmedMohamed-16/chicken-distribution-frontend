@@ -181,3 +181,81 @@ html, body {
 .dashboard-container {
   padding: 16px;
 }
+
+@media print {
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  * {
+    overflow: visible !important;
+  }
+
+  /* Angular Material containers */
+  mat-sidenav-container,
+  mat-sidenav-content,
+  mat-drawer-container,
+  mat-drawer-content,
+  .mat-drawer-content,
+  .mat-sidenav-content,
+  .mat-mdc-table,
+  .mat-mdc-card,
+  .mat-mdc-dialog-container,
+  .cdk-overlay-container,
+  .cdk-global-overlay-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* App layout wrappers */
+  app-root,
+  router-outlet,
+  .app-container,
+  .main-content,
+  .content,
+  .page-container,
+  .table-container,
+  .report-container {
+    height: auto !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* إخفاء العناصر الغير مطلوبة */
+  button,
+  .sidebar,
+  .navbar,
+  .header,
+  .footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* منع قطع الصفوف */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
+  }
+
+  /* إزالة flex وقت الطباعة */
+  .row,
+  .container,
+  .wrapper {
+    display: block !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}

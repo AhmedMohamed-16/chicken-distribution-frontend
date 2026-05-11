@@ -59,22 +59,24 @@
 /* =========================
    Buttons (Mobile)
 ========================= */
-
 .button-group {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
 }
 
 .button-group button {
-  width: 100%;
-  min-height: 44px; /* touch target */
-  font-size: 0.95rem;
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
-.button-group mat-spinner {
-  vertical-align: middle;
+.button-group mat-icon {
+  flex-shrink: 0;
 }
 
 /* =========================
@@ -131,6 +133,20 @@
    Tablet ≥ 768px
 ========================= */
 
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .costs-container {
     padding: 20px;
@@ -143,16 +159,6 @@
 
   .costs-container h3 {
     font-size: 1.2rem;
-  }
-
-  .button-group {
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-
-  .button-group button {
-    width: auto;
-    min-width: 160px;
   }
 
   .costs-list th,
@@ -182,19 +188,125 @@
 }
 
 /* =========================
-   RTL Enhancements
+   Payment & Status Styles
 ========================= */
 
-[dir="rtl"] {
-  direction: rtl;
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-[dir="rtl"] .costs-list th,
-[dir="rtl"] .costs-list td {
-  text-align: right;
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 250px;
 }
 
-[dir="rtl"] .vehicle-badge {
-  margin-inline-start: 0;
-  margin-inline-end: 6px;
+.payment-metadata-section {
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed #ccc;
+  margin-bottom: 20px;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-chip.success {
+  background-color: #e6f4ea;
+  color: #1e8e3e;
+  border: 1px solid #ceead6;
+}
+
+.status-chip.warning {
+  background-color: #fef7e0;
+  color: #f9ab00;
+  border: 1px solid #feefc3;
+}
+
+.status-chip.error {
+  background-color: #fce8e6;
+  color: #d93025;
+  border: 1px solid #fad2cf;
+}
+
+.text-success {
+  color: #1e8e3e;
+  font-weight: 500;
+}
+
+.full-width {
+  width: 100%;
+}
+
+
+/* Mode toggle */
+.mode-toggle-section {
+  margin-bottom: 16px;
+}
+
+.mode-hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Debt warning info box */
+.debt-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.debt-warning mat-icon {
+  color: #f9a825;
+  flex-shrink: 0;
+}
+
+/* Form section */
+.form-section {
+  margin-top: 16px;
+}
+
+.form-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+/* No data message */
+.no-data {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+}
+.cost-balance-positive {
+  color: #16a34a; /* green */
+  font-weight: 600;
+}
+
+.cost-balance-negative {
+  color: #dc2626; /* red */
+  font-weight: 600;
+}
+
+.cost-balance-zero {
+  color: #6b7280; /* gray */
 }

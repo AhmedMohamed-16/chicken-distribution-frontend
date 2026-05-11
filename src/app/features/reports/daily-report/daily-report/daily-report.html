@@ -807,8 +807,8 @@
                         }
                         <div class="info-item">
                           <span class="label">الرصيد الحالي:</span>
-                          <span class="value balance"
-                            [class]="getBalanceStatusClass(transaction.farm?.current_balance ?? 0)">
+                          <!-- Using balance_type from API - NO component calculation -->
+                          <span class="value balance" [class]="getBalanceStatusClass(transaction.farm?.balance_type)">
                             {{ formatCurrency(transaction.farm?.current_balance) }} ج
                             ({{ transaction.farm?.balance_type }})
                           </span>
@@ -992,12 +992,12 @@
                       </div>
                     </mat-panel-title>
                     <mat-panel-description>
-                      <span class="amount">{{ formatCurrency(sale.pricing.total_amount) }} ج</span>
+                      <!-- <span class="amount">{{ formatCurrency(sale.pricing.total_amount) }} ج</span> -->
                       <mat-chip size="small" [class]="getPaymentStatusClass(
-                                sale.debt_info.is_full_payment,
-                                sale.debt_info.has_remaining_debt
+                                sale.debt_info?.is_full_payment ?? false,
+                                sale.debt_info?.has_remaining_debt ?? false
                               )">
-                        {{ sale.debt_info.status }}
+                        {{ sale.debt_info?.status }}
                       </mat-chip>
                     </mat-panel-description>
                   </mat-expansion-panel-header>
@@ -1028,11 +1028,11 @@
                         </div>
                         }
                         <div class="info-item">
-                          <span class="label">إجمالي الديون:</span>
-                          <span class="value balance" [class.receivable]="(sale.buyer?.total_debt ?? 0) > 0">
-                            {{ formatCurrency(sale.buyer?.total_debt) }} ج
-                            ({{ sale.buyer?.debt_status }})
-                          </span>
+                          <span class="label">الرصيد الحالي:</span>
+                          <span class="value balance" [class.receivable]="(sale.buyer?.current_balance ?? 0) > 0"
+                            [class.payable]="(sale.buyer?.current_balance ?? 0) < 0">
+                            {{ formatCurrency(sale.buyer?.current_balance) }} ج
+                          </span> ({{ sale.buyer?.debt_status }})
                         </div>
                       </div>
                     </div>
@@ -1048,19 +1048,19 @@
                       <div class="weighing-grid">
                         <div class="weighing-item">
                           <span class="label">وزن الأقفاص محملة:</span>
-                          <span class="value">{{ formatNumber(sale.weighing.loaded_cages_weight, 2) }} كجم</span>
+                          <!-- <span class="value">{{ formatNumber(sale.weighing?.loaded_cages_weight, 2) }} كجم</span> -->
                         </div>
                         <div class="weighing-item">
                           <span class="label">وزن الأقفاص فارغة:</span>
-                          <span class="value">{{ formatNumber(sale.weighing.empty_cages_weight, 2) }} كجم</span>
+                          <span class="value">{{ formatNumber(sale.weighing?.empty_cages_weight, 2) }} كجم</span>
                         </div>
                         <div class="weighing-item">
                           <span class="label">عدد الأقفاص:</span>
-                          <span class="value">{{ formatNumber(sale.weighing.cage_count) }}</span>
+                          <!-- <span class="value">{{ formatNumber(sale.weighing.cage_count) }}</span> -->
                         </div>
                         <div class="weighing-item highlight">
                           <span class="label">صافي وزن الفراخ:</span>
-                          <span class="value">{{ formatNumber(sale.weighing.net_chicken_weight, 2) }} كجم</span>
+                          <!-- <span class="value">{{ formatNumber(sale.weighing?.net_chicken_weight, 2) }} كجم</span> -->
                         </div>
                       </div>
                     </div>
@@ -1076,29 +1076,29 @@
                       <div class="pricing-grid">
                         <div class="pricing-item">
                           <span class="label">سعر الكيلو:</span>
-                          <span class="value">{{ formatCurrency(sale.pricing.price_per_kg) }} ج</span>
+                          <span class="value">{{ formatCurrency(sale.pricing?.price_per_kg) }} ج</span>
                         </div>
                         <div class="pricing-item highlight">
                           <span class="label">إجمالي المبلغ:</span>
-                          <span class="value">{{ formatCurrency(sale.pricing.total_amount) }} ج</span>
+                          <!-- <span class="value">{{ formatCurrency(sale.pricing.total_amount) }} ج</span> -->
                         </div>
                         <div class="pricing-item">
                           <span class="label">المدفوع:</span>
-                          <span class="value">{{ formatCurrency(sale.pricing.paid_amount) }} ج</span>
+                          <span class="value">{{ formatCurrency(sale.pricing?.paid_amount) }} ج</span>
                         </div>
-                        @if (sale.pricing.old_debt_paid > 0) {
+                        <!-- @if (sale.pricing?.old_debt_paid > 0) { -->
                         <div class="pricing-item">
                           <span class="label">سداد من الدين القديم:</span>
-                          <span class="value">{{ formatCurrency(sale.pricing.old_debt_paid) }} ج</span>
+                          <!-- <span class="value">{{ formatCurrency(sale.pricing?.old_debt_paid) }} ج</span> -->
                         </div>
-                        }
+                        <!-- } -->
                         <div class="pricing-item">
                           <span class="label">المتبقي:</span>
-                          <span class="value">{{ formatCurrency(sale.pricing.remaining_amount) }} ج</span>
+                          <span class="value">{{ formatCurrency(sale.pricing?.remaining_amount) }} ج</span>
                         </div>
                         <div class="pricing-item">
                           <span class="label">نسبة الدفع:</span>
-                          <span class="value">{{ formatPercentage(sale.pricing.payment_percentage) }}%</span>
+                          <span class="value">{{ formatPercentage(sale.pricing?.payment_percentage) }}%</span>
                         </div>
                       </div>
                     </div>
@@ -1115,33 +1115,33 @@
                         <div class="breakdown-grid">
                           <div class="breakdown-item">
                             <span class="label">تغيير الدين:</span>
-                            <span class="value">{{ formatCurrency(sale.debt_info.buyer_debt_change) }} ج</span>
+                            <span class="value">{{ formatCurrency(sale.debt_info?.buyer_debt_change ) }} ج</span>
                           </div>
                           <div class="breakdown-item highlight">
                             <span class="label">التأثير الصافي:</span>
-                            <span class="value">{{ formatCurrency(sale.debt_info.net_debt_impact) }} ج</span>
+                            <span class="value">{{ formatCurrency(sale.debt_info?.net_debt_impact) }} ج</span>
                           </div>
                         </div>
 
                         <div class="status-flags">
-                          @if (sale.debt_info.is_full_payment) {
+                          @if (sale.debt_info?.is_full_payment) {
                           <mat-chip color="primary">
                             <mat-icon>check_circle</mat-icon>
                             دفع كامل
                           </mat-chip>
                           }
-                          @if (sale.debt_info.has_remaining_debt) {
+                          @if (sale.debt_info?.has_remaining_debt) {
                           <mat-chip color="warn">
                             <mat-icon>warning</mat-icon>
                             يوجد متبقي
                           </mat-chip>
                           }
-                          @if (sale.debt_info.paid_old_debt) {
+                          <!-- @if (sale.debt_info?.paid_old_debt) { -->
                           <mat-chip color="accent">
                             <mat-icon>payment</mat-icon>
                             سدد من الدين القديم
                           </mat-chip>
-                          }
+                          <!-- } -->
                         </div>
                       </div>
                     </div>
@@ -1363,12 +1363,12 @@
                       <div class="balance-info">
                         <span class="label">الرصيد الحالي:</span>
                         <span class="value">
-                          @if (payment.farm?.balance_display) {
-                          {{ payment.farm?.balance_display }}
+                          @if (payment.farm?.display_balance) {
+                          {{ payment.farm?.display_balance }}
                           } @else {
                           {{ formatCurrency(payment.farm?.current_balance) }} ج
-                          @if ((payment.farm?.current_balance ?? 0) < 0) { (لنا عليهم) } @else if
-                            ((payment.farm?.current_balance ?? 0)> 0) { (لهم علينا) } @else { (متصفي) } }
+                          ({{ payment.farm?.balance_type | balanceDirection }})
+                          }
                         </span>
                       </div>
                     </div>

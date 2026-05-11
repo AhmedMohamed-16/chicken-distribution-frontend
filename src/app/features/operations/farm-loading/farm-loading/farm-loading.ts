@@ -431,13 +431,14 @@ import {
   Vehicle,
   FarmLoadingRequest,
   BalanceInfo,
-  DebtPaymentInfo
 } from '../../../../core/models';
 import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { PersonSelectorComponent } from '../../../../shared/components/person-selector/person-selector.component';
+import { PaymentSourceSelectorComponent } from '../../../../shared/components/payment-source-selector/payment-source-selector.component';
+import { PaymentSourceSelection } from '../../../../models/custody.models';
 
 @Component({
   selector: 'app-farm-loading',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -450,438 +451,643 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     MatProgressSpinnerModule,
     MatDividerModule,
     MatIconModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    PersonSelectorComponent,
+    PaymentSourceSelectorComponent
   ],
   templateUrl: './farm-loading.html',
   styleUrl: './farm-loading.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FarmLoading implements OnInit {
-  private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private operationService = inject(OperationService);
-  private farmService = inject(FarmService);
-  private chickenTypeService = inject(ChickenTypeService);
-  private snackBar = inject(MatSnackBar);
- constructor(){
+  export class FarmLoading implements OnInit {
+    private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private operationService = inject(OperationService);
+    private farmService = inject(FarmService);
+    private chickenTypeService = inject(ChickenTypeService);
+    private snackBar = inject(MatSnackBar);
+    private utils = inject(ReportUtilitiesService);
+
+    constructor() {
       effect(() => {
-  console.log('Balance:', this.selectedFarmBalance());
-  console.log('Old paid:', this.formValue().old_balance_paid);
-  console.log('Debt only:', this.isDebtPaymentOnly());
-  console.log('Remaining:', this.remainingAmount());
-  console.log('New total:', this.newTotalBalance());
-});
+        console.log('Balance:', this.selectedFarmBalance());
+        console.log('Total paid:', this.formValue().total_paid);
+        console.log('Debt only:', this.isDebtPaymentOnly());
+        console.log('Final remaining:', this.finalRemainingAmount());
+        console.log('Projected balance:', this.projectedBalance());
 
- }
-  // ============================================
-  // SIGNALS
-  // ============================================
-  loading = signal(false);
-  submitting = signal(false);
-  farms = signal<Farm[]>([]);
-  chickenTypes = signal<ChickenType[]>([]);
-  operationId = signal<number>(0);
-  activeVehicles = signal<Vehicle[]>([]);
+        // Check current values
+console.log('paymentSourceAmount:', this.paymentSourceAmount());
+console.log('paymentSource:', this.paymentSource());
+console.log('isPaymentSourceValid:', this.isPaymentSourceValid());
 
-  // Farm balance tracking
-  selectedFarmBalance = signal<number>(0);
-  selectedFarmBalanceType = signal<'RECEIVABLE' | 'PAYABLE' | 'SETTLED'>('SETTLED');
-
-  // ✅ NEW: Debt payment only mode
-isDebtPaymentOnly = computed(() => {
-  return !!this.formValue().is_debt_payment_only;
-});
-  // ============================================
-  // FORM
-  // ============================================
-  loadingForm = this.fb.nonNullable.group({
-    // Payment mode toggle
-    is_debt_payment_only: [false],
-
-    // Loading fields (required for normal mode)
-    vehicle_id: [null as number | null],
-    chicken_type_id: [null as number | null],
-    empty_vehicle_weight: [0],
-    cage_count: [0],
-    cage_weight_per_unit: [15],
-    loaded_vehicle_weight: [0],
-    price_per_kg: [0],
-    paid_amount: [0],
-
-    // Farm selection (always required)
-    farm_id: [null as number | null, Validators.required],
-
-    // Old balance payment (conditional)
-    old_balance_paid: [0, [Validators.min(0)]]
-  });
-
-  // ============================================
-  // COMPUTED VALUES
-  // ============================================
-
-  formValue = toSignal(
-    this.loadingForm.valueChanges.pipe(
-      startWith(this.loadingForm.getRawValue())
-    ),
-    { initialValue: this.loadingForm.getRawValue() }
-  );
-
-  // ✅ Dynamic validation based on mode
-  ngAfterViewInit() {
-    this.loadingForm.get('is_debt_payment_only')?.valueChanges.subscribe(isDebtOnly => {
-
-      this.updateFormValidation(isDebtOnly);
-    });
-  }
-
-
-  netWeight = computed(() => {
-    if (this.isDebtPaymentOnly()) return 0;
-
-    const form = this.formValue();
-    const empty = form.empty_vehicle_weight ?? 0;
-    const loaded = form.loaded_vehicle_weight ?? 0;
-    const cageCount = form.cage_count ?? 0;
-    const cageWeight = form.cage_weight_per_unit ?? 0;
-    return Math.max(0, loaded - empty - (cageCount * cageWeight));
-  });
-
-  totalAmount = computed(() => {
-    if (this.isDebtPaymentOnly()) return 0;
-
-    const price = this.formValue().price_per_kg ?? 0;
-    return this.netWeight() * price;
-  });
-
-  remainingAmount = computed(() => {
-    if (this.isDebtPaymentOnly()) return 0;
-
-    const paid = this.formValue().paid_amount ?? 0;
-    return Math.max(0, this.totalAmount() - paid);
-  });
-
-  // ✅ Calculate new balance after transaction
-newTotalBalance = computed(() => {
-  const currentBalance = Number(this.selectedFarmBalance()) || 0;
-  const oldBalancePaid = Number(this.formValue().old_balance_paid) || 0;
-
-  if (this.isDebtPaymentOnly()) {
-    if (currentBalance > 0) {
-      return currentBalance - oldBalancePaid;
-    } else if (currentBalance < 0) {
-      return currentBalance + oldBalancePaid;
-    }
-    return 0;
-  }
-
-  const newDebt = Number(this.remainingAmount()) || 0;
-
-  if (currentBalance > 0) {
-    return currentBalance - newDebt - oldBalancePaid;
-  } else if (currentBalance < 0) {
-    return currentBalance - newDebt + oldBalancePaid;
-  }
-
-  return newDebt - oldBalancePaid;
-});
-
-  // ✅ Show payment field conditions
-  shouldShowPaymentField = computed(() => {
-    console.log("this.selectedFarmBalance()",typeof(+ this.selectedFarmBalance()));
-
-    return +this.selectedFarmBalance() as number !== 0 ;
-  });
-
-  // ✅ Get max payment amount
-  maxPaymentAmount = computed(() => {
-    console.log("maxPaymentAmount",Math.abs(this.selectedFarmBalance()));
-
-    return Math.abs(this.selectedFarmBalance());
-
-  });
-
-  // ✅ Payment field is required in debt-only mode
-  isPaymentRequired = computed(() => {
-    return this.isDebtPaymentOnly() && this.selectedFarmBalance() !== 0;
-  });
-
-  // ============================================
-  // LIFECYCLE
-  // ============================================
-private utils = inject(ReportUtilitiesService);
- formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
-formatNumber = (num: number | undefined | null |string, decimals?: number) => this.utils.formatNumber(num, decimals);
-formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
-formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
-
-  ngOnInit(): void {
-    this.operationId.set(+this.route.snapshot.params['id']);
-    this.loadData();
-    this.loadingForm.get('farm_id')?.valueChanges.subscribe(() => {
-    this.onFarmChange();
-
-  });
-  }
-
-  // ============================================
-  // FORM VALIDATION UPDATE
-  // ============================================
-
-  updateFormValidation(isDebtOnly: boolean): void {
-    const vehicleControl = this.loadingForm.get('vehicle_id');
-    const chickenTypeControl = this.loadingForm.get('chicken_type_id');
-    const priceControl = this.loadingForm.get('price_per_kg');
-    const paymentControl = this.loadingForm.get('old_balance_paid');
-
-    if (isDebtOnly) {
-      // Debt payment only: Remove loading field requirements
-      vehicleControl?.clearValidators();
-      chickenTypeControl?.clearValidators();
-      priceControl?.clearValidators();
-
-      // Make payment required
-      paymentControl?.setValidators([Validators.required, Validators.min(0.01)]);
-
-      // Reset loading fields
-      this.loadingForm.patchValue({
-        vehicle_id: null,
-        chicken_type_id: null,
-        empty_vehicle_weight: 0,
-        cage_count: 0,
-        cage_weight_per_unit: 15,
-        loaded_vehicle_weight: 0,
-        price_per_kg: 0,
-        paid_amount: 0
       });
-    } else {
-      // Normal loading: Require loading fields
-      vehicleControl?.setValidators([Validators.required]);
-      chickenTypeControl?.setValidators([Validators.required]);
-      priceControl?.setValidators([Validators.required, Validators.min(0)]);
+      this.loadingForm.get('payment_method')?.valueChanges.subscribe(value => {
+    const safeControl = this.loadingForm.get('safe_id');
 
-      // Make payment optional
-      paymentControl?.setValidators([Validators.min(0)]);
-    }
-
-    vehicleControl?.updateValueAndValidity();
-    chickenTypeControl?.updateValueAndValidity();
-    priceControl?.updateValueAndValidity();
-    paymentControl?.updateValueAndValidity();
-  }
-
-  // ============================================
-  // DATA LOADING
-  // ============================================
-
-  loadData(): void {
-    this.loading.set(true);
-
-    Promise.all([
-      this.farmService.getAll().toPromise(),
-      this.chickenTypeService.getAll().toPromise(),
-      this.operationService.getOperation(this.operationId()).toPromise()
-    ]).then(([farmsRes, typesRes, operationRes]: any[]) => {
-      this.farms.set(farmsRes?.data || []);
-      this.chickenTypes.set(typesRes?.data || []);
-
-      if (operationRes?.data) {
-        const vehicles = operationRes.data.vehicle_operations
-          ?.filter((vo: any) => vo.status === 'ACTIVE')
-          ?.map((vo: any) => vo.vehicle) || [];
-
-        this.activeVehicles.set(vehicles);
-      }
-
-      this.loading.set(false);
-    }).catch((error) => {
-      console.error('Error loading data:', error);
-      this.snackBar.open('فشل تحميل البيانات', 'حسناً', { duration: 3000 });
-      this.loading.set(false);
-    });
-  }
-
-  // ============================================
-  // EVENT HANDLERS
-  // ============================================
-
-  onVehicleChange(event: any): void {
-    const vehicleId = event.value;
-    console.log('Selected vehicle:', vehicleId);
-  }
-
-  onFarmChange(): void {
-    const farmId = this.loadingForm.get('farm_id')?.value;
-    if (farmId) {
-      const farm = this.farms().find(f => f.id === farmId);
-      if (farm) {
-        this.selectedFarmBalance.set(Number(farm.current_balance) || 0);
-
-        if (farm.current_balance > 0) {
-          this.selectedFarmBalanceType.set('RECEIVABLE');
-        } else if (farm.current_balance < 0) {
-          this.selectedFarmBalanceType.set('PAYABLE');
+        if (value) {
+          safeControl?.setValidators([Validators.required]);
         } else {
-          this.selectedFarmBalanceType.set('SETTLED');
+          safeControl?.clearValidators();
         }
 
-        this.loadingForm.patchValue({ old_balance_paid: 0 },{ emitEvent: true });
-      }
-    } else {
-      this.selectedFarmBalance.set(0);
-      this.selectedFarmBalanceType.set('SETTLED');
-    }
-  }
-
-  // ============================================
-  // FORM SUBMISSION
-  // ============================================
-
-  onSubmit(): void {
-    if (this.loadingForm.invalid) {
-      this.snackBar.open('يرجى ملء جميع الحقول المطلوبة', 'حسناً', { duration: 3000 });
-      return;
+        safeControl?.updateValueAndValidity();
+      });
     }
 
-    // Validate old balance payment
-    const oldBalancePaid = this.loadingForm.get('old_balance_paid')?.value || 0;
-    const maxPayment = this.maxPaymentAmount();
+    // ============================================
+    // SIGNALS
+    // ============================================
+    loading = signal(false);
+    submitting = signal(false);
+    farms = signal<Farm[]>([]);
+    chickenTypes = signal<ChickenType[]>([]);
+    operationId = signal<number>(0);
+    activeVehicles = signal<Vehicle[]>([]);
+    paymentSource = signal<PaymentSourceSelection | null>(null);
 
-    if (oldBalancePaid > maxPayment) {
-      this.snackBar.open(
-        `المبلغ المدفوع لا يمكن أن يتجاوز ${maxPayment.toFixed(2)} جنيه`,
-        'حسناً',
-        { duration: 3000 }
-      );
-      return;
-    }
+    // Farm balance tracking
+    selectedFarmBalance = signal<number>(0);
+    selectedFarmBalanceType = signal<'RECEIVABLE' | 'PAYABLE' | 'SETTLED'>('SETTLED');
 
-    // Check if debt payment only requires payment
-    if (this.isDebtPaymentOnly() && oldBalancePaid === 0) {
-      this.snackBar.open('يرجى إدخال مبلغ الدفع', 'حسناً', { duration: 3000 });
-      return;
-    }
+    // ============================================
+    // FORM
+    // ============================================
+    loadingForm = this.fb.nonNullable.group({
+      // Payment mode toggle
+      is_debt_payment_only: [false],
 
-    this.submitting.set(true);
-    const payload = this.buildPayload();
+      // Loading fields (required for normal mode)
+      vehicle_id: [null as number | null],
+      chicken_type_id: [null as number | null],
+      empty_vehicle_weight: [0],
+      cage_count: [0],
+      cage_weight_per_unit: [15],
+      loaded_vehicle_weight: [0],
+      price_per_kg: [0],
 
-    this.operationService.farmLoading(this.operationId(), payload).subscribe({
-      next: (result) => {
-        this.submitting.set(false);
+      // NEW: unified payment input (replaces paid_amount)
+      total_paid: [0, [Validators.min(0)]],
 
-        const isDebtOnly = this.isDebtPaymentOnly();
-        let message = isDebtOnly
-          ? 'تم تسجيل الدفع بنجاح'
-          : 'تم تسجيل التحميل بنجاح';
+      // NEW: discount
+      discount_amount: [0, [Validators.min(0)]],
 
-        if (result.data?.balance_info) {
-          const balanceInfo: BalanceInfo = result.data.balance_info;
-          message += `\n${balanceInfo.display_balance}`;
+      // Farm selection (always required)
+      farm_id: [null as number | null, Validators.required],
 
-          if (balanceInfo.direction_changed && balanceInfo.alert) {
-            this.snackBar.open(balanceInfo.alert, 'حسناً', {
-              duration: 5000,
-              panelClass: ['warning-snackbar']
-            });
-          }
-        }
+      // Old balance payment (debt-only mode)
+      old_balance_paid: [0, [Validators.min(0)]],
 
-        this.snackBar.open(message, 'حسناً', { duration: 4000 });
-        this.router.navigate(['/operations/daily', this.operationId()]);
-      },
-      error: (error) => {
-        this.submitting.set(false);
-        console.error('Error recording farm loading:', error);
-
-        const errorMessage = error.error?.message || 'فشل تسجيل العملية';
-        this.snackBar.open(errorMessage, 'حسناً', { duration: 3000 });
-      }
+      // NEW: payment metadata (DEFAULT SAFE/CASH)
+      payment_method: ['CASH', Validators.required],
+      safe_id: [null as number | null],
+      person_type: [null as string | null],
+      paid_by_person_id: [null as number | null]
     });
-  }
 
-  // ✅ Build payload based on mode
-  buildPayload(): FarmLoadingRequest {
-    const formValue = this.loadingForm.getRawValue();
+
+
+    // ============================================
+    // FORM VALUE SIGNAL
+    // ============================================
+    formValue = toSignal(
+      this.loadingForm.valueChanges.pipe(
+        startWith(this.loadingForm.getRawValue())
+      ),
+      { initialValue: this.loadingForm.getRawValue() }
+    );
+
+    // ============================================
+    // COMPUTED: MODE
+    // ============================================
+    isDebtPaymentOnly = computed(() => {
+      return !!this.formValue().is_debt_payment_only;
+    });
+
+    // ============================================
+    // COMPUTED: WEIGHT & PRICING
+    // ============================================
+    netWeight = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const form = this.formValue();
+      const empty = form.empty_vehicle_weight ?? 0;
+      const loaded = form.loaded_vehicle_weight ?? 0;
+      const cageCount = form.cage_count ?? 0;
+      const cageWeight = form.cage_weight_per_unit ?? 0;
+      return Math.max(0, loaded - empty - (cageCount * cageWeight));
+    });
+
+    /** Subtotal before discount */
+    subtotalAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const price = this.formValue().price_per_kg ?? 0;
+      return this.netWeight() * price;
+    });
+
+    discountAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.formValue().discount_amount ?? 0);
+    });
+
+    /** Total after discount */
+    totalAmount = computed(() => {
+      return Math.max(0, this.subtotalAmount() - this.discountAmount());
+    });
+
+    // ============================================
+    // COMPUTED: PAYMENT SPLIT
+    // ============================================
+
+    /** How much of total_paid covers this invoice */
+    paidForTransaction = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const totalPaid = this.formValue().total_paid ?? 0;
+      // return Math.min(totalPaid, this.totalAmount());
+      return  totalPaid ;
+    });
+
+    /** Surplus beyond invoice total — goes toward old balance */
+  surplusAppliedToDebt = computed(() => {
+    if (this.isDebtPaymentOnly()) return 0;
+
+    const totalPaid = this.formValue().total_paid ?? 0;
+    const surplus = Math.max(0, totalPaid - this.totalAmount());
+    const farmBalance = this.selectedFarmBalance();
+
+    // ✅ لو المزرعة مدينة لنا (RECEIVABLE) أو رصيد صفر:
+    // الزيادة كلها تتحسب — مفيش cap، لأنها فلوس دفعناها زيادة
+    if (farmBalance >= 0) return surplus;
+
+    // ✅ لو نحن مدينين للمزرعة (PAYABLE):
+    // الزيادة تقدر تسدد جزء من دينا عليها بس، مش أكتر من الدين
+    return Math.min(surplus, Math.abs(farmBalance));
+  });
+
+
+    /** Remaining on the invoice before credit auto-application */
+    private rawRemainingAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.totalAmount() - this.paidForTransaction());
+    });
+
+    /**
+     * running balance after old_balance_paid adjustment (debt-only uses old_balance_paid directly).
+     * For normal mode it uses surplusAppliedToDebt.
+     */
+    private runningBalance = computed(() => {
+      const current = this.selectedFarmBalance();
+      if (this.isDebtPaymentOnly()) {
+        const paid = this.formValue().old_balance_paid ?? 0;
+        if (current > 0) return current - paid;
+        if (current < 0) return current + paid;
+        return 0;
+      }
+      const surplus = this.surplusAppliedToDebt();
+      return current + surplus;
+
+    });
+
+    /** Credit auto-applied from RECEIVABLE balance to offset remaining debt */
+    usedCreditDisplay = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const rb = this.runningBalance();
+      const remaining = this.rawRemainingAmount();
+      if (rb > 0 && remaining > 0) {
+        return Math.min(rb, remaining);
+      }
+      return 0;
+    });
+
+    /** Final remaining after credit auto-application */
+    finalRemainingAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.rawRemainingAmount() - this.usedCreditDisplay());
+    });
+
+    // ============================================
+    // COMPUTED: PROJECTED BALANCE
+    // ============================================
+  //  projectedBalance = computed(() => {
+  //   const currentBalance = this.selectedFarmBalance();
+
+  //   if (this.isDebtPaymentOnly()) {
+  //     return this.runningBalance();
+  //   }
+
+  //   const oldBalancePaid = this.surplusAppliedToDebt(); // ✅ بعد الفيكس، دايمًا 0 لو balance < 0
+  //   const totalPaid = this.formValue().total_paid ?? 0;
+  //   const rawSurplus = Math.max(0, totalPaid - this.totalAmount());
+  //   const remaining = this.rawRemainingAmount();
+
+  //   let debtPaymentImpact = 0;
+  //   if (oldBalancePaid > 0) {
+  //     // ✅ بعد الفيكس، هنا بس هيدخل لو balance > 0 (RECEIVABLE)
+  //     debtPaymentImpact = -oldBalancePaid; // يقلل ما تدين لنا المزرعة
+  //   }
+
+  //   const rb = currentBalance + debtPaymentImpact;
+  //   const usedCredit = rb > 0 && remaining > 0 ? Math.min(rb, remaining) : 0;
+  //   const finalRemaining = remaining - usedCredit;
+
+  //   const netSurplus = Math.max(0, rawSurplus - oldBalancePaid);
+
+  //   return currentBalance + debtPaymentImpact - usedCredit - finalRemaining + netSurplus;
+  // });
+
+  projectedBalance = computed(() => {
+    const currentBalance = this.selectedFarmBalance();
 
     if (this.isDebtPaymentOnly()) {
-      // Debt payment only
-      return {
-        farm_id: formValue.farm_id!,
-        old_balance_paid: formValue.old_balance_paid || 0,
-        is_debt_payment_only: true
+      return this.runningBalance();
+    }
+    const totalPaid = this.formValue().total_paid ?? 0;
+    const surplus = Math.max(0, totalPaid - this.totalAmount());
+
+    const remaining = this.rawRemainingAmount();
+
+    // ✅ الزيادة دايمًا بتزيد ما تدين لنا المزرعة (أو بتقلل دينا عليها)
+    const afterSurplus = currentBalance + surplus;
+
+    // لو الرصيد موجب والفاتورة فيها متبقي → استخدم الرصيد تلقائيًا
+    const usedCredit = afterSurplus > 0 && remaining > 0
+      ? Math.min(afterSurplus, remaining)
+      : 0;
+
+    const finalRemaining = remaining - usedCredit;
+
+    // المتبقي من الفاتورة → يزيد دينا على المزرعة (يقلل الرصيد)
+    return afterSurplus - usedCredit - finalRemaining;
+  });
+
+    // ============================================
+    // COMPUTED: DISPLAY CONDITIONS
+    // ============================================
+    shouldShowPaymentField = computed(() => {
+      return +this.selectedFarmBalance() !== 0;
+    });
+    paymentSourceAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) {
+        return this.formValue().old_balance_paid ?? 0;
+      }
+      return this.formValue().total_paid ?? 0;
+    });
+    currentPersonType = computed(() => (this.formValue().person_type as 'EMPLOYEE' | 'PARTNER' | null) ?? null);
+    currentPersonId = computed(() => this.formValue().paid_by_person_id ?? null);
+    isPaymentSourceValid = computed(() => this.paymentSourceAmount() <= 0 || this.paymentSource() !== null);
+
+    maxPaymentAmount = computed(() => {
+      return Math.abs(this.selectedFarmBalance());
+    });
+
+    isPaymentRequired = computed(() => {
+      return this.isDebtPaymentOnly() && this.selectedFarmBalance() !== 0;
+    });
+
+    creditAutoApplied = computed(() => {
+      return this.usedCreditDisplay() > 0;
+    });
+
+    // ============================================
+    // UTILITIES
+    // ============================================
+    formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
+    formatNumber = (num: number | undefined | null | string, decimals?: number) => this.utils.formatNumber(num, decimals);
+    formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
+    formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
+
+    // ============================================
+    // LIFECYCLE
+    // ============================================
+    ngOnInit(): void {
+      this.operationId.set(+this.route.snapshot.params['id']);
+      this.loadData();
+      this.loadingForm.get('farm_id')?.valueChanges.subscribe(() => {
+        this.onFarmChange();
+      });
+    }
+
+    ngAfterViewInit(): void {
+      this.loadingForm.get('is_debt_payment_only')?.valueChanges.subscribe(isDebtOnly => {
+        this.updateFormValidation(isDebtOnly);
+      });
+    }
+
+    // ============================================
+    // FORM VALIDATION UPDATE
+    // ============================================
+    updateFormValidation(isDebtOnly: boolean): void {
+      const vehicleControl = this.loadingForm.get('vehicle_id');
+      const chickenTypeControl = this.loadingForm.get('chicken_type_id');
+      const priceControl = this.loadingForm.get('price_per_kg');
+      const paymentControl = this.loadingForm.get('old_balance_paid');
+      const discountControl = this.loadingForm.get('discount_amount');
+
+      if (isDebtOnly) {
+        vehicleControl?.clearValidators();
+        chickenTypeControl?.clearValidators();
+        priceControl?.clearValidators();
+        discountControl?.clearValidators();
+        paymentControl?.setValidators([Validators.required, Validators.min(0.01)]);
+
+        this.loadingForm.patchValue({
+          vehicle_id: null,
+          chicken_type_id: null,
+          empty_vehicle_weight: 0,
+          cage_count: 0,
+          cage_weight_per_unit: 15,
+          loaded_vehicle_weight: 0,
+          price_per_kg: 0,
+          total_paid: 0,
+          discount_amount: 0
+        });
+      } else {
+        vehicleControl?.setValidators([Validators.required]);
+        chickenTypeControl?.setValidators([Validators.required]);
+        priceControl?.setValidators([Validators.required, Validators.min(0)]);
+        discountControl?.setValidators([Validators.min(0)]);
+        paymentControl?.setValidators([Validators.min(0)]);
+      }
+
+      vehicleControl?.updateValueAndValidity();
+      chickenTypeControl?.updateValueAndValidity();
+      priceControl?.updateValueAndValidity();
+      paymentControl?.updateValueAndValidity();
+      discountControl?.updateValueAndValidity();
+    }
+
+    // ============================================
+    // DATA LOADING
+    // ============================================
+    loadData(): void {
+      this.loading.set(true);
+
+      Promise.all([
+        this.farmService.getAll().toPromise(),
+        this.chickenTypeService.getAll().toPromise(),
+        this.operationService.getOperation(this.operationId()).toPromise()
+      ]).then(([farmsRes, typesRes, operationRes]: unknown[]) => {
+        const farms = farmsRes as { data?: Farm[] };
+        const types = typesRes as { data?: ChickenType[] };
+        const operation = operationRes as { data?: { vehicle_operations?: { status: string; vehicle: Vehicle }[] } };
+
+        this.farms.set(farms?.data || []);
+        this.chickenTypes.set(types?.data || []);
+
+        if (operation?.data) {
+          const vehicles = operation.data.vehicle_operations
+            ?.filter(vo => vo.status === 'ACTIVE')
+            ?.map(vo => vo.vehicle) || [];
+          this.activeVehicles.set(vehicles);
+        }
+
+        this.loading.set(false);
+      }).catch((error) => {
+        console.error('Error loading data:', error);
+        this.snackBar.open('فشل تحميل البيانات', 'حسناً', { duration: 3000 });
+        this.loading.set(false);
+      });
+    }
+
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+    onVehicleChange(event: { value: number }): void {
+      console.log('Selected vehicle:', event.value);
+    }
+
+    onFarmChange(): void {
+      const farmId = this.loadingForm.get('farm_id')?.value;
+      if (farmId) {
+        const farm = this.farms().find(f => f.id === farmId);
+        if (farm) {
+          this.selectedFarmBalance.set(Number(farm.current_balance) || 0);
+
+          if (farm.current_balance > 0) {
+            this.selectedFarmBalanceType.set('RECEIVABLE');
+          } else if (farm.current_balance < 0) {
+            this.selectedFarmBalanceType.set('PAYABLE');
+          } else {
+            this.selectedFarmBalanceType.set('SETTLED');
+          }
+
+          this.loadingForm.patchValue({ old_balance_paid: 0 }, { emitEvent: true });
+        }
+      } else {
+        this.selectedFarmBalance.set(0);
+        this.selectedFarmBalanceType.set('SETTLED');
+      }
+    }
+
+    // ============================================
+    // FORM SUBMISSION
+    // ============================================
+    onSubmit(): void {
+      if (this.loadingForm.invalid) {
+        this.snackBar.open('يرجى ملء جميع الحقول المطلوبة', 'حسناً', { duration: 3000 });
+        return;
+      }
+      if (!this.isPaymentSourceValid()) {
+        this.snackBar.open('يجب اختيار مصدر الدفع', 'حسناً', { duration: 3000 });
+        return;
+      }
+
+      // Validate discount does not exceed subtotal
+      if (!this.isDebtPaymentOnly() && this.discountAmount() > this.subtotalAmount()) {
+        this.snackBar.open(
+          `الخصم (${this.formatCurrency(this.discountAmount())}) لا يمكن أن يتجاوز الإجمالي قبل الخصم (${this.formatCurrency(this.subtotalAmount())})`,
+          'حسناً',
+          { duration: 4000 }
+        );
+        return;
+      }
+
+      // Validate old balance payment in debt-only mode
+      const oldBalancePaid = this.loadingForm.get('old_balance_paid')?.value || 0;
+      const maxPayment = this.maxPaymentAmount();
+
+      // if (oldBalancePaid > maxPayment) {
+      //   this.snackBar.open(
+      //     `المبلغ المدفوع لا يمكن أن يتجاوز ${maxPayment.toFixed(2)} جنيه`,
+      //     'حسناً',
+      //     { duration: 3000 }
+      //   );
+      //   return;
+      // }
+
+      if (this.isDebtPaymentOnly() && oldBalancePaid === 0) {
+        this.snackBar.open('يرجى إدخال مبلغ الدفع', 'حسناً', { duration: 3000 });
+        return;
+      }
+
+      this.submitting.set(true);
+      const payload = this.buildPayload();
+
+      this.operationService.farmLoading(this.operationId(), payload).subscribe({
+        next: (result) => {
+          this.submitting.set(false);
+
+          const isDebtOnly = this.isDebtPaymentOnly();
+          let message = isDebtOnly
+            ? 'تم تسجيل الدفع بنجاح'
+            : 'تم تسجيل التحميل بنجاح';
+
+          if (result.data?.balance_info) {
+            const balanceInfo: BalanceInfo = result.data.balance_info;
+            message += `\n${balanceInfo.display_balance}`;
+
+            if (balanceInfo.direction_changed && balanceInfo.alert) {
+              this.snackBar.open(balanceInfo.alert, 'حسناً', {
+                duration: 5000,
+                panelClass: ['warning-snackbar']
+              });
+            }
+          }
+
+          this.snackBar.open(message, 'حسناً', { duration: 4000 });
+          this.router.navigate(['/operations/daily', this.operationId()]);
+        },
+        error: (error) => {
+          this.submitting.set(false);
+          console.error('Error recording farm loading:', error);
+          const errorMessage = error.error?.message || 'فشل تسجيل العملية';
+          this.snackBar.open(errorMessage, 'حسناً', { duration: 3000 });
+        }
+      });
+    }
+
+    buildPayload(): FarmLoadingRequest {
+      const formValue = this.loadingForm.getRawValue();
+
+      const paymentMetadata:any = {
+        payment_method: formValue.payment_method,
+        payment_source_type: this.paymentSource()?.payment_source_type ?? 'SAFE',
+        payment_source_id: this.paymentSource()?.payment_source_id ?? null,
+        safe_id: this.paymentSource()?.payment_source_type === 'SAFE' ? this.paymentSource()?.payment_source_id ?? null : null,
+        person_type: formValue.person_type,
       };
-    } else {
-      // Normal loading with optional payment
-      return {
-        vehicle_id: formValue.vehicle_id!,
-        farm_id: formValue.farm_id!,
-        chicken_type_id: formValue.chicken_type_id!,
-        empty_vehicle_weight: formValue.empty_vehicle_weight || 0,
-        loaded_vehicle_weight: formValue.loaded_vehicle_weight || 0,
-        cage_count: formValue.cage_count || 0,
-        cage_weight_per_unit: formValue.cage_weight_per_unit || 15,
-        price_per_kg: formValue.price_per_kg || 0,
-        paid_amount: formValue.paid_amount || 0,
-        old_balance_paid: formValue.old_balance_paid || 0,
-        is_debt_payment_only: false
-      };
+      console.log("formValue.payment_method",formValue.payment_method);
+
+      if (this.isDebtPaymentOnly()) {
+        if(this.selectedFarmBalance()>0){
+          paymentMetadata.received_by_person_id=formValue.paid_by_person_id || null
+        }else{
+          paymentMetadata.paid_by_person_id=formValue.paid_by_person_id || null
+        }
+        return {
+          farm_id: formValue.farm_id!,
+          old_balance_paid: formValue.old_balance_paid || 0,
+          is_debt_payment_only: true,
+          ...paymentMetadata,
+        };
+      } else {
+        return {
+          vehicle_id: formValue.vehicle_id!,
+          farm_id: formValue.farm_id!,
+          chicken_type_id: formValue.chicken_type_id!,
+          empty_vehicle_weight: formValue.empty_vehicle_weight || 0,
+          loaded_vehicle_weight: formValue.loaded_vehicle_weight || 0,
+          cage_count: formValue.cage_count || 0,
+          cage_weight_per_unit: formValue.cage_weight_per_unit || 15,
+          price_per_kg: formValue.price_per_kg || 0,
+          discount_amount: this.discountAmount(),
+          paid_amount: this.paidForTransaction(),
+          old_balance_paid: this.surplusAppliedToDebt() ,
+          is_debt_payment_only: false,
+          ...paymentMetadata,
+          paid_by_person_id: formValue.paid_by_person_id || null
+        };
+      }
+    }
+
+    cancel(): void {
+      this.router.navigate(['/operations/daily', this.operationId()]);
+    }
+
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+    getBalanceTypeClass(farm: Farm) {
+      return this.farmService.getBalanceColorClass(farm);
+    }
+
+    formatBalance(farm: Farm): string {
+      return this.farmService.formatBalance(farm);
+    }
+
+    getBalanceWarningMessage(): string {
+      const balance = this.selectedFarmBalance();
+      const absBalance = Math.abs(balance);
+
+      if (balance > 0) {
+        return `⚠️ المزرعة مدينة لنا بمبلغ ${absBalance.toFixed(2)} جنيه`;
+      } else if (balance < 0) {
+        return `⚠️ نحن مدينون للمزرعة بمبلغ ${absBalance.toFixed(2)} جنيه`;
+      }
+      return '';
+    }
+
+    getOldBalancePaymentLabel(): string {
+      const balanceType = this.selectedFarmBalanceType();
+
+      if (balanceType === 'RECEIVABLE') {
+        return 'استلام من المزرعة (تسديد دين سابق)';
+      }
+      else if (balanceType === 'PAYABLE') {
+        return 'دفع للمزرعة (تسديد دين سابق)';
+      }
+      return 'دفع';
+    }
+
+    getOldBalancePaymentHint(): string {
+      const maxAmount = this.maxPaymentAmount();
+      const balanceType = this.selectedFarmBalanceType();
+
+      if (balanceType === 'RECEIVABLE') {
+        return `الحد الأقصى للاستلام: ${maxAmount.toFixed(2)} جنيه`;
+      } else if (balanceType === 'PAYABLE') {
+        return `الحد الأقصى للدفع: ${maxAmount.toFixed(2)} جنيه`;
+      }
+      return '';
+    }
+
+    getSubmitButtonText(): string {
+      return this.isDebtPaymentOnly() ? 'تسجيل الدفع' : 'تسجيل التحميل';
+    }
+
+    get paymentLabel(): string {
+      if (!this.isDebtPaymentOnly()) {
+        return 'طريقة الدفع';
+      }
+      return this.selectedFarmBalanceType() !== 'RECEIVABLE' ? 'طريقة الدفع' : 'طريقة الاستلام';
+    }
+    get label(): string {
+      if (!this.isDebtPaymentOnly()) {
+        return 'مصدر الدفع';
+      }
+      return this.selectedFarmBalanceType() !== 'RECEIVABLE' ? 'مصدر الدفع' : 'مصدر الاستلام';
+    }
+
+    get personLabel(): string {
+      if (!this.isDebtPaymentOnly()) {
+        return 'الشخص الذي دفع';
+      }
+      return this.selectedFarmBalanceType() !== 'RECEIVABLE' ? 'الشخص الذي دفع' : 'الشخص الذي استلم';
+    }
+
+    preventNegative(event: KeyboardEvent) {
+  if (event.key === '-' || event.key === '+') {
+    event.preventDefault();
+  }
+  }
+
+  preventPasteNegative(event: ClipboardEvent) {
+    const pasted = event.clipboardData?.getData('text') || '';
+    if (pasted.includes('-')) {
+      event.preventDefault();
     }
   }
 
-  cancel(): void {
-    this.router.navigate(['/operations/daily', this.operationId()]);
-  }
-
-  // ============================================
-  // UTILITY METHODS
-  // ============================================
-
-  getBalanceTypeClass(farm: Farm): string {
-    return this.farmService.getBalanceColorClass(farm);
-  }
-
-  formatBalance(farm: Farm): string {
-    return this.farmService.formatBalance(farm);
-  }
-
-  getBalanceWarningMessage(): string {
-    const balance = this.selectedFarmBalance();
-    const absBalance = Math.abs(balance);
-
-    if (balance > 0) {
-      return `⚠️ المزرعة مدينة لنا بمبلغ ${absBalance.toFixed(2)} جنيه`;
-    } else if (balance < 0) {
-      return `⚠️ نحن مدينون للمزرعة بمبلغ ${absBalance.toFixed(2)} جنيه`;
-    }
-    return '';
-  }
-
-  getOldBalancePaymentLabel(): string {
-    const balanceType = this.selectedFarmBalanceType();
-
-    if (balanceType === 'RECEIVABLE') {
-      return 'استلام من المزرعة (تسديد دين سابق)';
-    } else if (balanceType === 'PAYABLE') {
-      return 'دفع للمزرعة (تسديد دين سابق)';
-    }
-    return 'دفع/استلام';
-  }
-
-  getOldBalancePaymentHint(): string {
-    const maxAmount = this.maxPaymentAmount();
-    const balanceType = this.selectedFarmBalanceType();
-
-    if (balanceType === 'RECEIVABLE') {
-      return `الحد الأقصى للاستلام: ${maxAmount.toFixed(2)} جنيه`;
-    } else if (balanceType === 'PAYABLE') {
-      return `الحد الأقصى للدفع: ${maxAmount.toFixed(2)} جنيه`;
-    }
-    return '';
-  }
-
-  getSubmitButtonText(): string {
-    return this.isDebtPaymentOnly() ? 'تسجيل الدفع' : 'تسجيل التحميل';
-  }
-
+  // isPaymentValid = signal(true);
 
 }

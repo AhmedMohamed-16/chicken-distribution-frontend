@@ -80,12 +80,12 @@ export class BackupService {
    * Programmatic file download helper
    */
   triggerBrowserDownload(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
+const url = (window as any).URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
     link.click();
-    window.URL.revokeObjectURL(url);
+   (window as any).URL.revokeObjectURL(url);
   }
 
   /**

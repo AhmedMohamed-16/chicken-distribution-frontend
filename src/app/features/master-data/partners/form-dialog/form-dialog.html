@@ -297,6 +297,32 @@
       </div>
     </div>
 
+    <!-- ========== PAYMENT INFORMATION ========== -->
+    @if ((form.get('investment_amount')?.value || 0) > 0 && (!data || investmentChanged())) {
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>account_balance_wallet</mat-icon>
+        معلومات الدفع والخزنة
+      </h3>
+
+      @if (data && investmentChanged()) {
+      <div class="payment-hint">
+        <mat-icon>info</mat-icon>
+        <span>
+          تم تغيير مبلغ الاستثمار من {{ originalInvestmentAmount() | number:'1.2-2' }} إلى
+          {{ form.get('investment_amount')?.value | number:'1.2-2' }}.
+          يرجى تحديد طريقة الدفع والخزنة لتسجيل الفرق.
+        </span>
+      </div>
+      }
+
+      <app-payment-method-selector [parentForm]="form" label="طريقة دفع الاستثمار">
+      </app-payment-method-selector>
+    </div>
+
+    <mat-divider></mat-divider>
+    }
+
     <!-- ========== VEHICLE SHARES (UPDATED) ========== -->
     <div class="form-section vehicle-partnerships-section">
       <h3 class="section-title">

@@ -132,6 +132,20 @@
 
   <form [formGroup]="costForm" (ngSubmit)="onSubmit()">
 
+    <!-- Mode Toggle -->
+    <div class="mode-toggle-section">
+      <mat-slide-toggle formControlName="is_debt_payment_only" color="primary" (change)="onModeToggle($event.checked)">
+        <strong>دفع دين تكلفة سابقة فقط</strong>
+      </mat-slide-toggle>
+      <p class="mode-hint">
+        {{ isDebtPaymentOnly()
+        ? 'اختر تكلفة غير مدفوعة وسجل دفعة عليها'
+        : 'تسجيل تكلفة جديدة مع إمكانية الدفع الجزئي' }}
+      </p>
+    </div>
+
+    <mat-divider style="margin-bottom: 20px;"></mat-divider>
+    @if (!isDebtPaymentOnly()) {
     <!-- Cost Category -->
     <mat-form-field>
       <mat-label>فئة التكلفة</mat-label>
@@ -156,38 +170,132 @@
       </mat-error>
     </mat-form-field>
 
-    <!-- Amount -->
-    <mat-form-field>
-      <mat-label>المبلغ (جنيه)</mat-label>
-      <input matInput type="number" formControlName="amount" step="0.01">
-    </mat-form-field>
+    <!-- Amount & Payment -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>المبلغ الإجمالي (جنيه)</mat-label>
+        <input matInput type="number" formControlName="amount" step="0.01">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>المبلغ المدفوع الآن (جنيه)</mat-label>
+        <input matInput type="number" formControlName="paid_amount" step="0.01">
+        <mat-hint *ngIf="remainingAmount() > 0">
+          المتبقي سيُسجل كدين: {{ remainingAmount() | number:'1.2-2' }} جنيه
+        </mat-hint>
+        <mat-hint *ngIf="remainingAmount() === 0 && amountSignal() > 0">
+          ✅ تم دفع كامل المبلغ
+        </mat-hint>
+      </mat-form-field>
+    </div>
+    }
+
+    @if (isDebtPaymentOnly()) {
+    <div class="form-section">
+      @if (loadingUnpaid()) {
+      <mat-spinner diameter="30"></mat-spinner>
+      } @else if (unpaidCosts().length === 0) {
+      <p class="no-data">لا توجد تكاليف غير مدفوعة</p>
+      } @else {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>اختر التكلفة المراد سدادها</mat-label>
+        <mat-select (selectionChange)="onCostSelected($event.value)">
+          @for (cost of unpaidCosts(); track cost.category_id) {
+          <mat-option [value]="cost.category_id">
+            {{ cost.name }} —
+            @let balance = cost.current_balance ?? cost.total_unpaid ?? cost.balance ?? 0;
+            @if (balance !== 0) {
+            <span [class]="getCostBalanceClass(cost)">
+              ({{ formatBalance(cost) }})
+            </span>
+            }
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      }
+
+      @if (selectedCostForPayment()) {
+      <!-- Show cost summary -->
+      <div class=" debt-warning" style="background: #fff3e0; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+        <mat-icon style="vertical-align: middle;">info</mat-icon>
+        <strong>
+          إجمالي اخر عمليات للتكلفة: {{ selectedCostForPayment()!.total_amount | number:'1.2-2' }} ج |
+          مدفوع: {{ selectedCostForPayment()!.total_paid | number:'1.2-2' }} ج |
+          <span [class]="getCostBalanceClass(selectedCostForPayment())">
+            ({{ formatBalance(selectedCostForPayment()!) }})
+          </span>
+        </strong>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>المبلغ المراد {{selectedCostForPayment()!.balance_type === 'PAYABLE' ? 'دفعه' : 'استلامه'}}
+          (جنيه)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="payment_amount" min="0.01">
+        <!-- [max]="selectedCostBalance()"> -->
+        <!-- <mat-hint>الحد الأقصى: {{ selectedCostBalance() | number:'1.2-2' }} جنيه</mat-hint> -->
+        <mat-error *ngIf="costForm.get('payment_amount')?.hasError('max')">
+          المبلغ لا يتجاوز المتبقي
+        </mat-error>
+      </mat-form-field>
+      }
+    </div>
+    }
+    @if (showPaymentSelector()) {
+
+    <div class="payment-metadata-section">
+      <app-payment-source-selector [amount]="paymentSourceAmount()" [personType]="currentPersonType()"
+        [personId]="currentPersonId()" [paymentLabel]="paymentLabel" [label]="label"
+        [isDebtPaymentOnly]="isDebtPaymentOnly()" [balance]="selectedCostBalance()" [parentForm]="costForm"
+        (selectionChange)="paymentSource.set($event)" />
+
+
+      <app-person-selector [parentForm]="costForm" typeControlName="paid_by_person_type"
+        idControlName="paid_by_person_id" [label]="personLabel">
+      </app-person-selector>
+    </div>
+
+    <!-- <div class="payment-metadata-section" required>
+          <app-payment-method-selector
+            [label]="selectedFarmBalanceType() !== 'RECEIVABLE' ? 'طريقة الدفع' : 'طريقة الاستلام'"
+            [parentForm]="loadingForm">
+          </app-payment-method-selector> -->
+
+    <!-- </div> -->
+
+    }
 
     <!-- Description -->
-    <mat-form-field>
+    @if (!isDebtPaymentOnly()) {
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>الوصف (اختياري)</mat-label>
-      <textarea matInput formControlName="description" rows="3"></textarea>
+      <textarea matInput formControlName="description" rows="2"></textarea>
     </mat-form-field>
+    }
+
     <div class="button-group">
-      <button mat-raised-button color="primary" type="submit" [disabled]="costForm.invalid || submitting()">
+      <button mat-raised-button color="primary" type="submit"
+        [disabled]="costForm.invalid || submitting() || !isPaymentSourceValid()">
         @if (submitting()) {
         <mat-spinner diameter="20"></mat-spinner>
         } @else {
-        تسجيل التكلفة
+        <ng-container>
+          <mat-icon>save</mat-icon>
+          {{ isDebtPaymentOnly() ? 'تسجيل الدفعة' : 'تسجيل التكلفة' }}
+        </ng-container>
         }
       </button>
       <button mat-button type="button" (click)="cancel()">
+        <mat-icon>cancel</mat-icon>
         إلغاء
       </button>
     </div>
-    <!-- <button mat-raised-button color="primary" type="submit" [disabled]="!costForm.valid">
-      تسجيل التكلفة
-    </button> -->
   </form>
 
   <!-- Costs List -->
   <div class="costs-list">
-    <h3>التكاليف المسجلة</h3>
-    <table mat-table [dataSource]="costs()">
+    <h3>التكاليف المسجلة للمهمة</h3>
+    <table mat-table [dataSource]="costs()" class="mat-elevation-z2">
 
       <ng-container matColumnDef="category">
         <th mat-header-cell *matHeaderCellDef>الفئة</th>
@@ -196,22 +304,54 @@
         </td>
       </ng-container>
 
-      <!-- ✅ VEHICLE COLUMN -->
       <ng-container matColumnDef="vehicle">
         <th mat-header-cell *matHeaderCellDef>المركبة</th>
         <td mat-cell *matCellDef="let cost">
-          <span *ngIf="cost.vehicle_id">{{ cost.vehicle?.name }}</span>
-          <span *ngIf="!cost.vehicle_id" class="shared-cost">لا توجد</span>
+          @if (cost.vehicle_id) {
+          {{ cost.vehicle?.name }}
+          } @else {
+          <span class="shared-cost">عامة</span>
+          }
         </td>
       </ng-container>
 
       <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef>المبلغ</th>
-        <td mat-cell *matCellDef="let cost">{{ cost.amount }} ج</td>
+        <th mat-header-cell *matHeaderCellDef>إجمالي المبلغ</th>
+        <td mat-cell *matCellDef="let cost">{{ cost.amount | number:'1.2-2' }} ج</td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="['category', 'vehicle', 'amount']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['category', 'vehicle', 'amount']"></tr>
+      <ng-container matColumnDef="paid">
+        <th mat-header-cell *matHeaderCellDef>المدفوع</th>
+        <td mat-cell *matCellDef="let cost">
+          <span [class.text-success]="cost.is_paid">
+            {{ cost.paid_amount | number:'1.2-2' }} ج
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>الحالة</th>
+        <td mat-cell *matCellDef="let cost">
+          @let status = getStatusInfo(cost);
+          <span class="status-chip" [class]="status.color">
+            {{ status.label }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+        <td mat-cell *matCellDef="let cost">
+          @if (!cost.is_paid || cost.remaining_amount > 0) {
+          <button mat-icon-button color="primary" (click)="openPaymentDialog(cost)" matTooltip="تسجيل دفعة">
+            <mat-icon>payments</mat-icon>
+          </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['category', 'vehicle', 'amount', 'paid', 'status', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['category', 'vehicle', 'amount', 'paid', 'status', 'actions']"></tr>
     </table>
   </div>
 </div>

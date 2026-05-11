@@ -854,8 +854,9 @@ private prepareDebtPosition(report: PeriodReportResponse): any[] {
     { 'البيان': 'إجمالي المدفوعات (لهم علينا)', 'القيمة': this.utils.formatCurrency(report.debt_position.farms.total_payables) + ' ج' },
     { 'البيان': 'صافي المركز', 'القيمة': this.utils.formatCurrency(report.debt_position.farms.net_position) + ' ج' },
     { 'البيان': 'نوع المركز', 'القيمة':
-      report.debt_position.farms.position_type === 'NET_RECEIVABLE' ? 'لنا عليهم' :
-      report.debt_position.farms.position_type === 'NET_PAYABLE' ? 'لهم علينا' : 'متوازن'
+      // Using balance_type from API - NO component calculation
+      report.debt_position.farms.balance_type === 'RECEIVABLE' ? 'لنا عليهم' :
+      report.debt_position.farms.balance_type === 'PAYABLE' ? 'لهم علينا' : 'متوازن'
     },
     { 'البيان': 'عدد المزارع ذات الأرصدة', 'القيمة': this.utils.formatNumber(report.debt_position.farms.farms_with_balance, 0) }
   );

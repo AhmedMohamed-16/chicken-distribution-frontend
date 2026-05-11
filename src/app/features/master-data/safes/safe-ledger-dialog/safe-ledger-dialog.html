@@ -1,0 +1,93 @@
+<h2 mat-dialog-title>كشف حساب: {{ safe.name }}</h2>
+
+<mat-dialog-content>
+  <div class="filters" [formGroup]="dateForm">
+    <mat-form-field appearance="outline">
+      <mat-label>من</mat-label>
+      <input matInput [matDatepicker]="pickerFrom" formControlName="from">
+      <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFrom></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>إلى</mat-label>
+      <input matInput [matDatepicker]="pickerTo" formControlName="to">
+      <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+      <mat-datepicker #pickerTo></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  @if (ledger()?.warning && !isLoading()) {
+  <div class="alert alert-danger">
+    <mat-icon>warning</mat-icon>
+    {{ ledger()?.warning }}
+  </div>
+  }
+
+  @if (ledger() && !isLoading()) {
+  <div class="balance-summary">
+    <div class="summary-item">
+      <span class="label">رصيد أول الفترة</span>
+      <span class="value">{{ formatCurrency(ledger()?.opening_balance) }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="label">رصيد آخر الفترة</span>
+      <span class="value">{{ formatCurrency(ledger()?.closing_balance) }}</span>
+    </div>
+    <div class="summary-item highlight">
+      <span class="label">الرصيد الدفتري</span>
+      <span class="value">{{ formatCurrency(ledger()?.recorded_balance) }}</span>
+    </div>
+  </div>
+  }
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+  } @else {
+  <div class="table-container">
+    <table mat-table [dataSource]="ledger()?.transactions || []">
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+        <!-- ✅ created_at مش date -->
+        <td mat-cell *matCellDef="let entry">{{ formatDate(entry.created_at) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>النوع</th>
+        <td mat-cell *matCellDef="let entry"> {{ entry.type | transactionTypeArabic }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="direction">
+        <th mat-header-cell *matHeaderCellDef>الاتجاه</th>
+        <td mat-cell *matCellDef="let entry">
+          <mat-chip [ngClass]="entry.direction === 'IN' ? 'chip-in' : 'chip-out'">
+            {{ entry.direction === 'IN' ? 'دخل' : 'خرج' }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+        <td mat-cell *matCellDef="let entry" [ngClass]="entry.direction === 'IN' ? 'text-green' : 'text-red'">
+          {{ formatCurrency(entry.amount) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="balance">
+        <th mat-header-cell *matHeaderCellDef>الرصيد</th>
+        <td mat-cell *matCellDef="let entry">{{ formatCurrency(entry.running_balance) }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>إغلاق</button>
+</mat-dialog-actions>

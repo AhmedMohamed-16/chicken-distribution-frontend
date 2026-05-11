@@ -1,0 +1,88 @@
+<div class="container">
+  <div class="header-section">
+    <div class="title-group">
+      <h1>إدارة الخزن والحسابات</h1>
+      <p>متابعة الأرصدة والتحويلات المالية</p>
+    </div>
+    <div class="action-group" *ngIf="isAdmin">
+      <mat-slide-toggle [formControl]="showInactiveControl" color="primary">
+        إظهار غير الفعالة
+      </mat-slide-toggle>
+      <button mat-raised-button color="accent" (click)="openTransfer()">
+        <mat-icon>swap_horiz</mat-icon>
+        تحويل بين الخزن
+      </button>
+      <button mat-raised-button color="primary" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+        إضافة خزنة / حساب
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+  } @else {
+  <div class="safes-grid">
+    @for (safe of safes(); track safe.id) {
+    @if (showInactiveControl.value || safe.is_active) {
+    <mat-card class="safe-card" [class.inactive-safe]="!safe.is_active">
+      <mat-card-header>
+        <div mat-card-avatar class="safe-avatar">
+          <mat-icon>{{ getSafeIcon(safe.type) }}</mat-icon>
+        </div>
+        <mat-card-title>{{ safe.name }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ getSafeTypeName(safe.type) }}
+          <span class="status-badge" *ngIf="!safe.is_active" matBadge matBadgeColor="warn" matBadgeSize="small">
+            غير نشطة
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="balance-section">
+          <span class="label">الرصيد الحالي</span>
+          <span class="amount" [ngClass]="getBalanceColorClass(safe.current_balance || 0)">
+            {{ formatCurrency(safe.current_balance || 0) }} <small>ج.م</small>
+          </span>
+        </div>
+
+        <div class="stats-section" *ngIf="safe.is_active">
+          <div class="stat-item in">
+            <mat-icon>arrow_downward</mat-icon>
+            <span>دخل اليوم: {{ formatCurrency(safe.total_in_today || 0) }}</span>
+          </div>
+          <div class="stat-item out">
+            <mat-icon>arrow_upward</mat-icon>
+            <span>خرج اليوم: {{ formatCurrency(safe.total_out_today || 0) }}</span>
+          </div>
+        </div>
+        <div *ngIf="!safe.is_active" class="inactive-message">
+          هذه الخزنة غير نشطة حالياً
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="openLedger(safe)">
+          <mat-icon>list_alt</mat-icon>
+          كشف الحساب
+        </button>
+        <button mat-icon-button color="primary" (click)="openEditDialog(safe)" *ngIf="isAdmin">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    }
+    }
+    @if (!showInactiveControl.value && safes().length === 0) {
+    <div class="empty-state">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <h3>لا توجد خزن نشطة</h3>
+      <p *ngIf="isAdmin">اضغط إظهار غير الفعالة أو أضف خزنة جديدة</p>
+    </div>
+    }
+  </div>
+  }
+</div>

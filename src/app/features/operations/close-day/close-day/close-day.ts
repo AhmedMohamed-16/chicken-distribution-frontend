@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import { OperationService } from '../../../../core/services/operation.service';
-import { DailyOperation, ProfitDistribution, VehicleOperation } from '../../../../core/models';
+import { DailyOperation, PartnerProfit, ProfitDistribution, VehicleBreakdown, VehicleOperation } from '../../../../core/models';
 import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog/confirmation-dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatChipsModule } from '@angular/material/chips';
@@ -396,12 +396,15 @@ export class CloseDay implements OnInit {
 //     this.router.navigate(['/daily-operations']);
 //   }
 // }
-currentOperation: DailyOperation | null = null;
+currentOperation = signal<DailyOperation | null>(null);
 profitDistribution = signal<ProfitDistribution | null>(null);
+partnerDistributions = signal<PartnerProfit[]>([]);
+vehicleBreakdown = signal<VehicleBreakdown[]>([]);
 operationId = signal<number>(0);
 summary = signal<boolean>(false);
 vehicleOperations: VehicleOperation[] = [];
-vehicleColumns = ['vehicle', 'status', 'sales', 'costs', 'revenue','actions'];
+vehicleColumns = ['vehicle', 'status', 'purchases', 'revenue', 'costs','actions'];
+partnerColumns = ['partner', 'base_share', 'vehicle_cost', 'final_profit'];
 isLoading = false;
 isClosing = false;
 
@@ -435,23 +438,29 @@ loadCurrentOperation() {
 
       if (!response.data) {
         this.snackBar.open('لم يتم العثور على عملية يومية نشطة', 'حسناً', { duration: 3000 });
-        this.currentOperation = null;
+        this.currentOperation.set(null);
         this.vehicleOperations = [];
         this.profitDistribution.set(null);
         this.summary.set(false);
         return;
       }
 
-      // ✅ Set currentOperation first
-      this.currentOperation = response.data;
-
-      // ✅ Check if day is closed AFTER setting currentOperation
-      if (this.isDayClosed() && response.data.profitDistribution) {
+      // ✅ Set currentOperation signal
+      this.currentOperation.set(response.data);
+      const op = response.data;
+      console.log("loadCurrentOperation", op);
+      
+      // ✅ Check if day is closed
+      if (this.isDayClosed() && op.profitDistribution) {
         console.log("isDayClosed", response.data.profitDistribution);
-        this.profitDistribution.set(response.data.profitDistribution); // ✅ Use .set()
+        this.profitDistribution.set(response.data.profitDistribution);
+        this.partnerDistributions.set(response.data.partnerDistributions || []);
+        this.vehicleBreakdown.set(response.data.vehicleBreakdown || []);
         this.summary.set(true);
       } else {
         this.profitDistribution.set(null);
+        this.partnerDistributions.set([]);
+        this.vehicleBreakdown.set([]);
         this.summary.set(false);
       }
 
@@ -463,6 +472,7 @@ loadCurrentOperation() {
         sales_count: vo.sale_transactions?.length || 0,
         costs_count: vo.daily_costs?.length || 0,
         total_revenue: this.calculateVehicleRevenue(vo),
+        total_purchases: this.calculateVehiclePurchase(vo),
         total_costs: this.calculateVehicleCosts(vo),
       }));
 
@@ -489,6 +499,16 @@ private calculateVehicleRevenue(vehicleOp: any): number {
     0
   );
 }
+private calculateVehiclePurchase(vehicleOp: any): number {
+  console.log("calculateVehiclePurchase",vehicleOp);
+  
+  if (!vehicleOp.farm_transactions) return 0;
+
+  return vehicleOp.farm_transactions.reduce(
+    (sum: number, purchase: any) => sum + Number(purchase.total_amount || 0),
+    0
+  );
+}
 
 
 /**
@@ -497,7 +517,7 @@ private calculateVehicleRevenue(vehicleOp: any): number {
 private calculateVehicleCosts(vehicleOp: any): number {
   if (!vehicleOp.daily_costs) return 0;
   return vehicleOp.daily_costs.reduce(
-    (sum: number, cost: any) => sum + (cost.amount || 0),
+    (sum: number, cost: any) => sum + (parseFloat(cost.amount) || 0),
     0
   );
 }
@@ -508,8 +528,10 @@ private calculateVehicleCosts(vehicleOp: any): number {
  */
 totalRevenue = computed(() => {
   const pd = this.profitDistribution();
+  // console.log("this.profitDistribution()",this.profitDistribution());
+  
   if (!pd) return 0;
-  return Number((pd as any).totalRevenue || (pd as any).total_revenue || 0);
+  return Number((pd as any).total_revenue || (pd as any).totalRevenue || 0);
 });
 
 /**
@@ -519,7 +541,7 @@ totalRevenue = computed(() => {
 totalPurchases = computed(() => {
   const pd = this.profitDistribution();
   if (!pd) return 0;
-  return Number((pd as any).totalPurchases || (pd as any).total_purchases || 0);
+  return Number( (pd as any).total_purchases || (pd as any).totalPurchases || 0);
 });
 
 /**
@@ -540,25 +562,63 @@ private calculateGeneralTransportLosses(vehicleOps: any[]): number {
 totalCosts = computed(() => {
   const pd = this.profitDistribution() as any;
   if (!pd) return 0;
-  return Number(pd.totalCosts);
+  return Number(pd.total_costs || pd.totalCosts || 0);
 });
 
 totalLosses= computed(() => {
   const pd = this.profitDistribution() as any;
   if (!pd) return 0;
-  return Number(pd.totalLosses);
+  return Number(pd.total_losses || pd.totalLosses || 0);
 });
 lossesWithFarm= computed(() => {
   const pd = this.profitDistribution() as any;
   if (!pd) return 0;
-  return Number(pd.lossesWithFarm );
+  return Number(pd.losses_with_farm || pd.lossesWithFarm || 0);
 });
 lossesWithoutFarm= computed(() => {
   const pd = this.profitDistribution() as any;
   if (!pd) return 0;
-  return Number(pd.lossesWithoutFarm);
+  return Number(pd.losses_without_farm || pd.lossesWithoutFarm || 0);
 });
 
+saleLosses = computed(() => {
+  const pd = this.profitDistribution() as any;
+  if (!pd) return 0;
+  return Number(pd.sale_losses || pd.saleLosses || 0);
+});
+
+transportOnlyLosses = computed(() => {
+  const pd = this.profitDistribution() as any;
+  if (!pd) return 0;
+  return Number(pd.transport_losses || pd.transportLosses || 0);
+});
+
+salesDiscount = computed(() => {
+  const pd = this.profitDistribution() as any;
+  console.log("salesDiscount",pd);
+  
+  return pd?.discounts?.totalSalesDiscount ?? 0;
+});
+
+purchaseDiscount = computed(() => {
+  const pd = this.profitDistribution() as any;
+  return pd?.discounts?.total_purchase_discount ?? 0;
+});
+
+totalDiscount = computed(() => {
+  const pd = this.profitDistribution() as any;
+  return pd?.discounts?.total ?? 0;
+});
+
+debtsPaid = computed(() => {
+  const pd = this.profitDistribution() as any;
+  return pd?.debts_paid ?? null;
+});
+
+debtsReceived = computed(() => {
+  const pd = this.profitDistribution() as any;
+  return pd?.debts_received ?? null;
+});
 /**
  * ✅ COMPUTED: Net Profit from profit distribution
  * Supports both camelCase (netProfit) and snake_case (net_profit)
@@ -573,9 +633,8 @@ netProfit = computed(() => {
  * Check if current operation is closed
  */
 isDayClosed(): boolean {
-  console.log("this.currentOperation?.status",this.currentOperation?.status);
-
-  return this.currentOperation?.status === 'CLOSED';
+  const op = this.currentOperation();
+  return op?.status === 'CLOSED';
 }
 
 /**
@@ -687,33 +746,25 @@ closeDay() {
  */
 private performCloseDay() {
   this.isClosing = true;
+  const opId = this.currentOperation()?.id;
+  if (!opId) return;
 
-  this.dailyOpService.closeDay(this.currentOperation!.id).subscribe({
+  this.dailyOpService.closeDay(opId).subscribe({
     next: (response: any) => {
       this.isClosing = false;
-      console.log("response", response);
-
-      // ✅ CRITICAL FIX: Use .set() instead of direct assignment
-      if (response.data?.profitDistribution) {
-        this.profitDistribution.set(response.data.profitDistribution);
-        this.summary.set(true);
-
-        // Update current operation status
-        if (this.currentOperation) {
-          this.currentOperation.status = 'CLOSED';
-        }
-
-        this.snackBar.open(
-          `تم إغلاق العملية اليومية بنجاح! صافي الربح: ${this.netProfit()} جنيه`,
-          'حسناً',
-          { duration: 5000 }
-        );
-      }
+      const netProf = response.data?.profitDistribution?.net_profit || response.data?.profitDistribution?.netProfit || this.netProfit();
+      
+      this.snackBar.open(
+        `تم إغلاق العملية اليومية بنجاح! صافي الربح: ${this.formatNumber(netProf)} جنيه`,
+        'حسناً', { duration: 5000 }
+      );
+      
+      // Reload the current operation to ensure all data is formatted properly from the fetch endpoint, covering any structure mismatch
+      this.loadCurrentOperation();
     },
     error: (error) => {
       this.isClosing = false;
-      const errorMessage = error.error?.message || 'خطأ في إغلاق اليوم';
-      this.snackBar.open(errorMessage, 'حسناً', { duration: 5000 });
+      this.snackBar.open(error.error?.message || 'خطأ في إغلاق اليوم', 'حسناً', { duration: 5000 });
       this.loadCurrentOperation();
     }
   });

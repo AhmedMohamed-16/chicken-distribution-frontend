@@ -1,0 +1,272 @@
+/* =========================================================
+   ROOT DIALOG
+========================================================= */
+
+.dialog-content {
+  direction: rtl;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  width: min(100%, 34rem);
+  max-width: 95vw;
+  max-height: 90vh;
+
+  padding: clamp(1rem, 3vw, 1.5rem);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  text-align: center;
+}
+
+.dialog-title {
+  margin: 0;
+
+  color: #2e7d32;
+
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dialog-subtitle {
+  margin: 0;
+
+  color: #616161;
+
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  padding: clamp(1rem, 2.5vw, 1.25rem);
+
+  border: 2px solid #2e7d32;
+  border-radius: 1rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      #c8e6c9 0%,
+      #e8f5e9 100%
+    );
+
+  box-shadow:
+    0 4px 12px rgba(46, 125, 50, 0.12);
+}
+
+.summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.summary-label {
+  color: #424242;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #1b5e20;
+
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.summary-row.highlight {
+  padding-top: 0.75rem;
+
+  border-top: 1px dashed rgba(46, 125, 50, 0.3);
+}
+
+.summary-amount {
+  color: #2e7d32;
+
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 800;
+
+  word-break: break-word;
+}
+
+.summary-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.75rem;
+
+  border-radius: 0.75rem;
+
+  background: rgba(255, 255, 255, 0.6);
+
+  color: #1b5e20;
+
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.summary-note mat-icon {
+  flex-shrink: 0;
+
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.reinvest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.dialog-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+
+  padding-top: 1rem;
+  margin-top: 0.25rem;
+
+  border-top: 1px solid #e0e0e0;
+}
+
+.dialog-actions button {
+  width: 100%;
+  min-height: 48px;
+
+  border-radius: 0.9rem;
+
+  font-weight: 600;
+}
+
+.primary-btn {
+  --mdc-protected-button-container-shape: 18px;
+
+  box-shadow:
+    0 4px 10px rgba(46, 125, 50, 0.25);
+}
+
+.primary-btn mat-icon {
+  margin-inline-end: 0.35rem;
+}
+
+.secondary-btn {
+  border-radius: 0.9rem;
+}
+
+/* =========================================================
+   MATERIAL FORM IMPROVEMENTS
+========================================================= */
+
+mat-form-field {
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+/* =========================================================
+   SNACKBAR
+========================================================= */
+
+.success-snackbar {
+  --mdc-snackbar-container-color: #2e7d32;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 768px) {
+
+  .dialog-content {
+    gap: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 1rem;
+  }
+
+  .dialog-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .dialog-actions button {
+    width: auto;
+    min-width: 160px;
+  }
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 1024px) {
+
+  .dialog-content {
+    width: min(34rem, 90vw);
+  }
+
+  .summary-card {
+    padding: 1.5rem;
+  }
+
+  .dialog-actions {
+    padding-top: 1.25rem;
+  }
+}

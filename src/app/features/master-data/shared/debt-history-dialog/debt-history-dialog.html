@@ -101,10 +101,30 @@
   </div>
   } @else {
 
-  <mat-chip color="warn" style="margin-bottom: 12px">
-    الدين الحالي: {{formatCurrency( currentDebt())  }} ج
-  </mat-chip>
+  <div class="filters-container">
+    <div class="date-filter">
+      <label>من:</label>
+      <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); onDateChange()">
+    </div>
+    <div class="date-filter">
+      <label>إلى:</label>
+      <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event); onDateChange()">
+    </div>
+    <div class="summary-chips">
+      <mat-chip color="primary">
+        رصيد بداية المدة: {{ formatCurrency(openingBalance()) }} ج
+      </mat-chip>
+      <mat-chip color="warn">
+        الرصيد الحالي: {{ formatCurrency(currentDebt()) }} ج
+      </mat-chip>
+    </div>
+  </div>
 
+  @if (loading()) {
+  <div class="text-center p-4">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+  } @else {
   <div class="table-container">
     <table mat-table [dataSource]="dataSource()" class="full-width">
 
@@ -112,15 +132,15 @@
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef>التاريخ</th>
         <td mat-cell *matCellDef="let row">
-          {{ formatDateTime(row.date )  }}
+          {{ formatDateTime(row.date) }}
         </td>
       </ng-container>
 
-      <!-- إجمالي البيع -->
+      <!-- إجمالي المبلغ -->
       <ng-container matColumnDef="total_amount">
-        <th mat-header-cell *matHeaderCellDef>إجمالي الشراء من {{this.data.entityType !=='buyer'? 'المزرعه':'عندنا'}}</th>
+        <th mat-header-cell *matHeaderCellDef>إجمالي {{this.data.entityType === 'buyer' ? 'البيع' : 'الشراء'}}</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.total_amount !== '-' ? (formatCurrency(row.total_amount )) + ' ج' : '-' }}
+          {{ row.total_amount !== '-' ? (formatCurrency(row.total_amount) + ' ج') : '-' }}
         </td>
       </ng-container>
 
@@ -128,23 +148,39 @@
       <ng-container matColumnDef="paid_amount">
         <th mat-header-cell *matHeaderCellDef>المبلغ المدفوع</th>
         <td mat-cell *matCellDef="let row">
-          {{formatCurrency( row.paid_amount ) }} ج
+          {{ formatCurrency(row.paid_amount) }} ج
         </td>
       </ng-container>
 
-      <!-- الدين -->
+      <!-- الرصيد بعد -->
       <ng-container matColumnDef="debt_after">
-        <th mat-header-cell *matHeaderCellDef>الدين الحالي</th>
+        <th mat-header-cell *matHeaderCellDef>الرصيد بعد</th>
         <td mat-cell *matCellDef="let row">
-          {{ formatCurrency(row.debt_after ) }} ج
+          <span [ngClass]="row.debt_after > 0 ? 'text-danger' : (row.debt_after < 0 ? 'text-success' : '')">
+            {{ formatCurrency(row.debt_after) }} ج
+          </span>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
+      <!-- Opening Balance Row -->
+      @if (dataSource().length > 0) {
+      <tr class="opening-balance-row">
+        <td colspan="3" style="text-align: left; font-weight: bold; padding: 8px;">رصيد بداية المدة المعروضة:</td>
+        <td style="font-weight: bold; padding: 8px;">{{ formatCurrency(openingBalance()) }} ج</td>
+      </tr>
+      }
     </table>
+
+    @if (dataSource().length === 0) {
+    <div class="no-data text-center p-4">
+      لا توجد معاملات في هذه الفترة
+    </div>
+    }
   </div>
+  }
   }
 </mat-dialog-content>
 

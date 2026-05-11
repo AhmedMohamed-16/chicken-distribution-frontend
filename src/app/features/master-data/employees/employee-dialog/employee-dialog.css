@@ -1,0 +1,32 @@
+.employee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  width: calc(50% - 5px);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.status-toggle {
+  margin-top: 10px;
+  padding: 10px 0;
+}
+
+[dir='rtl'] .half-width:first-child {
+  margin-left: 10px;
+}
+
+[dir='rtl'] .half-width:last-child {
+  margin-left: 0;
+}

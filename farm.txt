@@ -1,0 +1,2471 @@
+// src/app/features/daily-operations/farm-loading/farm-loading.component.ts
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
+
+import { OperationService } from '../../../../core/services/operation.service';
+import { FarmService } from '../../../../core/services/farm.service';
+import { ChickenTypeService } from '../../../../core/services/chicken-type.service';
+import {
+  ChickenType,
+  Farm,
+  Vehicle,
+  FarmLoadingRequest,
+  BalanceInfo,
+} from '../../../../core/models';
+import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { PaymentMethodSelectorComponent } from '../../../../shared/components/payment-method-selector/payment-method-selector.component';
+import { PersonSelectorComponent } from '../../../../shared/components/person-selector/person-selector.component';
+
+@Component({
+  selector: 'app-farm-loading',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    PaymentMethodSelectorComponent,
+    PersonSelectorComponent
+  ],
+  templateUrl: './farm-loading.html',
+  styleUrl: './farm-loading.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+  export class FarmLoading implements OnInit {
+    private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private operationService = inject(OperationService);
+    private farmService = inject(FarmService);
+    private chickenTypeService = inject(ChickenTypeService);
+    private snackBar = inject(MatSnackBar);
+    private utils = inject(ReportUtilitiesService);
+
+    constructor() {
+      effect(() => {
+        console.log('Balance:', this.selectedFarmBalance());
+        console.log('Total paid:', this.formValue().total_paid);
+        console.log('Debt only:', this.isDebtPaymentOnly());
+        console.log('Final remaining:', this.finalRemainingAmount());
+        console.log('Projected balance:', this.projectedBalance());
+      });
+      this.loadingForm.get('payment_method')?.valueChanges.subscribe(value => {
+    const safeControl = this.loadingForm.get('safe_id');
+
+        if (value) {
+          safeControl?.setValidators([Validators.required]);
+        } else {
+          safeControl?.clearValidators();
+        }
+
+        safeControl?.updateValueAndValidity();
+      });
+    }
+
+    // ============================================
+    // SIGNALS
+    // ============================================
+    loading = signal(false);
+    submitting = signal(false);
+    farms = signal<Farm[]>([]);
+    chickenTypes = signal<ChickenType[]>([]);
+    operationId = signal<number>(0);
+    activeVehicles = signal<Vehicle[]>([]);
+
+    // Farm balance tracking
+    selectedFarmBalance = signal<number>(0);
+    selectedFarmBalanceType = signal<'RECEIVABLE' | 'PAYABLE' | 'SETTLED'>('SETTLED');
+
+    // ============================================
+    // FORM
+    // ============================================
+    loadingForm = this.fb.nonNullable.group({
+      // Payment mode toggle
+      is_debt_payment_only: [false],
+
+      // Loading fields (required for normal mode)
+      vehicle_id: [null as number | null],
+      chicken_type_id: [null as number | null],
+      empty_vehicle_weight: [0],
+      cage_count: [0],
+      cage_weight_per_unit: [15],
+      loaded_vehicle_weight: [0],
+      price_per_kg: [0],
+
+      // NEW: unified payment input (replaces paid_amount)
+      total_paid: [0, [Validators.min(0)]],
+
+      // NEW: discount
+      discount_amount: [0, [Validators.min(0)]],
+
+      // Farm selection (always required)
+      farm_id: [null as number | null, Validators.required],
+
+      // Old balance payment (debt-only mode)
+      old_balance_paid: [0, [Validators.min(0)]],
+
+      // NEW: payment metadata (optional)
+      payment_method: ['CASH', Validators.required],
+      safe_id: [null as number | null],
+      person_type: [null as string | null, Validators.required],
+      paid_by_person_id: [null as number | null]
+    });
+
+
+    // ============================================
+    // FORM VALUE SIGNAL
+    // ============================================
+    formValue = toSignal(
+      this.loadingForm.valueChanges.pipe(
+        startWith(this.loadingForm.getRawValue())
+      ),
+      { initialValue: this.loadingForm.getRawValue() }
+    );
+
+    // ============================================
+    // COMPUTED: MODE
+    // ============================================
+    isDebtPaymentOnly = computed(() => {
+      return !!this.formValue().is_debt_payment_only;
+    });
+
+    // ============================================
+    // COMPUTED: WEIGHT & PRICING
+    // ============================================
+    netWeight = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const form = this.formValue();
+      const empty = form.empty_vehicle_weight ?? 0;
+      const loaded = form.loaded_vehicle_weight ?? 0;
+      const cageCount = form.cage_count ?? 0;
+      const cageWeight = form.cage_weight_per_unit ?? 0;
+      return Math.max(0, loaded - empty - (cageCount * cageWeight));
+    });
+
+    /** Subtotal before discount */
+    subtotalAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const price = this.formValue().price_per_kg ?? 0;
+      return this.netWeight() * price;
+    });
+
+    discountAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.formValue().discount_amount ?? 0);
+    });
+
+    /** Total after discount */
+    totalAmount = computed(() => {
+      return Math.max(0, this.subtotalAmount() - this.discountAmount());
+    });
+
+    // ============================================
+    // COMPUTED: PAYMENT SPLIT
+    // ============================================
+
+    /** How much of total_paid covers this invoice */
+    paidForTransaction = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const totalPaid = this.formValue().total_paid ?? 0;
+      // return Math.min(totalPaid, this.totalAmount());
+      return  totalPaid ;
+    });
+
+    /** Surplus beyond invoice total — goes toward old balance */
+  surplusAppliedToDebt = computed(() => {
+    if (this.isDebtPaymentOnly()) return 0;
+
+    const totalPaid = this.formValue().total_paid ?? 0;
+    const surplus = Math.max(0, totalPaid - this.totalAmount());
+    const farmBalance = this.selectedFarmBalance();
+
+    // ✅ لو المزرعة مدينة لنا (RECEIVABLE) أو رصيد صفر:
+    // الزيادة كلها تتحسب — مفيش cap، لأنها فلوس دفعناها زيادة
+    if (farmBalance >= 0) return surplus;
+
+    // ✅ لو نحن مدينين للمزرعة (PAYABLE):
+    // الزيادة تقدر تسدد جزء من دينا عليها بس، مش أكتر من الدين
+    return Math.min(surplus, Math.abs(farmBalance));
+  });
+
+
+    /** Remaining on the invoice before credit auto-application */
+    private rawRemainingAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.totalAmount() - this.paidForTransaction());
+    });
+
+    /**
+     * running balance after old_balance_paid adjustment (debt-only uses old_balance_paid directly).
+     * For normal mode it uses surplusAppliedToDebt.
+     */
+    private runningBalance = computed(() => {
+      const current = this.selectedFarmBalance();
+      if (this.isDebtPaymentOnly()) {
+        const paid = this.formValue().old_balance_paid ?? 0;
+        if (current > 0) return current - paid;
+        if (current < 0) return current + paid;
+        return 0;
+      }
+      const surplus = this.surplusAppliedToDebt();
+      return current + surplus;
+
+    });
+
+    /** Credit auto-applied from RECEIVABLE balance to offset remaining debt */
+    usedCreditDisplay = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      const rb = this.runningBalance();
+      const remaining = this.rawRemainingAmount();
+      if (rb > 0 && remaining > 0) {
+        return Math.min(rb, remaining);
+      }
+      return 0;
+    });
+
+    /** Final remaining after credit auto-application */
+    finalRemainingAmount = computed(() => {
+      if (this.isDebtPaymentOnly()) return 0;
+      return Math.max(0, this.rawRemainingAmount() - this.usedCreditDisplay());
+    });
+
+    // ============================================
+    // COMPUTED: PROJECTED BALANCE
+    // ============================================
+  //  projectedBalance = computed(() => {
+  //   const currentBalance = this.selectedFarmBalance();
+
+  //   if (this.isDebtPaymentOnly()) {
+  //     return this.runningBalance();
+  //   }
+
+  //   const oldBalancePaid = this.surplusAppliedToDebt(); // ✅ بعد الفيكس، دايمًا 0 لو balance < 0
+  //   const totalPaid = this.formValue().total_paid ?? 0;
+  //   const rawSurplus = Math.max(0, totalPaid - this.totalAmount());
+  //   const remaining = this.rawRemainingAmount();
+
+  //   let debtPaymentImpact = 0;
+  //   if (oldBalancePaid > 0) {
+  //     // ✅ بعد الفيكس، هنا بس هيدخل لو balance > 0 (RECEIVABLE)
+  //     debtPaymentImpact = -oldBalancePaid; // يقلل ما تدين لنا المزرعة
+  //   }
+
+  //   const rb = currentBalance + debtPaymentImpact;
+  //   const usedCredit = rb > 0 && remaining > 0 ? Math.min(rb, remaining) : 0;
+  //   const finalRemaining = remaining - usedCredit;
+
+  //   const netSurplus = Math.max(0, rawSurplus - oldBalancePaid);
+
+  //   return currentBalance + debtPaymentImpact - usedCredit - finalRemaining + netSurplus;
+  // });
+
+  projectedBalance = computed(() => {
+    const currentBalance = this.selectedFarmBalance();
+
+    if (this.isDebtPaymentOnly()) {
+      return this.runningBalance();
+    }
+    const totalPaid = this.formValue().total_paid ?? 0;
+    const surplus = Math.max(0, totalPaid - this.totalAmount());
+
+    const remaining = this.rawRemainingAmount();
+
+    // ✅ الزيادة دايمًا بتزيد ما تدين لنا المزرعة (أو بتقلل دينا عليها)
+    const afterSurplus = currentBalance + surplus;
+
+    // لو الرصيد موجب والفاتورة فيها متبقي → استخدم الرصيد تلقائيًا
+    const usedCredit = afterSurplus > 0 && remaining > 0
+      ? Math.min(afterSurplus, remaining)
+      : 0;
+
+    const finalRemaining = remaining - usedCredit;
+
+    // المتبقي من الفاتورة → يزيد دينا على المزرعة (يقلل الرصيد)
+    return afterSurplus - usedCredit - finalRemaining;
+  });
+
+    // ============================================
+    // COMPUTED: DISPLAY CONDITIONS
+    // ============================================
+    shouldShowPaymentField = computed(() => {
+      return +this.selectedFarmBalance() !== 0;
+    });
+
+    maxPaymentAmount = computed(() => {
+      return Math.abs(this.selectedFarmBalance());
+    });
+
+    isPaymentRequired = computed(() => {
+      return this.isDebtPaymentOnly() && this.selectedFarmBalance() !== 0;
+    });
+
+    creditAutoApplied = computed(() => {
+      return this.usedCreditDisplay() > 0;
+    });
+
+    // ============================================
+    // UTILITIES
+    // ============================================
+    formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
+    formatNumber = (num: number | undefined | null | string, decimals?: number) => this.utils.formatNumber(num, decimals);
+    formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
+    formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
+
+    // ============================================
+    // LIFECYCLE
+    // ============================================
+    ngOnInit(): void {
+      this.operationId.set(+this.route.snapshot.params['id']);
+      this.loadData();
+      this.loadingForm.get('farm_id')?.valueChanges.subscribe(() => {
+        this.onFarmChange();
+      });
+    }
+
+    ngAfterViewInit(): void {
+      this.loadingForm.get('is_debt_payment_only')?.valueChanges.subscribe(isDebtOnly => {
+        this.updateFormValidation(isDebtOnly);
+      });
+    }
+
+    // ============================================
+    // FORM VALIDATION UPDATE
+    // ============================================
+    updateFormValidation(isDebtOnly: boolean): void {
+      const vehicleControl = this.loadingForm.get('vehicle_id');
+      const chickenTypeControl = this.loadingForm.get('chicken_type_id');
+      const priceControl = this.loadingForm.get('price_per_kg');
+      const paymentControl = this.loadingForm.get('old_balance_paid');
+      const discountControl = this.loadingForm.get('discount_amount');
+
+      if (isDebtOnly) {
+        vehicleControl?.clearValidators();
+        chickenTypeControl?.clearValidators();
+        priceControl?.clearValidators();
+        discountControl?.clearValidators();
+        paymentControl?.setValidators([Validators.required, Validators.min(0.01)]);
+
+        this.loadingForm.patchValue({
+          vehicle_id: null,
+          chicken_type_id: null,
+          empty_vehicle_weight: 0,
+          cage_count: 0,
+          cage_weight_per_unit: 15,
+          loaded_vehicle_weight: 0,
+          price_per_kg: 0,
+          total_paid: 0,
+          discount_amount: 0
+        });
+      } else {
+        vehicleControl?.setValidators([Validators.required]);
+        chickenTypeControl?.setValidators([Validators.required]);
+        priceControl?.setValidators([Validators.required, Validators.min(0)]);
+        discountControl?.setValidators([Validators.min(0)]);
+        paymentControl?.setValidators([Validators.min(0)]);
+      }
+
+      vehicleControl?.updateValueAndValidity();
+      chickenTypeControl?.updateValueAndValidity();
+      priceControl?.updateValueAndValidity();
+      paymentControl?.updateValueAndValidity();
+      discountControl?.updateValueAndValidity();
+    }
+
+    // ============================================
+    // DATA LOADING
+    // ============================================
+    loadData(): void {
+      this.loading.set(true);
+
+      Promise.all([
+        this.farmService.getAll().toPromise(),
+        this.chickenTypeService.getAll().toPromise(),
+        this.operationService.getOperation(this.operationId()).toPromise()
+      ]).then(([farmsRes, typesRes, operationRes]: unknown[]) => {
+        const farms = farmsRes as { data?: Farm[] };
+        const types = typesRes as { data?: ChickenType[] };
+        const operation = operationRes as { data?: { vehicle_operations?: { status: string; vehicle: Vehicle }[] } };
+
+        this.farms.set(farms?.data || []);
+        this.chickenTypes.set(types?.data || []);
+
+        if (operation?.data) {
+          const vehicles = operation.data.vehicle_operations
+            ?.filter(vo => vo.status === 'ACTIVE')
+            ?.map(vo => vo.vehicle) || [];
+          this.activeVehicles.set(vehicles);
+        }
+
+        this.loading.set(false);
+      }).catch((error) => {
+        console.error('Error loading data:', error);
+        this.snackBar.open('فشل تحميل البيانات', 'حسناً', { duration: 3000 });
+        this.loading.set(false);
+      });
+    }
+
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+    onVehicleChange(event: { value: number }): void {
+      console.log('Selected vehicle:', event.value);
+    }
+
+    onFarmChange(): void {
+      const farmId = this.loadingForm.get('farm_id')?.value;
+      if (farmId) {
+        const farm = this.farms().find(f => f.id === farmId);
+        if (farm) {
+          this.selectedFarmBalance.set(Number(farm.current_balance) || 0);
+
+          if (farm.current_balance > 0) {
+            this.selectedFarmBalanceType.set('RECEIVABLE');
+          } else if (farm.current_balance < 0) {
+            this.selectedFarmBalanceType.set('PAYABLE');
+          } else {
+            this.selectedFarmBalanceType.set('SETTLED');
+          }
+
+          this.loadingForm.patchValue({ old_balance_paid: 0 }, { emitEvent: true });
+        }
+      } else {
+        this.selectedFarmBalance.set(0);
+        this.selectedFarmBalanceType.set('SETTLED');
+      }
+    }
+
+    // ============================================
+    // FORM SUBMISSION
+    // ============================================
+    onSubmit(): void {
+      if (this.loadingForm.invalid) {
+        this.snackBar.open('يرجى ملء جميع الحقول المطلوبة', 'حسناً', { duration: 3000 });
+        return;
+      }
+
+      // Validate discount does not exceed subtotal
+      if (!this.isDebtPaymentOnly() && this.discountAmount() > this.subtotalAmount()) {
+        this.snackBar.open(
+          `الخصم (${this.formatCurrency(this.discountAmount())}) لا يمكن أن يتجاوز الإجمالي قبل الخصم (${this.formatCurrency(this.subtotalAmount())})`,
+          'حسناً',
+          { duration: 4000 }
+        );
+        return;
+      }
+
+      // Validate old balance payment in debt-only mode
+      const oldBalancePaid = this.loadingForm.get('old_balance_paid')?.value || 0;
+      const maxPayment = this.maxPaymentAmount();
+
+      // if (oldBalancePaid > maxPayment) {
+      //   this.snackBar.open(
+      //     `المبلغ المدفوع لا يمكن أن يتجاوز ${maxPayment.toFixed(2)} جنيه`,
+      //     'حسناً',
+      //     { duration: 3000 }
+      //   );
+      //   return;
+      // }
+
+      if (this.isDebtPaymentOnly() && oldBalancePaid === 0) {
+        this.snackBar.open('يرجى إدخال مبلغ الدفع', 'حسناً', { duration: 3000 });
+        return;
+      }
+
+      this.submitting.set(true);
+      const payload = this.buildPayload();
+
+      this.operationService.farmLoading(this.operationId(), payload).subscribe({
+        next: (result) => {
+          this.submitting.set(false);
+
+          const isDebtOnly = this.isDebtPaymentOnly();
+          let message = isDebtOnly
+            ? 'تم تسجيل الدفع بنجاح'
+            : 'تم تسجيل التحميل بنجاح';
+
+          if (result.data?.balance_info) {
+            const balanceInfo: BalanceInfo = result.data.balance_info;
+            message += `\n${balanceInfo.display_balance}`;
+
+            if (balanceInfo.direction_changed && balanceInfo.alert) {
+              this.snackBar.open(balanceInfo.alert, 'حسناً', {
+                duration: 5000,
+                panelClass: ['warning-snackbar']
+              });
+            }
+          }
+
+          this.snackBar.open(message, 'حسناً', { duration: 4000 });
+          this.router.navigate(['/operations/daily', this.operationId()]);
+        },
+        error: (error) => {
+          this.submitting.set(false);
+          console.error('Error recording farm loading:', error);
+          const errorMessage = error.error?.message || 'فشل تسجيل العملية';
+          this.snackBar.open(errorMessage, 'حسناً', { duration: 3000 });
+        }
+      });
+    }
+
+    buildPayload(): FarmLoadingRequest {
+      const formValue = this.loadingForm.getRawValue();
+
+      const paymentMetadata:any = {
+        payment_method: formValue.payment_method,
+        safe_id: formValue.safe_id,
+        person_type: formValue.person_type,
+      };
+
+      if (this.isDebtPaymentOnly()) {
+        if(this.selectedFarmBalance()>0){
+          paymentMetadata.received_by_person_id=formValue.paid_by_person_id || null
+        }else{
+          paymentMetadata.paid_by_person_id=formValue.paid_by_person_id || null
+        }
+        return {
+          farm_id: formValue.farm_id!,
+          old_balance_paid: formValue.old_balance_paid || 0,
+          is_debt_payment_only: true,
+          ...paymentMetadata,
+        };
+      } else {
+        return {
+          vehicle_id: formValue.vehicle_id!,
+          farm_id: formValue.farm_id!,
+          chicken_type_id: formValue.chicken_type_id!,
+          empty_vehicle_weight: formValue.empty_vehicle_weight || 0,
+          loaded_vehicle_weight: formValue.loaded_vehicle_weight || 0,
+          cage_count: formValue.cage_count || 0,
+          cage_weight_per_unit: formValue.cage_weight_per_unit || 15,
+          price_per_kg: formValue.price_per_kg || 0,
+          discount_amount: this.discountAmount(),
+          paid_amount: this.paidForTransaction(),
+          old_balance_paid: this.surplusAppliedToDebt() ,
+          is_debt_payment_only: false,
+          ...paymentMetadata,
+          paid_by_person_id: formValue.paid_by_person_id || null
+        };
+      }
+    }
+
+    cancel(): void {
+      this.router.navigate(['/operations/daily', this.operationId()]);
+    }
+
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+    getBalanceTypeClass(farm: Farm): string {
+      return this.farmService.getBalanceColorClass(farm);
+    }
+
+    formatBalance(farm: Farm): string {
+      return this.farmService.formatBalance(farm);
+    }
+
+    getBalanceWarningMessage(): string {
+      const balance = this.selectedFarmBalance();
+      const absBalance = Math.abs(balance);
+
+      if (balance > 0) {
+        return `⚠️ المزرعة مدينة لنا بمبلغ ${absBalance.toFixed(2)} جنيه`;
+      } else if (balance < 0) {
+        return `⚠️ نحن مدينون للمزرعة بمبلغ ${absBalance.toFixed(2)} جنيه`;
+      }
+      return '';
+    }
+
+    getOldBalancePaymentLabel(): string {
+      const balanceType = this.selectedFarmBalanceType();
+
+      if (balanceType === 'RECEIVABLE') {
+        return 'استلام من المزرعة (تسديد دين سابق)';
+      }
+      else if (balanceType === 'PAYABLE') {
+        return 'دفع للمزرعة (تسديد دين سابق)';
+      }
+      return 'دفع';
+    }
+
+    getOldBalancePaymentHint(): string {
+      const maxAmount = this.maxPaymentAmount();
+      const balanceType = this.selectedFarmBalanceType();
+
+      if (balanceType === 'RECEIVABLE') {
+        return `الحد الأقصى للاستلام: ${maxAmount.toFixed(2)} جنيه`;
+      } else if (balanceType === 'PAYABLE') {
+        return `الحد الأقصى للدفع: ${maxAmount.toFixed(2)} جنيه`;
+      }
+      return '';
+    }
+
+    getSubmitButtonText(): string {
+      return this.isDebtPaymentOnly() ? 'تسجيل الدفع' : 'تسجيل التحميل';
+    }
+
+    preventNegative(event: KeyboardEvent) {
+  if (event.key === '-' || event.key === '+') {
+    event.preventDefault();
+  }
+  }
+
+  preventPasteNegative(event: ClipboardEvent) {
+    const pasted = event.clipboardData?.getData('text') || '';
+    if (pasted.includes('-')) {
+      event.preventDefault();
+    }
+  }
+  }
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        {{ isDebtPaymentOnly() ? 'دفع/استلام للمزرعة' : 'تحميل من المزرعة' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isDebtPaymentOnly() ? 'تسديد ديون سابقة' : 'تسجيل عملية تحميل الدواجن' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
+      <form [formGroup]="loadingForm" (ngSubmit)="onSubmit()">
+
+        <!-- Payment Mode Toggle -->
+        <div class="mode-toggle-section">
+          <mat-slide-toggle formControlName="is_debt_payment_only" color="primary">
+            <strong>دفع ديون فقط (بدون تحميل)</strong>
+          </mat-slide-toggle>
+          <p class="mode-hint">
+            {{ isDebtPaymentOnly()
+            ? 'سيتم تسجيل دفع/استلام فقط بدون عملية تحميل'
+            : 'تسجيل عملية تحميل عادية مع إمكانية دفع ديون سابقة' }}
+          </p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Farm Selection (Always Required) -->
+        <div class="form-section">
+          <h3>بيانات المزرعة</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المزرعة</mat-label>
+            <mat-select formControlName="farm_id" (selectionChange)="onFarmChange()">
+              @for (farm of farms(); track farm.id) {
+              <mat-option [value]="farm.id">
+                {{ farm.name }}
+                @if (farm.current_balance !== 0) {
+                <span [class]="getBalanceTypeClass(farm)">
+                  ({{ formatBalance(farm) }})
+                </span>
+                }
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>المزرعة مطلوبة</mat-error>
+          </mat-form-field>
+
+          <!-- Balance Warning -->
+          @if (shouldShowPaymentField()) {
+          <div class="debt-warning">
+            <mat-icon>info</mat-icon>
+            <strong>{{ getBalanceWarningMessage() }}</strong>
+          </div>
+          }
+        </div>
+
+        <!-- Loading Section (Hidden in Debt-Only Mode) -->
+        @if (!isDebtPaymentOnly()) {
+        <mat-divider></mat-divider>
+
+        <!-- Vehicle Selection -->
+        <div class="form-section">
+          <h3>المركبة</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>اختر المركبة</mat-label>
+            <mat-select formControlName="vehicle_id" (selectionChange)="onVehicleChange($event)">
+              @for (vehicle of activeVehicles(); track vehicle.id) {
+              <mat-option [value]="vehicle.id">
+                <mat-icon>local_shipping</mat-icon>
+                {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number) }}
+                <span class="vehicle-inventory-hint">
+                  (وزنها: {{ formatNumber(vehicle.empty_weight, 2) }} كجم)
+                </span>
+              </mat-option>
+              }
+              @empty {
+              <mat-option disabled>لا توجد مركبات نشطة</mat-option>
+              }
+            </mat-select>
+            <mat-error>اختيار المركبة مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Chicken Type -->
+        <div class="form-section">
+          <h3>نوع الفراخ</h3>
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>نوع الفراخ</mat-label>
+            <mat-select formControlName="chicken_type_id">
+              @for (type of chickenTypes(); track type.id) {
+              <mat-option [value]="type.id">{{ type.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>نوع الفراخ مطلوب</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Weighing Section -->
+        <div class="form-section">
+          <h3>الوزن</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية فاضية (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="empty_vehicle_weight">
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>عدد الأقفاص</mat-label>
+              <input matInput type="number" formControlName="cage_count">
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن القفص الواحد (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="cage_weight_per_unit">
+            </mat-form-field>
+
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>وزن العربية مليانة (كجم)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="loaded_vehicle_weight">
+            </mat-form-field>
+          </div>
+
+          <!-- 1. Net chicken weight -->
+          <div class="calculated-value success">
+            <mat-icon>scale</mat-icon>
+            <strong>صافي وزن الفراخ: {{ formatNumber(netWeight(), 2) }} كجم</strong>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Pricing & Payment Section -->
+        <div class="form-section">
+          <h3>التسعير والدفع</h3>
+          <div class="form-row">
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>سعر الكيلو (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+              <mat-error>السعر مطلوب</mat-error>
+            </mat-form-field>
+
+            <!-- NEW: Discount field -->
+            <mat-form-field class="form-field" appearance="outline">
+              <mat-label>خصم (اختياري)</mat-label>
+              <input matInput type="number" step="0.01" formControlName="discount_amount" min="0">
+              <mat-hint>اختياري — يُطرح من الإجمالي</mat-hint>
+              <mat-error>قيمة الخصم غير صحيحة</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- 2. Subtotal before discount -->
+          <div class="calculated-value info">
+            <mat-icon>receipt</mat-icon>
+            <strong>الإجمالي قبل الخصم: {{ formatCurrency(subtotalAmount()) }} جنيه</strong>
+          </div>
+
+          <!-- 3. Total after discount -->
+          <div class="calculated-value info">
+            <mat-icon>payments</mat-icon>
+            <strong>إجمالي المبلغ (بعد الخصم): {{ formatCurrency(totalAmount()) }} جنيه</strong>
+          </div>
+
+          <!-- NEW: Single total_paid input -->
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>إجمالي المدفوع (جنيه)</mat-label>
+            <input matInput type="number" step="0.01" formControlName="total_paid" min="0"
+              (keypress)="preventNegative($event)" (paste)="preventPasteNegative($event)">
+            <mat-hint>أدخل المبلغ الإجمالي المدفوع — سيتم التوزيع تلقائياً</mat-hint>
+            <mat-error>المبلغ غير صحيح</mat-error>
+          </mat-form-field>
+
+          <!-- 4. Split: paid for invoice -->
+          <div class="calculated-value info">
+            <mat-icon>monetization_on</mat-icon>
+            <strong>المدفوع من الفاتورة: {{ formatCurrency(paidForTransaction()) }} جنيه</strong>
+          </div>
+
+          <!-- 5. Surplus applied to debt (show only when > 0) -->
+          @if (surplusAppliedToDebt() > 0) {
+          <div class="calculated-value info">
+            <mat-icon>add_circle_outline</mat-icon>
+            <strong>زيادة تُحسب على الدين: {{ formatCurrency(surplusAppliedToDebt()) }} جنيه</strong>
+          </div>
+          }
+
+          <!-- 6. Credit auto-applied (show only when > 0) -->
+          @if (creditAutoApplied()) {
+          <div class="calculated-value success">
+            <mat-icon>check_circle</mat-icon>
+            <strong>
+              سيتم سداد {{ formatCurrency(usedCreditDisplay()) }} جنيه تلقائياً من الرصيد المستحق للمزرعة
+            </strong>
+          </div>
+          }
+
+          <!-- 7. Final remaining -->
+          <div class="calculated-value" [class.warning]="finalRemainingAmount() > 0">
+            <mat-icon>{{ finalRemainingAmount() > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+            <strong>المتبقي من الشراء: {{ formatCurrency(finalRemainingAmount()) }} جنيه</strong>
+          </div>
+        </div>
+        }
+
+        <!-- Old Balance Payment Section (Debt-Only Mode) -->
+        @if (isDebtPaymentOnly() ) {
+        <mat-divider></mat-divider>
+
+        <div class="form-section">
+          <h3>
+            <mat-icon>account_balance_wallet</mat-icon>
+            تسديد الديون السابقة
+          </h3>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>{{ getOldBalancePaymentLabel() }}</mat-label>
+            <input matInput type="number" step="0.01" formControlName="old_balance_paid" min="0"
+              [required]="isPaymentRequired()" (keypress)="preventNegative($event)"
+              (paste)="preventPasteNegative($event)">
+            <mat-hint>{{ getOldBalancePaymentHint() }}</mat-hint>
+            <mat-error>
+              @if (isPaymentRequired()) {
+              المبلغ مطلوب
+              } @else {
+              المبلغ غير صحيح
+              }
+            </mat-error>
+          </mat-form-field>
+        </div>
+        }
+
+
+        <!-- Payment Metadata (Added) -->
+        <div class="payment-metadata-section" required>
+          <app-payment-method-selector
+            [label]="selectedFarmBalanceType() !== 'RECEIVABLE' ? 'طريقة الدفع' : 'طريقة الاستلام'"
+            [parentForm]="loadingForm">
+          </app-payment-method-selector>
+          <app-person-selector
+            [label]="selectedFarmBalanceType() !== 'RECEIVABLE' ? 'الشخص الذي دفع' : 'الشخص الذي استلم'"
+            [parentForm]="loadingForm" typeControlName="person_type" idControlName="paid_by_person_id">
+          </app-person-selector>
+        </div>
+
+
+        <!-- 8. Projected balance (show whenever a farm is selected) -->
+        @if (loadingForm.get('farm_id')?.value) {
+        <mat-divider></mat-divider>
+
+        <div class="form-section">
+          <div class="calculated-value" [class.success]="projectedBalance() > 0"
+            [class.warning]="projectedBalance() < 0" [class.info]="projectedBalance() === 0">
+            <mat-icon>account_balance</mat-icon>
+            <strong>
+              الرصيد المتوقع بعد العملية (المزرعة):
+              @if (projectedBalance() > 0) {
+              <span class="text-green-600">+{{ formatCurrency(projectedBalance()) }} ج.م</span>
+              <span class="hint-text">(المزرعة مدينة لنا)</span>
+              } @else if (projectedBalance() < 0) { <span class="text-red-600">{{ formatCurrency(projectedBalance()) }}
+                ج.م</span>
+                <span class="hint-text">(نحن مدينون للمزرعة)</span>
+                } @else {
+                <span class="text-gray-600">0.00 ج.م</span>
+                <span class="hint-text">(مسوى)</span>
+                }
+            </strong>
+          </div>
+        </div>
+        }
+
+        <!-- Submit Buttons -->
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loadingForm.invalid || submitting()">
+            @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+            <mat-icon>save</mat-icon>
+            {{ getSubmitButtonText() }}
+            }
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            <mat-icon>cancel</mat-icon>
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
+
+// src/app/core/services/farm.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ApiResponse, Buyer, Farm, PaginatedResponse, PaginationParams } from '../models';
+import { environment } from '../../../environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FarmService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/farms`;
+
+  getAll(): Observable<Farm[]> {
+    return this.http.get<Farm[]>(this.apiUrl);
+  }
+ getPaginationAll(params?: PaginationParams): Observable<PaginatedResponse<Farm>> {
+    let httpParams = new HttpParams();
+
+    if (params?.page !== undefined) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params?.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.has_debt !== undefined) {
+      httpParams = httpParams.set('has_debt', params.has_debt);
+    }
+
+    return this.http.get<PaginatedResponse<Farm>>(`${environment.apiUrl}/paginate-farms`, { params: httpParams });
+  }
+
+  getById(id: number): Observable<Farm> {
+    return this.http.get<Farm>(`${this.apiUrl}/${id}`);
+  }
+
+  create(farm: Partial<Farm>): Observable<Farm> {
+    return this.http.post<Farm>(this.apiUrl, farm);
+  }
+
+  update(id: number, farm: Partial<Farm>): Observable<Farm> {
+    return this.http.put<Farm>(`${this.apiUrl}/${id}`, farm);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+ // ============================================
+  // BALANCE & DEBT OPERATIONS (Updated)
+  // ============================================
+
+  /**
+   * Get debt history for a farm
+   * Returns both transactions and payments
+   */
+  getDebtHistory(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}/debt-history`);
+  }
+
+  /**
+   * Get farms with active balances (non-zero)
+   * Returns farms that have either receivables or payables
+   */
+  getActiveBalances(): Observable<ApiResponse<Farm[]>> {
+    return this.http.get<ApiResponse<Farm[]>>(`${this.apiUrl}/active-balances`);
+  }
+
+  /**
+   * Get farms that owe us money (receivables)
+   * current_balance > 0
+   */
+  getReceivables(): Observable<ApiResponse<Farm[]>> {
+    return this.http.get<ApiResponse<Farm[]>>(`${this.apiUrl}/receivables`);
+  }
+
+  /**
+   * Get farms we owe money to (payables)
+   * current_balance < 0
+   */
+  getPayables(): Observable<ApiResponse<Farm[]>> {
+    return this.http.get<ApiResponse<Farm[]>>(`${this.apiUrl}/payables`);
+  }
+
+  /**
+   * Get net farm position summary
+   * Returns totals for receivables, payables, and net position
+   */
+  getNetPosition(): Observable<ApiResponse<{
+    total_receivables: number;
+    total_payables: number;
+    net_position: number;
+    receivables_count: number;
+    payables_count: number;
+    position_type: 'NET_RECEIVABLE' | 'NET_PAYABLE' | 'BALANCED';
+  }>> {
+    return this.http.get<any>(`${this.apiUrl}/net-position`);
+  }
+
+  // ============================================
+  // HELPER METHODS FOR UI
+  // ============================================
+
+  /**
+   * Get balance type display for UI
+   */
+  getBalanceTypeDisplay(farm: Farm): string {
+    const balance = farm.current_balance;
+    if (balance > 0) return 'دائن لنا'; // Farm owes us
+    if (balance < 0) return 'مدين لنا'; // We owe farm
+    return 'مسوى'; // Settled
+  }
+
+  /**
+   * Get balance color class for UI
+   */
+  getBalanceColorClass(farm: Farm | Buyer): string {
+    const balance = farm.current_balance;
+    if (balance > 0) return 'text-green-600'; // Receivable (good)
+    if (balance < 0) return 'text-red-600'; // Payable (we owe)
+    return 'text-gray-600'; // Settled
+  }
+
+  /**
+   * Format balance for display
+   */
+  formatBalance(farm: Farm | Buyer): string {
+    const balance = Math.abs(farm.current_balance);
+    const formatted = balance.toFixed(2);
+
+    if (farm.current_balance > 0) {
+      return `لنا${formatted} ج.م`; // Farm owes us
+    } else if (farm.current_balance < 0) {
+      return `علينا${formatted} ج.م`; // We owe farm
+    } else {
+      return '0.00 ج.م';
+    }
+  }
+
+  /**
+   * Get detailed balance description
+   */
+  getBalanceDescription(farm: Farm): string {
+    const balance = Math.abs(farm.current_balance);
+    const formatted = balance.toFixed(2);
+
+    if (farm.current_balance > 0) {
+      return `المزرعة مدينة لنا بمبلغ ${formatted} جنيه`;
+    } else if (farm.current_balance < 0) {
+      return `نحن مدينون للمزرعة بمبلغ ${formatted} جنيه`;
+    } else {
+      return 'الحساب مسوى';
+    }
+  }
+}
+
+
+
+
+
+export interface FarmLoadingRequest {
+  vehicle_id?: number; // Optional for debt-only payments
+  farm_id: number;
+  chicken_type_id?: number; // Optional for debt-only payments
+  empty_vehicle_weight?: number; // Optional for debt-only payments
+  loaded_vehicle_weight?: number; // Optional for debt-only payments
+  cage_count?: number; // Optional for debt-only payments
+  cage_weight_per_unit?: number; // Optional for debt-only payments
+  price_per_kg?: number; // Optional for debt-only payments
+  paid_amount?: number; // Optional for debt-only payments
+  old_balance_paid?: number; // Payment toward old balance
+  discount_amount?: number; // Payment toward old balance
+  is_debt_payment_only?: boolean; // ✅ NEW: Flag for debt-only transactions
+  received_by_person_id?: number;
+  paid_by_person_id?: number;
+}
+export interface Farm {
+  id: number;
+  name: string;
+  owner_name?: string;
+  location?: string;
+  phone?: string;
+  created_at: string;
+    current_balance: number; // Positive = Farm owes us, Negative = We owe farm, Zero = Settled
+   balance_type?: 'RECEIVABLE' | 'PAYABLE' | 'SETTLED';
+  isDebtor?: boolean;
+  isCreditor?: boolean;
+  absoluteBalance?: number;
+  balance_display?: string;
+
+  // ✅ Backward compatibility (optional, will be removed eventually)
+  total_debt?: number; // Alias for current_balance (deprecated)
+
+  absolute_balance?: number;
+}
+export interface FarmDebtPayment {
+  payment_id: number;
+  farm_id: number;
+  daily_operation_id?: number;
+  amount: number; // Always positive
+
+  // ✅ NEW: Payment direction
+  payment_direction: 'FROM_FARM' | 'TO_FARM';
+  // FROM_FARM = Farm pays us (reduces their debt)
+  // TO_FARM = We pay farm (increases their debt or reduces our debt)
+
+  payment_date: string;
+  notes?: string;
+
+  // Relationships
+  farm?: Farm;
+  operation?: DailyOperation;
+
+  // ✅ Computed properties
+  signedAmount?: number; // Positive for FROM_FARM, negative for TO_FARM
+  balanceImpact?: number; // How this affects farm's balance
+  displayDescription?: string;
+
+
+  operation_id?: number;
+
+
+  payment_details: {
+    amount: number;
+    direction: string;
+    direction_arabic: string;
+    explanation: string;
+    balance_impact: number;
+  };
+
+  is_standalone?: boolean;
+
+}
+-----------------backend----------
+
+exports.recordFarmLoading = async (req, res) => {
+  const dbTransaction = await sequelize.transaction();
+
+  try {
+    const { id } = req.params;
+
+    // ── BUG 1 + 3 FIX: restore paid_amount and old_balance_paid ─────────────
+    const {
+      vehicle_id,
+      farm_id,
+      chicken_type_id,
+      empty_vehicle_weight,
+      loaded_vehicle_weight,
+      cage_count,
+      cage_weight_per_unit,
+      price_per_kg,
+      paid_amount       = 0,        // was commented out → undefined everywhere
+      discount_amount   = 0,
+      old_balance_paid  = 0,        // was commented out → undefined everywhere
+      is_debt_payment_only = false,
+      received_by_person_id,
+      person_type,
+      paid_by_person_id,
+      payment_method = 'CASH',
+      safe_id
+    } = req.body;
+
+    console.log("req.body", req.body);
+
+    // ========================================================================
+    // VALIDATION
+    // ========================================================================
+
+    const operation = await DailyOperation.findByPk(id, { transaction: dbTransaction });
+
+    if (!operation) {
+      await dbTransaction.rollback();
+      return res.status(404).json({ success: false, message: 'Daily operation not found' });
+    }
+
+    if (operation.status !== 'OPEN') {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'Operation is already closed' });
+    }
+
+    const farm = await Farm.findByPk(farm_id, { transaction: dbTransaction });
+
+    if (!farm) {
+      await dbTransaction.rollback();
+      return res.status(404).json({ success: false, message: 'Farm not found' });
+    }
+
+    const previous_balance = parseFloat(farm.current_balance) || 0;
+
+    // ========================================================================
+    // BRANCH A — DEBT PAYMENT ONLY (NO LOADING)
+    // BUG 5 FIX: guard against null debtPayment before calling balanceImpact.
+    // BUG 4 FIX: payment_direction declared once, at the top of this branch.
+    // ========================================================================
+
+    if (is_debt_payment_only) {
+
+      // Must supply a positive amount
+      if (!old_balance_paid || old_balance_paid <= 0) {
+        await dbTransaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: 'Payment amount must be greater than 0 for debt payment'
+        });
+      }
+
+      // Must have an actual outstanding balance to pay
+      // if (previous_balance === 0) {
+      //   await dbTransaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: 'Cannot pay old balance: No outstanding balance exists',
+      //     current_balance: 0
+      //   });
+      // }
+
+      // Determine direction — declared ONCE here (no duplicate let)
+      let payment_direction;
+      let payment_description;
+      let transaction_type;
+      let direction;
+      let paid_by_person_type=null;
+      let received_by_person_type=null;
+      if (previous_balance > 0) {
+        // Farm owes us → farm pays us
+        payment_direction   = 'FROM_FARM';
+        payment_description = 'الدفع من المزرعة لسداد الرصيد المستحق';
+        transaction_type = 'RECEIVE_DEPT';
+        direction ='IN';
+        received_by_person_type=person_type;
+      } else if(previous_balance < 0) {
+        // We owe farm → we pay them
+        payment_direction   = 'TO_FARM';
+        payment_description = 'دفع للمزرعة لسداد الرصيد الدائن';
+        transaction_type = 'PAID_DEPT';
+        direction ='OUT';
+        paid_by_person_type=person_type;
+      }
+      else{
+        payment_direction   = 'TO_FARM';
+        payment_description = 'دفع للمزرعة لزيادة الرصيد عند الشراء';
+        transaction_type = 'PAID_DEPT';
+        direction ='OUT';
+        paid_by_person_type=person_type;
+      }
+      // Create payment record — guaranteed non-null here
+      const debtPayment = await FarmDebtPayment.create({
+        farm_id,
+        daily_operation_id: id,
+        amount:             old_balance_paid,
+        payment_direction,
+        notes: payment_description,
+        payment_method,
+        safe_id
+      }, { transaction: dbTransaction });
+      
+
+
+       await logTransaction({ 
+        transaction_type,
+        direction,
+        amount: old_balance_paid,
+        safe_id,
+        reference_type: 'FarmDebtPayment',
+        reference_id: debtPayment.id,
+        daily_operation_id: id,
+        performed_by_user_id: req.user ? req.user.id : null,
+        paid_by_person_type,
+        received_by_person_type,
+        paid_by_person_id: paid_by_person_id,
+        received_by_person_id: received_by_person_id,
+        payment_method,
+      }, dbTransaction);
+
+
+      // balanceImpact:
+      //   FROM_FARM → -amount  (farm's debt to us decreases → balance ↓)
+      //   TO_FARM   → +amount  (our debt to farm decreases → balance ↑ toward 0)
+      const balanceInfo = await farm.updateBalance(debtPayment.balanceImpact, dbTransaction);
+
+      if (safe_id) {
+        const safe = await Safe.findByPk(safe_id, { transaction: dbTransaction });
+        if (safe) {
+          await safe.updateBalance(-debtPayment.balanceImpact, dbTransaction);
+        }
+      }
+
+      await dbTransaction.commit();
+
+      return res.status(201).json({
+        success: true,
+        message: 'Debt payment recorded successfully',
+        data: {
+          payment: {
+            id:          debtPayment.id,
+            amount:      debtPayment.amount,
+            direction:   debtPayment.payment_direction,
+            date:        debtPayment.payment_date,
+            description: debtPayment.displayDescription
+          },
+          balance_info: {
+            farm_id:           balanceInfo.farm_id,
+            farm_name:         balanceInfo.farm_name,
+            previous_balance,
+            payment_amount:    old_balance_paid,
+            payment_direction,
+            new_balance:       balanceInfo.new_balance,
+            balance_type:      balanceInfo.new_type,
+            direction_changed: balanceInfo.direction_changed,
+            display_balance:   balanceInfo.display_balance,
+            ...(balanceInfo.direction_changed && {
+              alert: `⚠️ Balance direction changed from ${balanceInfo.previous_type} to ${balanceInfo.new_type}`
+            })
+          }
+        }
+      });
+    }
+
+    // ========================================================================
+    // BRANCH B — NORMAL FARM LOADING
+    // ========================================================================
+
+    if (!vehicle_id) {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'vehicle_id is required for farm loading' });
+    }
+
+    if (!chicken_type_id) {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'chicken_type_id is required for farm loading' });
+    }
+
+    const vehicleAssignment = await VehicleOperation.findOne({
+      where: { daily_operation_id: id, vehicle_id, status: 'ACTIVE' },
+      transaction: dbTransaction
+    });
+
+    if (!vehicleAssignment) {
+      await dbTransaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `Vehicle ${vehicle_id} is not assigned to this operation`
+      });
+    }
+
+    // ── Weight calculation ───────────────────────────────────────────────────
+
+    const totalCageWeight    = cage_count * cage_weight_per_unit;
+    const net_chicken_weight = loaded_vehicle_weight - empty_vehicle_weight - totalCageWeight;
+
+    if (net_chicken_weight <= 0) {
+      await dbTransaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid weight calculation: net weight must be positive',
+        debug: {
+          loaded: loaded_vehicle_weight,
+          empty:  empty_vehicle_weight,
+          cages:  totalCageWeight,
+          net:    net_chicken_weight
+        }
+      });
+    }
+
+    // ── Pricing calculation ──────────────────────────────────────────────────
+
+    const subtotal_amount = net_chicken_weight * price_per_kg;
+    const total_amount    = Math.max(0, subtotal_amount - discount_amount);
+
+    // ── BUG 7 FIX: calculate surplus (overpayment) ───────────────────────────
+    // Original code used Math.max(0, total_amount - paid_amount) which silently
+    // discarded any overpayment.  We now track it so the farm gets credited.
+    const surplus          = Math.max(0, paid_amount - total_amount);//100
+    const remaining_amount = Math.max(0, total_amount - paid_amount);//0
+
+    // ── Sequence number ──────────────────────────────────────────────────────
+
+    const lastTransaction = await FarmTransaction.findOne({
+      where:       { daily_operation_id: id, vehicle_id },
+      order:       [['sequence_number', 'DESC']],
+      transaction: dbTransaction
+    });
+
+    const sequence_number = (lastTransaction?.sequence_number || 0) + 1;
+
+    // ── Handle old_balance_paid ──────────────────────────────────────────────
+    // BUG 4 FIX: single declaration of payment_direction / payment_description
+    // (original had duplicate `let` declarations causing SyntaxError).
+
+    let debtPayment         = null;
+    let payment_direction   = null;
+    let payment_description = null;
+    let debt_payment_impact = 0;
+
+    if (old_balance_paid > 0) {
+
+      if (previous_balance === 0) {
+        await dbTransaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot pay old balance: No outstanding balance exists',
+          current_balance: 0
+        });
+      }
+
+      // if (previous_balance > 0) {
+      //   // Farm owes us → farm pays us during this loading
+      //   payment_direction   = 'FROM_FARM';
+      //   payment_description = `الدفع أثناء تحميل المعاملة رقم ${sequence_number}`;
+
+        
+      // } else {
+        // We owe farm → we pay them during this loading
+        payment_direction   = 'TO_FARM';
+        payment_description = `الدفع للمزرعة أثناء تحميل المعاملة رقم ${sequence_number}`;
+
+      // } 
+      debtPayment = await FarmDebtPayment.create({
+        farm_id,
+        daily_operation_id: id,
+        amount:             old_balance_paid,
+        payment_direction,
+        notes:          payment_description,
+        payment_method,
+        safe_id
+      }, { transaction: dbTransaction });
+
+      debt_payment_impact = parseFloat(debtPayment.balanceImpact) || 0;
+    }
+
+    // ── BUG 6 FIX: use running_balance, not stale total_balance_change ───────
+    // Original checked `total_balance_change > 0` but that variable still held
+    // the old `debt_payment_impact` value at that point — not the balance after
+    // applying the payment.  running_balance is the correct value to check.
+    //
+    // Credit consumption:
+    //   Farm has RECEIVABLE (running_balance > 0, farm owes us) AND we now have
+    //   a new remaining_amount (we owe them from this transaction).
+    //   These oppose each other → auto-consume the receivable.
+    const running_balance = previous_balance + debt_payment_impact;//-80
+
+    let used_credit = 0;
+    if (running_balance > 0 && remaining_amount > 0) {
+      used_credit = Math.min(running_balance, remaining_amount);
+    }
+
+    const final_remaining_amount = remaining_amount - used_credit;
+
+    // ── Create FarmTransaction ───────────────────────────────────────────────
+
+    const farmTransaction = await FarmTransaction.create({
+      daily_operation_id:   id,
+      vehicle_id,
+      farm_id,
+      vehicle_operation_id: vehicleAssignment.id,
+      chicken_type_id,
+      sequence_number,
+      empty_vehicle_weight,
+      loaded_vehicle_weight,
+      cage_count,
+      cage_weight_per_unit,
+      net_chicken_weight,
+      price_per_kg,
+      discount_amount,
+      total_amount,
+      paid_amount,
+      remaining_amount: final_remaining_amount,
+      used_credit,
+      received_by_person_id,
+      person_type,
+      paid_by_person_id,
+      payment_method,
+      safe_id
+    }, { transaction: dbTransaction });
+
+    console.log("\ntrans\n", farmTransaction);
+
+    if (paid_amount > 0) {  
+      // ── LOG FINANCIAL TRANSACTION ──────────────────────────────────────────
+      await logTransaction({
+        transaction_type: 'PURCHASE',
+        direction: 'OUT',
+        amount: paid_amount,
+        safe_id,
+        reference_type: 'FarmTransaction',
+        reference_id: farmTransaction.id,
+        daily_operation_id: id,
+        performed_by_user_id: req.user ? req.user.id : null,
+        paid_by_person_type: person_type,
+        paid_by_person_id: paid_by_person_id,
+        payment_method, 
+      }, dbTransaction);
+
+      // ── UPDATE SAFE BALANCE ────────────────────────────────────────────────
+      if (safe_id) {
+        const safe = await Safe.findByPk(safe_id, { transaction: dbTransaction });
+        if (safe) {
+          await safe.updateBalance(-paid_amount, dbTransaction);
+        }
+      }
+    }
+
+    // ── Balance change formula ───────────────────────────────────────────────
+    //
+    // Farm PURCHASE semantics (opposite to sale):
+    //
+    //   final_remaining_amount  > 0  →  we STILL OWE farm  →  balance ↓  (subtract)
+    //   surplus                 > 0  →  farm OWES us extra  →  balance ↑  (add)
+    //   used_credit             > 0  →  consumed farm's receivable → balance ↓ (subtract)
+    //   debt_payment_impact          →  already directional via balanceImpact getter
+    //
+    //   Δ = debt_payment_impact - used_credit - final_remaining_amount + surplus
+    //
+    // BUG 7 FIX: + surplus was missing entirely in original code.
+  
+    
+    let total_balance_change =
+    //  debt_payment_impact 
+      - used_credit
+      - final_remaining_amount
+      + surplus;
+      
+   
+    console.log('\n── recordFarmLoading balance breakdown ──');
+    console.log('previous_balance:     ', previous_balance);
+    console.log('paid_amount:          ', paid_amount);
+    console.log('total_amount:         ', total_amount);
+    console.log('surplus:              ', surplus);
+    console.log('remaining_amount:     ', remaining_amount);
+    console.log('debt_payment_impact:  ', debt_payment_impact);
+    console.log('running_balance:      ', running_balance);
+    console.log('used_credit:          ', used_credit);
+    console.log('final_remaining:      ', final_remaining_amount);
+    console.log('total_balance_change: ', total_balance_change);
+    console.log('expected new_balance: ', previous_balance + total_balance_change);
+    console.log('old_balance_paid: ', old_balance_paid);
+    console.log('─────────────────────────────────────────\n');
+
+    // ── Update farm balance (single call) ────────────────────────────────────
+
+    const balanceInfo = await farm.updateBalance(total_balance_change, dbTransaction);
+
+
+  if (surplus - (old_balance_paid||0) > 0) {
+      surplusPayment = await FarmDebtPayment.create({
+        farm_id,
+        daily_operation_id: id,
+        amount:             surplus - old_balance_paid,
+        payment_direction:  'TO_FARM',
+        notes:              `زيادة دفع من عندنا في عملية البيع رقم ${sequence_number} — ${surplus - old_balance_paid} جنيه لينا عليهم`,
+        payment_method,
+        safe_id
+      }, { transaction: dbTransaction });
+    }
+
+    await dbTransaction.commit();
+
+    // ── Fetch full result ────────────────────────────────────────────────────
+
+    const result = await FarmTransaction.findByPk(farmTransaction.id, {
+      include: [
+        { model: Farm,        as: 'farm',         attributes: ['id', 'name', 'current_balance'] },
+        { model: ChickenType, as: 'chicken_type', attributes: ['id', 'name'] },
+        { model: Vehicle,     as: 'vehicle',      attributes: ['id', 'name', 'plate_number'] }
+      ]
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Farm loading recorded successfully',
+      data: {
+        transaction: result,
+        balance_info: {
+          farm_id:           balanceInfo.farm_id,
+          farm_name:         balanceInfo.farm_name,
+          previous_balance,
+          changes: {
+            old_balance_paid,
+            old_balance_direction: debtPayment?.payment_direction || null,
+            debt_payment_impact,
+            surplus,
+            used_credit,
+            new_transaction_debt:  final_remaining_amount,
+            subtotal_amount,
+            discount_amount,
+            net_change:            total_balance_change
+          },
+          new_balance:       balanceInfo.new_balance,
+          balance_type:      balanceInfo.new_type,
+          direction_changed: balanceInfo.direction_changed,
+          display_balance:   balanceInfo.display_balance,
+          ...(balanceInfo.direction_changed && {
+            alert: `⚠️ Balance direction changed from ${balanceInfo.previous_type} to ${balanceInfo.new_type}`
+          })
+        },
+        ...(debtPayment && {
+          debt_payment: {
+            id:          debtPayment.id,
+            amount:      debtPayment.amount,
+            direction:   debtPayment.payment_direction,
+            date:        debtPayment.payment_date,
+            description: debtPayment.displayDescription
+          }
+        })
+      }
+    });
+
+  } catch (error) {
+    if (!dbTransaction.finished) await dbTransaction.rollback();
+    console.error('Error recording farm loading:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error recording farm loading',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const Farm = sequelize.define('Farm', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      notEmpty: {
+        msg: 'Farm name is required'
+      }
+    }
+  },
+  owner_name: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  location: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  phone: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    validate: {
+      is: {
+        args: /^[0-9+\-\s()]*$/,
+        msg: 'Phone number can only contain numbers, +, -, spaces, and parentheses'
+      }
+    }
+  },
+  current_balance: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+    allowNull: false,
+    comment: 'Positive = Farm owes us (RECEIVABLE), Negative = We owe farm (PAYABLE), Zero = Settled'
+  }
+}, {
+  tableName: 'farms',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false,
+  indexes: [
+    {
+      name: 'idx_farms_current_balance',
+      fields: ['current_balance']
+    }
+  ],
+  
+  // ✅ COMPUTED GETTERS
+  getterMethods: {
+    /**
+     * Get balance type: RECEIVABLE, PAYABLE, or SETTLED
+     * @returns {string}
+     */
+    balanceType() {
+      const balance = parseFloat(this.getDataValue('current_balance')) || 0;
+      if (balance > 0) return 'RECEIVABLE';
+      if (balance < 0) return 'PAYABLE';
+      return 'SETTLED';
+    },
+    
+    /**
+     * Check if farm owes us money
+     * @returns {boolean}
+     */
+    isDebtor() {
+      return parseFloat(this.getDataValue('current_balance')) > 0;
+    },
+    
+    /**
+     * Check if we owe farm money
+     * @returns {boolean}
+     */
+    isCreditor() {
+      return parseFloat(this.getDataValue('current_balance')) < 0;
+    },
+    
+    /**
+     * Get absolute value of balance (always positive)
+     * @returns {number}
+     */
+    absoluteBalance() {
+      return Math.abs(parseFloat(this.getDataValue('current_balance')) || 0);
+    },
+    
+    /**
+     * Get human-readable balance description
+     * @returns {string}
+     */
+    displayBalance() {
+      const balance = this.absoluteBalance;
+      if (this.isDebtor) {
+        return `Farm owes us: ${balance.toFixed(2)} EGP`;
+      } else if (this.isCreditor) {
+        return `We owe farm: ${balance.toFixed(2)} EGP`;
+      }
+      return 'Settled (0.00 EGP)';
+    }
+  }
+});
+
+/**
+ * Instance Methods
+ */
+
+/**
+ * Update farm balance and return change info
+ * @param {number} balanceChange - Net balance change (can be positive or negative)
+ * @param {object} transaction - Sequelize transaction
+ * @returns {object} Balance change information
+ */
+Farm.prototype.updateBalance = async function(balanceChange, transaction = null) {
+  const previousBalance = parseFloat(this.current_balance) || 0;
+  const newBalance = previousBalance + balanceChange;
+  
+  await this.update({
+    current_balance: newBalance 
+  }, { transaction });
+  
+  // Detect direction change
+  const previousType = previousBalance > 0 ? 'RECEIVABLE' : (previousBalance < 0 ? 'PAYABLE' : 'SETTLED');
+  const newType = newBalance > 0 ? 'RECEIVABLE' : (newBalance < 0 ? 'PAYABLE' : 'SETTLED');
+  const directionChanged = previousType !== newType && previousType !== 'SETTLED' && newType !== 'SETTLED';
+  
+  return {
+    farm_id: this.id,
+    farm_name: this.name,
+    previous_balance: previousBalance,
+    new_balance: newBalance,
+    change_amount: balanceChange,
+    direction_changed: directionChanged,
+    previous_type: previousType,
+    new_type: newType,
+    absolute_balance: Math.abs(newBalance),
+    display_balance: newBalance > 0 
+      ? `${newBalance.toFixed(2)} (لينا عليهم)جنيه `
+      : newBalance < 0
+        ? `${Math.abs(newBalance).toFixed(2)} (ليهم علينا)جنيه `
+        : 'متساوي 0.0 جنيه'
+  };
+};
+/**
+ * Class Methods
+ */
+
+/**
+ * Get all farms with non-zero balances
+ * @returns {Promise<Array>}
+ */
+Farm.getActiveBalances = async function() {
+  return await this.findAll({
+    where: {
+      current_balance: {
+        [sequelize.Sequelize.Op.ne]: 0
+      }
+    },
+    order: [['current_balance', 'DESC']]
+  });
+};
+
+/**
+ * Get farms that owe us (receivables)
+ * @returns {Promise<Array>}
+ */
+Farm.getReceivables = async function() {
+  return await this.findAll({
+    where: {
+      current_balance: {
+        [sequelize.Sequelize.Op.gt]: 0
+      }
+    },
+    order: [['current_balance', 'DESC']]
+  });
+};
+
+/**
+ * Get farms we owe (payables)
+ * @returns {Promise<Array>}
+ */
+Farm.getPayables = async function() {
+  return await this.findAll({
+    where: {
+      current_balance: {
+        [sequelize.Sequelize.Op.lt]: 0
+      }
+    },
+    order: [['current_balance', 'ASC']]  // Most negative first
+  });
+};
+
+/**
+ * Get net farm position summary
+ * @returns {Promise<object>}
+ */
+Farm.getNetPosition = async function() {
+  const result = await this.findAll({
+    attributes: [
+      [sequelize.fn('SUM', 
+        sequelize.literal('CASE WHEN current_balance > 0 THEN current_balance ELSE 0 END')
+      ), 'total_receivables'],
+      [sequelize.fn('SUM', 
+        sequelize.literal('CASE WHEN current_balance < 0 THEN ABS(current_balance) ELSE 0 END')
+      ), 'total_payables'],
+      [sequelize.fn('SUM', sequelize.col('current_balance')), 'net_position'],
+      [sequelize.fn('COUNT', 
+        sequelize.literal('CASE WHEN current_balance > 0 THEN 1 END')
+      ), 'receivables_count'],
+      [sequelize.fn('COUNT', 
+        sequelize.literal('CASE WHEN current_balance < 0 THEN 1 END')
+      ), 'payables_count']
+    ],
+    raw: true
+  });
+  
+  const data = result[0];
+  return {
+    total_receivables: parseFloat(data.total_receivables) || 0,
+    total_payables: parseFloat(data.total_payables) || 0,
+    net_position: parseFloat(data.net_position) || 0,
+    receivables_count: parseInt(data.receivables_count) || 0,
+    payables_count: parseInt(data.payables_count) || 0,
+    position_type: data.net_position > 0 ? 'NET_RECEIVABLE' : 
+                   data.net_position < 0 ? 'NET_PAYABLE' : 'BALANCED'
+  };
+};
+
+module.exports = Farm;
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const FarmDebtPayment = sequelize.define('FarmDebtPayment', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  farm_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'farms',
+      key: 'id'
+    },
+    validate: {
+      notNull: {
+        msg: 'Farm ID is required'
+      }
+    }
+  },
+  daily_operation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'daily_operations',
+      key: 'id'
+    }
+  },
+  amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false,
+    validate: {
+      notNull: {
+        msg: 'Payment amount is required'
+      },
+      min: {
+        args: [0.01],
+        msg: 'Payment amount must be greater than 0'
+      },
+      isDecimal: {
+        msg: 'Payment amount must be a valid number'
+      }
+    },
+    comment: 'Always positive - direction determined by payment_direction field'
+  },
+  payment_direction: {
+    type: DataTypes.ENUM('FROM_FARM', 'TO_FARM'),
+    allowNull: false,
+    defaultValue: 'FROM_FARM',
+    validate: {
+      isIn: {
+        args: [['FROM_FARM', 'TO_FARM']],
+        msg: 'Payment direction must be FROM_FARM or TO_FARM'
+      }
+    }
+    // Avoid setting a comment to prevent migration SQL bug that combines COMMENT with USING
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  payment_method: {
+    type: DataTypes.ENUM('CASH', 'INSTAPAY', 'BANK', 'VODAFONE_CASH'),
+    defaultValue: 'CASH',
+    allowNull: true
+  },
+  safe_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'safes',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'farm_debt_payments',
+  timestamps: true,
+createdAt: 'payment_date',
+updatedAt: false,
+underscored: true,
+  indexes: [
+    {
+      name: 'idx_farm_payments_direction',
+      fields: ['farm_id', 'payment_direction', 'payment_date']
+    },
+    {
+      name: 'idx_farm_payments_operation',
+      fields: ['daily_operation_id']
+    }
+  ],
+  
+  // ✅ COMPUTED GETTERS
+  getterMethods: {
+    /**
+     * Get signed amount based on direction
+     * Positive = money coming to us (FROM_FARM)
+     * Negative = money going to farm (TO_FARM)
+     * @returns {number}
+     */
+    signedAmount() {
+      const amt = parseFloat(this.getDataValue('amount')) || 0;
+      return this.getDataValue('payment_direction') === 'FROM_FARM' ? amt : -amt;
+    },
+    
+    /**
+     * Get balance impact (how this payment affects farm's balance)
+     * FROM_FARM: Negative impact (reduces their debt to us)
+     * TO_FARM: Positive impact (increases their debt to us / reduces our debt to them)
+     * @returns {number}
+     */
+    balanceImpact() {
+      const amt = parseFloat(this.getDataValue('amount')) || 0;
+      return this.getDataValue('payment_direction') === 'FROM_FARM' ? -amt : amt;
+    },
+    
+    /**
+     * Get human-readable description
+     * @returns {string}
+     */
+    displayDescription() {
+      const amt = parseFloat(this.getDataValue('amount')) || 0;
+      const dir = this.getDataValue('payment_direction');
+      
+      if (dir === 'FROM_FARM') {
+        return `Received ${amt.toFixed(2)} EGP from farm`;
+      } else {
+        return `Paid ${amt.toFixed(2)} EGP to farm`;
+      }
+    }
+  }
+});
+
+/**
+ * Instance Methods
+ */
+
+// /**
+//  * Process payment and update farm balance
+//  * @param {object} transaction - Sequelize transaction
+//  * @returns {Promise<object>} Updated farm and payment info
+//  */
+// FarmDebtPayment.prototype.processPayment = async function(transaction = null) {
+//   const Farm = require('./Farm');
+//   const farm = await Farm.findByPk(this.farm_id, { transaction });
+  
+//   if (!farm) {
+//     throw new Error(`Farm with ID ${this.farm_id} not found`);
+//   }
+  
+//   // Calculate balance change
+//   // FROM_FARM: Farm pays us → reduces their debt (negative change)
+//   // TO_FARM: We pay farm → increases their debt (positive change)
+//   const balanceChange = this.balanceImpact;
+  
+//   // Update farm balance
+//   const balanceInfo = await farm.updateBalance(balanceChange, transaction);
+  
+//   return {
+//     payment: this.toJSON(),
+//     balance_info: balanceInfo
+//   };
+// };
+
+/**
+ * Class Methods
+ */
+
+/**
+ * Get payment history for a farm
+ * @param {number} farmId
+ * @param {object} options - Query options (limit, offset, order)
+ * @returns {Promise<Array>}
+ */
+FarmDebtPayment.getPaymentHistory = async function(farmId, options = {}) {
+  const { limit = 50, offset = 0, startDate = null, endDate = null } = options;
+  
+  const where = { farm_id: farmId };
+  
+  if (startDate || endDate) {
+    where.payment_date = {};
+    if (startDate) where.payment_date[sequelize.Sequelize.Op.gte] = startDate;
+    if (endDate) where.payment_date[sequelize.Sequelize.Op.lte] = endDate;
+  }
+  
+  return await this.findAll({
+    where,
+    include: [
+      {
+        model: require('./Farm'),
+        as: 'farm',
+        attributes: ['id', 'name']
+      },
+      {
+        model: require('./DailyOperation'),
+        as: 'operation',
+        attributes: ['id', 'operation_date'],
+        required: false
+      }
+    ],
+    order: [['payment_date', 'DESC'], ['id', 'DESC']],
+    limit,
+    offset
+  });
+};
+
+/**
+ * Get payment summary for a farm
+ * @param {number} farmId
+ * @param {object} dateRange - { startDate, endDate }
+ * @returns {Promise<object>}
+ */
+FarmDebtPayment.getPaymentSummary = async function(farmId, dateRange = {}) {
+  const { startDate = null, endDate = null } = dateRange;
+  
+  const where = { farm_id: farmId };
+  
+  if (startDate || endDate) {
+    where.payment_date = {};
+    if (startDate) where.payment_date[sequelize.Sequelize.Op.gte] = startDate;
+    if (endDate) where.payment_date[sequelize.Sequelize.Op.lte] = endDate;
+  }
+  
+  const result = await this.findAll({
+    where,
+    attributes: [
+      [sequelize.fn('SUM', 
+        sequelize.literal("CASE WHEN payment_direction = 'FROM_FARM' THEN amount ELSE 0 END")
+      ), 'total_received'],
+      [sequelize.fn('SUM', 
+        sequelize.literal("CASE WHEN payment_direction = 'TO_FARM' THEN amount ELSE 0 END")
+      ), 'total_paid'],
+      [sequelize.fn('COUNT', 
+        sequelize.literal("CASE WHEN payment_direction = 'FROM_FARM' THEN 1 END")
+      ), 'received_count'],
+      [sequelize.fn('COUNT', 
+        sequelize.literal("CASE WHEN payment_direction = 'TO_FARM' THEN 1 END")
+      ), 'paid_count']
+    ],
+    raw: true
+  });
+  
+  const data = result[0];
+  
+  return {
+    total_received: parseFloat(data.total_received) || 0,
+    total_paid: parseFloat(data.total_paid) || 0,
+    net_received: (parseFloat(data.total_received) || 0) - (parseFloat(data.total_paid) || 0),
+    received_count: parseInt(data.received_count) || 0,
+    paid_count: parseInt(data.paid_count) || 0,
+    total_transactions: (parseInt(data.received_count) || 0) + (parseInt(data.paid_count) || 0)
+  };
+};
+
+module.exports = FarmDebtPayment;
+
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const FarmTransaction = sequelize.define('FarmTransaction', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  daily_operation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'daily_operations',
+      key: 'id'
+    }
+  },  vehicle_id: {  // ✅ NEW FIELD
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'vehicles',
+      key: 'id'
+    }
+  },
+  farm_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'farms',
+      key: 'id'
+    }
+  },
+  chicken_type_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'chicken_types',
+      key: 'id'
+    }
+  },
+  sequence_number: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  empty_vehicle_weight: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  loaded_vehicle_weight: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  cage_count: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  cage_weight_per_unit: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: false
+  },
+  net_chicken_weight: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  price_per_kg: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: false
+  },
+  total_amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false
+  },
+  paid_amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0
+  },
+  remaining_amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false
+  },
+  discount_amount: {
+  type: DataTypes.DECIMAL(12, 2),
+  defaultValue: 0,
+  allowNull: false
+}
+  ,vehicle_operation_id: {
+  type: DataTypes.INTEGER,
+  allowNull: false,
+  references: {
+    model: 'vehicle_operations',
+    key: 'id'
+  }, 
+},  used_credit: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+    allowNull: false
+  },
+  received_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  person_type: {
+    type: DataTypes.ENUM( 'EMPLOYEE', 'PARTNER'),
+    allowNull: true
+  },
+  paid_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  payment_method: {
+    type: DataTypes.ENUM('CASH', 'INSTAPAY', 'BANK', 'VODAFONE_CASH'),
+    defaultValue: 'CASH'
+  },
+  safe_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'safes',
+      key: 'id'
+    }
+  }
+
+}, {
+  tableName: 'farm_transactions',
+  timestamps: true,
+  createdAt: 'transaction_time',
+  updatedAt: false,
+  underscored: true,
+  indexes: [
+    { fields: ['daily_operation_id'] },
+    { fields: ['vehicle_id', 'daily_operation_id'] }  // ✅ NEW INDEX
+  ]
+});
+module.exports = FarmTransaction;
+
+
+
+// src/models/FinancialTransaction.js
+const { DataTypes, Op } = require('sequelize');
+const { sequelize } = require('../config/database');
+const { formatToDateString } = require('../utils/formatDate');
+
+const FinancialTransaction = sequelize.define('FinancialTransaction', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  transaction_type: {
+    type: DataTypes.ENUM(
+      'SALE', 
+      'PAID_DEPT',
+      'PURCHASE', 
+      'RECEIVE_DEPT', 
+      'COST', 
+      'LOSS', 
+      'EXPENSE',
+      'ADVANCE', 
+      'ADVANCE_RETURN', 
+      'SALARY', 
+      'CUSTODY', 
+      'CUSTODY_RETURN', 
+      'SAFE_TRANSFER', 
+      'PARTNER_WITHDRAWAL', 
+      'OTHER'
+    ),
+    allowNull: false
+  },
+  direction: {
+    type: DataTypes.ENUM('IN', 'OUT'),
+    allowNull: false
+  },
+  amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false
+  },
+  safe_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  reference_type: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  reference_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  daily_operation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'daily_operations',
+      key: 'id'
+    }
+  },
+  performed_by_user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  received_by_person_type: {
+    type: DataTypes.ENUM('EMPLOYEE', 'PARTNER'),
+    allowNull: true
+  },
+  received_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  paid_by_person_type: {
+    type: DataTypes.ENUM('EMPLOYEE', 'PARTNER'),
+    allowNull: true
+  },
+  paid_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  payment_method: {
+    type: DataTypes.ENUM('CASH', 'INSTAPAY', 'BANK', 'VODAFONE_CASH'),
+    defaultValue: 'CASH'
+  }
+}, {
+  tableName: 'financial_transactions',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+// ─── Class Methods ───────────────────────────────────────────────────────────
+
+/**
+ * Returns sum of IN and OUT amounts grouped by transaction_type for a given date.
+ * @param {string} date - The date to summarize (YYYY-MM-DD)
+ * @returns {Promise<Object>}
+ */
+FinancialTransaction.getDailySummary = async function (date) {
+  const dateStr = formatToDateString(date);
+  const startOfDay = `${dateStr} 00:00:00`;
+  const endOfDay = `${dateStr} 23:59:59.999999`;
+  
+  const results = await this.findAll({
+    where: { 
+      created_at: {
+        [Op.between]: [startOfDay, endOfDay]
+      }
+    },
+    attributes: [
+      'direction',
+      'transaction_type',
+      [sequelize.fn('SUM', sequelize.col('amount')), 'total_amount']
+    ],
+    group: ['direction', 'transaction_type'],
+    raw: true
+  });
+
+  const summary = {
+    IN: {},
+    OUT: {},
+    total_in: 0,
+    total_out: 0,
+    net_balance: 0
+  };
+
+  results.forEach(row => {
+    const amount = parseFloat(row.total_amount || 0);
+    summary[row.direction][row.transaction_type] = amount;
+    
+    if (row.direction === 'IN') {
+      summary.total_in += amount;
+    } else {
+      summary.total_out += amount;
+    }
+  });
+
+  summary.net_balance = summary.total_in - summary.total_out;
+  return summary;
+};
+
+/**
+ * Returns the running balance for a given safe.
+ * @param {number} safeId - The safe ID
+ * @returns {Promise<number>}
+ */
+FinancialTransaction.getSafeSummary = async function (safeId) {
+  const result = await this.findAll({
+    where: { safe_id: safeId },
+    attributes: [
+      'direction',
+      [sequelize.fn('SUM', sequelize.col('amount')), 'total_amount']
+    ],
+    group: ['direction'],
+    raw: true
+  });
+
+  let balance = 0;
+  result.forEach(row => {
+    const amount = parseFloat(row.total_amount || 0);
+    if (row.direction === 'IN') {
+      balance += amount;
+    } else if (row.direction === 'OUT') {
+      balance -= amount;
+    }
+  });
+
+  return balance;
+};
+
+module.exports = FinancialTransaction;

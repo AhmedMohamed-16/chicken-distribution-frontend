@@ -1,0 +1,144 @@
+<h2 mat-dialog-title class="dialog-title">كشف حساب: {{ data.category.name }}</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+  <div class="loading-spinner">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل كشف الحساب...</p>
+  </div>
+  } @else {
+  <div class="filters-container">
+    <mat-form-field appearance="outline" class="date-range-field">
+      <mat-label>فترة كشف الحساب</mat-label>
+      <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="من تاريخ">
+        <input matEndDate formControlName="end" placeholder="إلى تاريخ" (dateChange)="loadLedger()">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+    
+    <button mat-icon-button color="warn" (click)="clearDates()" *ngIf="dateRange.value.start || dateRange.value.end" title="مسح التصفية">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+
+  <div class="summary-cards">
+    <div class="debt-summary opening-balance" *ngIf="openingBalance() !== 0 || dateRange.value.start">
+      <div class="summary-label">رصيد أول المدة</div>
+      <div class="summary-value" [ngClass]="openingBalance() > 0 ? 'text-green-700' : (openingBalance() < 0 ? 'text-red-700' : 'text-gray-700')">
+        {{ formatCurrency(Math.abs(openingBalance())) }}
+        @if (openingBalance() > 0) {
+          <span class="text-sm">(لينا)</span>
+        } @else if (openingBalance() < 0) {
+          <span class="text-sm">(عليا)</span>
+        } @else {
+          <span class="text-sm">(متساوي)</span>
+        }
+      </div>
+    </div>
+
+    <div class="debt-summary" [class.no-debt]="currentDebt() === 0">
+      <div class="summary-label">الرصيد الحالي (الإجمالي)</div>
+      <div class="summary-value" [ngClass]="currentDebt() > 0 ? 'text-green-700' : (currentDebt() < 0 ? 'text-red-700' : 'text-gray-700')">
+        {{ formatCurrency(Math.abs(currentDebt())) }}
+        @if (currentDebt() > 0) {
+          <span class="text-sm">(لينا)</span>
+        } @else if (currentDebt() < 0) {
+          <span class="text-sm">(عليا)</span>
+        } @else {
+          <span class="text-sm">(مسدد)</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource()" class="mat-elevation-z1">
+      
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="datetime-cell">
+            <span class="date">{{ element.date | date:'yyyy-MM-dd' }}</span>
+            <span class="time">{{ element.date | date:'HH:mm' }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Type/Description Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>التفاصيل</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="flex items-center gap-2">
+            @if (element.type === 'COST_INC') {
+              <mat-chip class="cost-inc-chip">تسجيل تكلفة</mat-chip>
+            } @else if (element.type === 'TO_CATEGORY') {
+              <mat-chip class="payment-to-chip">دفعة للفئة</mat-chip>
+            } @else if (element.type === 'FROM_CATEGORY') {
+              <mat-chip class="payment-from-chip">دفعة من الفئة (استرداد)</mat-chip>
+            }
+            <span class="text-sm text-gray-500">{{ element.description }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Amount Incurred (Cost) Column -->
+      <ng-container matColumnDef="amount_incurred">
+        <th mat-header-cell *matHeaderCellDef>المطلوب (تكلفة)</th>
+        <td mat-cell *matCellDef="let element" class="amount-cell">
+          @if (element.type === 'COST_INC') {
+            <span class="text-red-600 font-bold">{{ formatNumber(element.amount) }}</span>
+          } @else {
+            <span class="text-gray-400">-</span>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Amount Paid Column -->
+      <ng-container matColumnDef="amount_paid">
+        <th mat-header-cell *matHeaderCellDef>المدفوع</th>
+        <td mat-cell *matCellDef="let element" class="amount-cell">
+          @if (element.type === 'TO_CATEGORY') {
+            <span class="text-green-600 font-bold">{{ formatNumber(element.amount) }}</span>
+          } @else if (element.type === 'FROM_CATEGORY') {
+            <span class="text-blue-600 font-bold font-sm">استرداد: {{ formatNumber(element.amount) }}</span>
+          } @else if (element.type === 'COST_INC' && element.paid_amount > 0) {
+            <span class="text-green-600 font-bold">{{ formatNumber(element.paid_amount) }}</span>
+          } @else {
+            <span class="text-gray-400">-</span>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Running Balance Column -->
+      <ng-container matColumnDef="running_balance">
+        <th mat-header-cell *matHeaderCellDef>الرصيد بعد الحركة</th>
+        <td mat-cell *matCellDef="let element" class="debt-cell font-bold" [ngClass]="element.running_balance > 0 ? 'text-green-700' : (element.running_balance < 0 ? 'text-red-700' : 'text-gray-700')">
+          {{ formatNumber(Math.abs(element.running_balance), 2) }}
+          @if (element.running_balance > 0) {
+            <span class="text-xs mr-1 opacity-75">لينا</span>
+          } @else if (element.running_balance < 0) {
+            <span class="text-xs mr-1 opacity-75">عليا</span>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.payment-row]="row.type !== 'COST_INC'"></tr>
+      
+      <!-- Empty state row -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+          لا توجد حركات مالية مسجلة لهذه الفئة
+        </td>
+      </tr>
+    </table>
+  </div>
+  }
+</mat-dialog-content>
+
+<div mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button mat-dialog-close>إغلاق</button>
+</div>

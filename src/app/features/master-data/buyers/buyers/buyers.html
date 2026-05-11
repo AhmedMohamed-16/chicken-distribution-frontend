@@ -68,16 +68,16 @@
             <td mat-cell *matCellDef="let buyer">{{ buyer.address || '-' }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="total_debt">
-            <th mat-header-cell *matHeaderCellDef>الدين المستحق</th>
+          <ng-container matColumnDef="current_balance">
+            <th mat-header-cell *matHeaderCellDef>الرصيد الحالي</th>
             <td mat-cell *matCellDef="let buyer">
-              @if (buyer.total_debt > 0) {
-              <mat-chip class="debt-chip">
-                {{ formatCurrency(buyer.total_debt)}} ج
+              <mat-chip
+                [ngClass]="buyer.current_balance > 0 ? 'debt-chip green' : buyer.current_balance < 0 ? 'debt-chip red' : 'debt-chip gray'">
+                {{ formatCurrency(Math.abs(buyer.current_balance)) }}
+                @if (buyer.current_balance > 0) { ج عليه }
+                @else if (buyer.current_balance < 0) { ج له }
+                @else { متساوي }
               </mat-chip>
-              } @else {
-              <span class="success-indicator">-</span>
-              }
             </td>
           </ng-container>
 

@@ -61,7 +61,7 @@ export class ExecutiveSummary {
   getPerformanceMessage(): string {
     const trend = this.summary().financial.trend_vs_previous;
     if (trend.direction === 'IMPROVING') {
-      return `تحسن الربح بنسبة ${Math.abs(trend.profit_change_pct || 0).toFixed(1)}% مقارنة بالفترة السابقة`;
+      return `تحسن الربح بنسبة ${trend.profit_change_pct?.toFixed(1) || 0}% مقارنة بالفترة السابقة`;
     }
     if (trend.direction === 'DECLINING') {
       return `انخفض الربح بنسبة ${Math.abs(trend.profit_change_pct || 0).toFixed(1)}% مقارنة بالفترة السابقة`;

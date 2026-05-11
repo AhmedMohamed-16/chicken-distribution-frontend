@@ -6,6 +6,42 @@
     </mat-card-header>
 
     <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>جاري تحميل ملخص اليوم...</p>
+        </div>
+      } @else if (hasLosses()) {
+        <div class="summary-section">
+          <div class="losses-grid">
+            <div class="loss-item transport">
+              <mat-icon>local_shipping</mat-icon>
+              <div class="loss-details">
+                <span class="label">خسائر النقل</span>
+                <span class="value">{{ formatCurrency(transportOnlyLosses()) }}</span>
+              </div>
+            </div>
+            
+            <div class="loss-item sale">
+              <mat-icon>shopping_basket</mat-icon>
+              <div class="loss-details">
+                <span class="label">نافق البيع</span>
+                <span class="value">{{ formatCurrency(saleLosses()) }}</span>
+              </div>
+            </div>
+
+            <div class="loss-item farm">
+              <mat-icon>agriculture</mat-icon>
+              <div class="loss-details">
+                <span class="label">على المزارع</span>
+                <span class="value">{{ formatCurrency(lossesWithFarm()) }}</span>
+              </div>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+      }
+
       <div class="operations-grid">
         <button mat-raised-button color="primary" [routerLink]="['/operations/farm-loading/', operationId()]">
           <mat-icon>agriculture</mat-icon>

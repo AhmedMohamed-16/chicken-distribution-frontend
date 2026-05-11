@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { HasPermissionDirective } from './core/directives/hasPermission.directive';
 import { PERMISSIONS } from './core/constants/Permissions.constant';
@@ -20,10 +21,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,MatTableModule,
-    MatSidenavModule,MatMenuModule
-    ,MatToolbarModule,MatListModule,
-   MatDividerModule,MatIconModule,RouterLink,RouterLinkActive,HasPermissionDirective,CommonModule],
+  imports: [RouterOutlet, MatTableModule, MatSidenavModule, MatMenuModule, MatToolbarModule, MatListModule, MatExpansionModule, MatDividerModule, MatIconModule, RouterLink, RouterLinkActive, HasPermissionDirective, CommonModule],
      providers: [provideNativeDateAdapter(),
     { provide: MAT_DATE_LOCALE, useValue: 'ar-EG' },
     { provide: LOCALE_ID, useValue: 'ar-EG' }

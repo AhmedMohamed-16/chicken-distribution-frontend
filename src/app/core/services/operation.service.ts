@@ -15,7 +15,7 @@ import {
   FarmLoadingResponse,
   VehicleOperation
 } from '../models';
-import { environment } from '../../../environments/environment.prod';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -125,11 +125,21 @@ export class OperationService {
   }
 
   recordCost(
-    operationId: number,
+    operation_id: number,
     data: DailyCostRequest
   ): Observable<ApiResponse<DailyCost>> {
     return this.http.post<ApiResponse<DailyCost>>(
-      `${this.apiUrl}/${operationId}/cost`,
+      `${this.apiUrl}/${operation_id}/cost`,
+      data
+    );
+  }
+
+  recordCostPayment(
+    costId: number,
+    data: any
+  ): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${environment.apiUrl}/daily-costs/${costId}/payment`,
       data
     );
   }
@@ -184,6 +194,28 @@ export class OperationService {
   getVehicleOperationStatusColor(status: 'ACTIVE' | 'COMPLETED'): string {
     return status === 'ACTIVE' ? 'text-blue-600' : 'text-green-600';
   }
+  
+  getUnpaidCostsForOperation(operationId: number): Observable<ApiResponse<DailyCost[]>> {
+  return this.http.get<ApiResponse<DailyCost[]>>(
+    `${this.apiUrl}/${operationId}/unpaid-costs`
+  );
+  }
+
+  getUnpaidCosts(): Observable<ApiResponse<any[]>> {
+  console.log("in getUnpaidCosts");
+
+  const c = this.http.get<ApiResponse<any[]>>(
+    `${this.apiUrl}/unpaid-costs`
+  );
+
+  c.subscribe({
+    next: (res) => console.log("Response:", res),
+    error: (err) => console.error("Error:", err),
+    complete: () => console.log("Completed")
+  });
+
+  return c;
+}
 
 }
 

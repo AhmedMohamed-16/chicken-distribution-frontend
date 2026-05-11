@@ -108,13 +108,72 @@ mat-dialog-actions {
 }
 
 /* ===============================
-   RTL Support
+   Filters
 ================================ */
-[dir="rtl"] .table-container {
-  direction: rtl;
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  align-items: flex-end;
 }
 
-[dir="rtl"] th.mat-header-cell,
-[dir="rtl"] td.mat-cell {
-  text-align: right;
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
+
+.date-filter label {
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+
+.date-filter input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.summary-chips {
+  display: flex;
+  gap: 8px;
+  flex-grow: 1;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.opening-balance-row {
+  background-color: #f0f4f8;
+}
+
+.opening-balance-row td {
+  border-top: 2px solid #dee2e6;
+  color: #2c3e50;
+}
+
+.text-danger {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.text-success {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.no-data {
+  color: #6c757d;
+  font-style: italic;
+  background: #fff;
+}
+
+[dir="rtl"] .summary-chips {
+  justify-content: flex-start;
+}
+

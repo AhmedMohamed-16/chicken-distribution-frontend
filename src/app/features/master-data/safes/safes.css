@@ -1,0 +1,137 @@
+.container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title-group h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1e293b;
+}
+
+.title-group p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+.action-group {
+  display: flex;
+  gap: 12px;
+}
+
+.safes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.safe-card {
+  transition: transform 0.2s;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.safe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.safe-avatar {
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+}
+
+.balance-section {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.balance-section .label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.balance-section .amount {
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.balance-positive { color: #10b981; }
+.balance-negative { color: #ef4444; }
+.balance-zero { color: #94a3b8; }
+
+.stats-section {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.stat-item.in { color: #059669; }
+.stat-item.out { color: #dc2626; }
+
+.stat-item mat-icon { font-size: 16px; height: 16px; width: 16px; }
+
+.inactive-safe {
+  opacity: 0.7;
+  border-color: #f59e0b;
+}
+
+.status-badge {
+  margin-left: 8px;
+}
+
+.inactive-message {
+  text-align: center;
+  color: #d97706;
+  font-style: italic;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 32px;
+  color: #64748b;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+

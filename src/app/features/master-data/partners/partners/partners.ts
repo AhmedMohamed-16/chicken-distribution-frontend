@@ -195,12 +195,18 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
 
   // Computed signal to add vehicle investment info to partners
   partnersWithVehicleInfo = computed(() => {
-    return this.partners().map(partner => ({
-      ...partner,
-      vehicle_count: partner.vehicles?.length || 0,
-      total_vehicle_investment: this.calculateTotalVehicleInvestment(partner),
-      is_vehicle_partner: (partner.vehicles?.length || 0) > 0
-    }));
+    return this.partners().map(partner => {
+      const totalVehicleInvestment = this.calculateTotalVehicleInvestment(partner);
+      const investmentAmount = parseFloat(partner.investment_amount?.toString() || '0');
+      
+      return {
+        ...partner,
+        vehicle_count: partner.vehicles?.length || 0,
+        total_vehicle_investment: totalVehicleInvestment,
+        net_investment: Math.max(0, investmentAmount - totalVehicleInvestment),
+        is_vehicle_partner: (partner.vehicles?.length || 0) > 0
+      };
+    });
   });
 
   ngOnInit(): void {

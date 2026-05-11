@@ -523,3 +523,29 @@ button:disabled {
     display: block; /* or flex, depending on the element */
   }
 }
+
+/* ===============================
+   Debt Chip
+================================ */
+
+.debt-chip {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.debt-chip.green {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.debt-chip.red {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.debt-chip.gray {
+  background-color: #f3f4f6;
+  color: #374151;
+}

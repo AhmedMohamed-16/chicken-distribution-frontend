@@ -1,8 +1,8 @@
 import { inject, Injectable } from "@angular/core";
-import { environment } from "../../../environments/environment.prod";
+import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { CostCategory, PaginatedResponse, PaginationParams } from "../models";
+import { CostCategory, PaginatedResponse, PaginationParams, CostLedgerEntry, CostSummary } from "../models";
 
 interface CostCategoryResponse {
   success: boolean;
@@ -91,5 +91,28 @@ export class CostCategoryService {
 
   delete(id: number): Observable<CostCategoryResponse> {
     return this.http.delete<CostCategoryResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  // ==========================================
+  // COST BALANCES & LEDGER ENDPOINTS
+  // ==========================================
+  
+  getCategoryBalances(): Observable<{success: boolean; data: {all: CostCategory[], payables: CostCategory[], receivables: CostCategory[]}}> {
+    return this.http.get<{success: boolean; data: {all: CostCategory[], payables: CostCategory[], receivables: CostCategory[]}}>(`${environment.apiUrl}/cost-balances`);
+  }
+
+  getCostSummary(): Observable<{success: boolean; data: CostSummary}> {
+    return this.http.get<{success: boolean; data: CostSummary}>(`${environment.apiUrl}/cost-balances/summary`);
+  }
+
+  getStatement(id: number, startDate?: string, endDate?: string): Observable<{success: boolean; data: {category: CostCategory, ledger: CostLedgerEntry[], current_balance: number, balance_type: string, display_balance: string}}> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('start_date', startDate);
+    if (endDate) params = params.set('end_date', endDate);
+
+    return this.http.get<{success: boolean; data: {category: CostCategory, ledger: CostLedgerEntry[], current_balance: number, balance_type: string, display_balance: string}}>(
+      `${environment.apiUrl}/cost-balances/statement/${id}`,
+      { params }
+    );
   }
 }

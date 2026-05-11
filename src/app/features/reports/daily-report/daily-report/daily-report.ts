@@ -993,6 +993,7 @@ import {
   CostByCategory
 } from '../../../../core/models';
 import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction.pipe';
 
 @Component({
   selector: 'app-daily-report',
@@ -1014,7 +1015,8 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     MatSnackBarModule,
     MatExpansionModule,
     MatTooltipModule,
-    MatDividerModule
+    MatDividerModule,
+    BalanceDirectionPipe  // Added - shared pipe for balance type display
   ],
   templateUrl: './daily-report.html',
   styleUrls: ['./daily-report.css'],
@@ -1439,15 +1441,15 @@ export class DailyReport implements OnInit {
       total_purchases: vehicleData.purchases,
       total_revenue: vehicleData.revenue,
       total_losses: vehicleData.losses,
-          lossesWithFarm: vehicleData.lossesWithFarm ?? 0,
-    lossesWithoutFarm: vehicleData.lossesWithoutFarm ?? 0,
-      total_costs: vehicleData.vehicle_costs + vehicleData.other_costs,
+      lossesWithFarm: vehicleData.lossesWithFarm ?? 0,
+      lossesWithoutFarm: vehicleData.lossesWithoutFarm ?? 0,
+      total_costs: vehicleData.total_costs ?? (vehicleData.vehicle_costs + vehicleData.other_costs),
       vehicle_costs: vehicleData.vehicle_costs,
       other_costs: vehicleData.other_costs,
       net_profit: vehicleData.net_profit,
-      profit_margin_percentage: vehicleData.revenue > 0
+      profit_margin_percentage: vehicleData.profit_margin_percentage ?? (vehicleData.revenue > 0
         ? ((vehicleData.net_profit / vehicleData.revenue) * 100).toFixed(2) + '%'
-        : '0.00%'
+        : '0.00%')
     };
   });
 
@@ -1608,10 +1610,12 @@ export class DailyReport implements OnInit {
     return vehicle ? vehicle.name : '-';
   }
 
-  getBalanceStatusClass(balance: number): string {
-    if (balance > 0) return 'receivable'; // لنا عليهم
-    if (balance < 0) return 'payable'; // لهم علينا
-    return 'settled'; // متصفي
+  // Using balance_type from API - NO component calculation of balance direction
+  getBalanceStatusClass(balanceType: string | undefined): string {
+    const type = balanceType?.toUpperCase();
+    if (type === 'RECEIVABLE' || type === 'NET_RECEIVABLE') return 'receivable';
+    if (type === 'PAYABLE' || type === 'CREDIT' || type === 'NET_CREDIT') return 'payable';
+    return 'settled';
   }
 
   getPaymentStatusClass(isFullPayment: boolean, hasRemaining: boolean): string {
@@ -1736,12 +1740,12 @@ export class DailyReport implements OnInit {
       'محل الفراخ': sale.buyer?.name,
       'نوع الفراخ': sale.chicken_type?.name,
       'المركبة': sale.vehicle?.name,
-      'صافي الوزن (كجم)': this.toArabicNumbers(sale.weighing.net_chicken_weight.toFixed(2)),
-      'سعر الكيلو (جنيه)': this.toArabicNumbers(sale.pricing.price_per_kg.toFixed(2)),
-      'إجمالي المبلغ (جنيه)': this.toArabicNumbers(sale.pricing.total_amount.toFixed(2)),
-      'المدفوع (جنيه)': this.toArabicNumbers(sale.pricing.paid_amount.toFixed(2)),
-      'المتبقي (جنيه)': this.toArabicNumbers(sale.pricing.remaining_amount.toFixed(2)),
-      'حالة الدفع': sale.debt_info.status,
+      // 'صافي الوزن (كجم)': this.toArabicNumbers(sale.weighing.net_chicken_weight.toFixed(2)),
+      // 'سعر الكيلو (جنيه)': this.toArabicNumbers(sale.pricing.price_per_kg.toFixed(2)),
+      // 'إجمالي المبلغ (جنيه)': this.toArabicNumbers(sale.pricing.total_amount.toFixed(2)),
+      // 'المدفوع (جنيه)': this.toArabicNumbers(sale.pricing.paid_amount.toFixed(2)),
+      // 'المتبقي (جنيه)': this.toArabicNumbers(sale.pricing.remaining_amount.toFixed(2)),
+      // 'حالة الدفع': sale.debt_info.status,
       'التاريخ': this.formatDateTime(sale.transaction_time)
     }));
   }
@@ -1789,7 +1793,8 @@ export class DailyReport implements OnInit {
         'الاتجاه': payment.payment_details.direction_arabic,
         'الشرح': payment.payment_details.explanation,
         'الرصيد الحالي (جنيه)': this.toArabicNumbers((payment.farm?.current_balance || 0).toFixed(2)),
-        'حالة الرصيد': payment.farm?.balance_display || this.getBalanceDescription(payment.farm?.current_balance || 0),
+        // Using balance_type from API - NO component calculation
+        'حالة الرصيد': payment.farm?.display_balance || payment.farm?.balance_type || '-',
         'ملاحظات': payment.notes || '',
         'التاريخ': this.formatDateTime(payment.payment_date)
       });
@@ -1803,8 +1808,9 @@ export class DailyReport implements OnInit {
         'المبلغ (جنيه)': this.toArabicNumbers(payment.payment_details.amount.toFixed(2)),
         'الاتجاه': 'سداد دين',
         'الشرح': payment.payment_details.explanation,
-        'الرصيد الحالي (جنيه)': this.toArabicNumbers((payment.buyer?.total_debt || 0).toFixed(2)),
-        'حالة الرصيد': (payment.buyer?.total_debt || 0) > 0 ? 'مدين' : 'متصفي',
+        'الرصيد الحالي (جنيه)': this.toArabicNumbers((payment.buyer?.current_balance || 0).toFixed(2)),
+        // Using balance_type/display_balance from API - NO component calculation
+        'حالة الرصيد': payment.buyer?.display_balance || payment.buyer?.balance_type || '-',
         'ملاحظات': payment.notes || '',
         'التاريخ': this.formatDateTime(payment.payment_date)
       });
@@ -1937,10 +1943,5 @@ export class DailyReport implements OnInit {
     return data;
   }
 
-  // دالة مساعدة لوصف حالة الرصيد
-  private getBalanceDescription(balance: number): string {
-    if (balance > 0) return 'لهم علينا';
-    if (balance < 0) return 'لنا عليهم';
-    return 'متصفي';
-  }
+  // REMOVED: getBalanceDescription() - now uses display_balance or balance_type from API
 }

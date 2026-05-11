@@ -16,6 +16,13 @@
       <mat-label>العنوان</mat-label>
       <textarea matInput formControlName="address" rows="3"></textarea>
     </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>الرصيد الحالي</mat-label>
+      <input matInput type="number" formControlName="current_balance" step="0.01">
+      <mat-hint>موجب = عليه دين | سالب = علينا دين</mat-hint>
+      <mat-error>الرقم بين -999,999 و +999,999</mat-error>
+    </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

@@ -53,171 +53,173 @@
 
     <!-- Loading State -->
     @if (loading()) {
-      <div class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p class="loading-text">جاري تحميل البيانات...</p>
-      </div>
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">جاري تحميل البيانات...</p>
+    </div>
     }
 
     <!-- Error State -->
     @if (error()) {
-      <div class="empty-state">
-        <mat-icon class="empty-icon">error_outline</mat-icon>
-        <h2>حدث خطأ</h2>
-        <p>{{ error() }}</p>
-      </div>
+    <div class="empty-state">
+      <mat-icon class="empty-icon">error_outline</mat-icon>
+      <h2>حدث خطأ</h2>
+      <p>{{ error() }}</p>
+    </div>
     }
 
     <!-- ========================================
          SUMMARY SECTION
          ======================================== -->
     @if (!loading() && summary()) {
-      <mat-card class="metrics-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">summarize</mat-icon>
-          <mat-card-title>ملخص الحساب</mat-card-title>
-        </mat-card-header>
+    <mat-card class="metrics-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">summarize</mat-icon>
+        <mat-card-title>ملخص الحساب</mat-card-title>
+      </mat-card-header>
 
-        <mat-card-content>
-          <div class="metrics-grid">
+      <mat-card-content>
+        <div class="metrics-grid">
 
-            @if (summary() && 'opening_balance' in summary()!) {
-              <div class="metric-item">
-                <span class="metric-label">الرصيد الافتتاحي</span>
-                <span class="metric-value" [ngClass]="getBalanceClass(summary()!.opening_balance)">
-                  {{ formatCurrency(summary()!.opening_balance) }} جنيه
-                </span>
-              </div>
-            }
-
-            @if (summary() && 'total_purchases' in summary()!) {
-              <div class="metric-item">
-                <span class="metric-label">إجمالي المشتريات</span>
-                <span class="metric-value">
-                  {{ formatCurrency(summary()!.total_purchases!) }} جنيه
-                </span>
-              </div>
-            }
-
-            @if (summary() && 'total_sales' in summary()!) {
-              <div class="metric-item">
-                <span class="metric-label">إجمالي المبيعات</span>
-                <span class="metric-value">
-                  {{ formatCurrency(totalSales) }} جنيه
-                </span>
-              </div>
-            }
-
-            @if (summary() && 'total_payments' in summary()!) {
-              <div class="metric-item">
-                <span class="metric-label">إجمالي المدفوعات</span>
-                <span class="metric-value">
-                  {{ formatCurrency(summary()!.total_payments!) }} جنيه
-                </span>
-              </div>
-            }
-
-            @if (summary() && 'closing_balance' in summary()!) {
-              <div class="metric-item" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
-                <span class="metric-label">الرصيد الختامي</span>
-                <span class="metric-value" [ngClass]="getBalanceClass(summary()!.closing_balance)">
-                  {{ formatCurrency(summary()!.closing_balance) }} جنيه
-                </span>
-              </div>
-            }
-
+          @if (summary() && 'opening_balance' in summary()!) {
+          <div class="metric-item">
+            <span class="metric-label">الرصيد الافتتاحي</span>
+            <span class="metric-value" [ngClass]="getBalanceClass(summary()!.opening_balance)">
+              {{ formatCurrency(summary()!.opening_balance) }} جنيه
+            </span>
           </div>
-        </mat-card-content>
-      </mat-card>
+          }
+
+          <!-- Farm Statement: total_purchases from API -->
+          @if (getTotalPurchases() !== null) {
+          <div class="metric-item">
+            <span class="metric-label">إجمالي المشتريات</span>
+            <span class="metric-value">
+              {{ formatCurrency(getTotalPurchases()!) }} جنيه
+            </span>
+          </div>
+          }
+
+          <!-- Buyer Statement: total_sales from API -->
+          @if (getTotalSales() !== null) {
+          <div class="metric-item">
+            <span class="metric-label">إجمالي المبيعات</span>
+            <span class="metric-value">
+              {{ formatCurrency(getTotalSales()!) }} جنيه
+            </span>
+          </div>
+          }
+
+          @if (summary() && 'total_payments' in summary()!) {
+          <div class="metric-item">
+            <span class="metric-label">إجمالي المدفوعات</span>
+            <span class="metric-value">
+              {{ formatCurrency(summary()!.total_payments!) }} جنيه
+            </span>
+          </div>
+          }
+
+          @if (summary() && 'closing_balance' in summary()!) {
+          <div class="metric-item" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+            <span class="metric-label">الرصيد الختامي</span>
+            <span class="metric-value" [ngClass]="getBalanceClass(summary()!.closing_balance)">
+              {{ formatCurrency(summary()!.closing_balance) }} جنيه
+            </span>
+          </div>
+          }
+
+        </div>
+      </mat-card-content>
+    </mat-card>
     }
 
     <!-- ========================================
          TRANSACTIONS TABLE
          ======================================== -->
     @if (!loading() && hasData()) {
-      <mat-card class="metrics-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">list_alt</mat-icon>
-          <mat-card-title>تفاصيل الحركات</mat-card-title>
-        </mat-card-header>
+    <mat-card class="metrics-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">list_alt</mat-icon>
+        <mat-card-title>تفاصيل الحركات</mat-card-title>
+      </mat-card-header>
 
-        <mat-card-content>
-          <div class="table-container">
-            <table mat-table [dataSource]="transactions()">
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="transactions()">
 
-              <!-- Date Column -->
-              <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef>التاريخ</th>
-                <td mat-cell *matCellDef="let transaction">
-                  {{ formatDateTime(transaction.date) }}
-                </td>
-              </ng-container>
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>التاريخ</th>
+              <td mat-cell *matCellDef="let transaction">
+                {{ formatDateTime(transaction.date) }}
+              </td>
+            </ng-container>
 
-              <!-- Type Column -->
-              <ng-container matColumnDef="type">
-                <th mat-header-cell *matHeaderCellDef>النوع</th>
-                <td mat-cell *matCellDef="let transaction">
-                  <mat-chip [attr.data-type]="transaction.type">
-                    {{ getTransactionTypeLabel(transaction.type) }}
-                  </mat-chip>
-                </td>
-              </ng-container>
+            <!-- Type Column -->
+            <ng-container matColumnDef="entry_type">
+              <th mat-header-cell *matHeaderCellDef>النوع</th>
+              <td mat-cell *matCellDef="let transaction">
+                <mat-chip [attr.data-type]="transaction.entry_type">
+                  {{ getTransactionTypeLabel(transaction.entry_type) }}
+                </mat-chip>
+              </td>
+            </ng-container>
 
-              <!-- Description Column -->
-              <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>الوصف</th>
-                <td mat-cell *matCellDef="let transaction">
-                  {{ transaction.description || '-' }}
-                </td>
-              </ng-container>
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>الوصف</th>
+              <td mat-cell *matCellDef="let transaction">
+                {{ transaction.description || '-' }}
+              </td>
+            </ng-container>
 
-              <!-- Amount Column -->
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>المبلغ</th>
-                <td mat-cell *matCellDef="let transaction">
-                  {{ formatCurrency(transaction.amount) }}
-                </td>
-              </ng-container>
+            <!-- Amount Column -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>المبلغ</th>
+              <td mat-cell *matCellDef="let transaction">
+                {{ formatCurrency(transaction.amount) }}
+              </td>
+            </ng-container>
 
-              <!-- Paid Now Column -->
-              <ng-container matColumnDef="paid_now">
-                <th mat-header-cell *matHeaderCellDef>المدفوع</th>
-                <td mat-cell *matCellDef="let transaction">
-                  {{ formatCurrency(transaction.paid_now) }}
-                </td>
-              </ng-container>
+            <!-- Paid Now Column -->
+            <ng-container matColumnDef="paid_now">
+              <th mat-header-cell *matHeaderCellDef>المدفوع</th>
+              <td mat-cell *matCellDef="let transaction">
+                {{ formatCurrency(transaction.paid_now) }}
+              </td>
+            </ng-container>
 
-              <!-- Balance Change Column -->
-              <ng-container matColumnDef="balance_change">
-                <th mat-header-cell *matHeaderCellDef>التغيير</th>
-                <td mat-cell *matCellDef="let transaction" [ngClass]="getBalanceClass(transaction.balance_change)">
-                  {{ formatCurrency(transaction.balance_change) }}
-                </td>
-              </ng-container>
+            <!-- Balance Change Column -->
+            <ng-container matColumnDef="balance_change">
+              <th mat-header-cell *matHeaderCellDef>التغيير</th>
+              <td mat-cell *matCellDef="let transaction" [ngClass]="getBalanceClass(transaction.balance_change)">
+                {{ formatCurrency(transaction.balance_change) }}
+              </td>
+            </ng-container>
 
-              <!-- Running Balance Column -->
-              <ng-container matColumnDef="running_balance">
-                <th mat-header-cell *matHeaderCellDef>الرصيد الجاري</th>
-                <td mat-cell *matCellDef="let transaction" [ngClass]="getBalanceClass(transaction.running_balance)">
-                  <strong>{{ formatCurrency(transaction.running_balance) }}</strong>
-                </td>
-              </ng-container>
+            <!-- Running Balance Column -->
+            <ng-container matColumnDef="balance_after">
+              <th mat-header-cell *matHeaderCellDef>الرصيد الجاري</th>
+              <td mat-cell *matCellDef="let transaction" [ngClass]="getBalanceClass(transaction.balance_after)">
+                <strong>{{ formatCurrency(transaction.balance_after) }}</strong>
+              </td>
+            </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          </div>
-        </mat-card-content>
-      </mat-card>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
     }
 
     <!-- No Data State -->
     @if (!loading() && !hasData() && !error()) {
-      <div class="empty-state">
-        <mat-icon class="empty-icon">inbox</mat-icon>
-        <h2>لا توجد حركات</h2>
-        <p>لا توجد حركات في الفترة المحددة</p>
-      </div>
+    <div class="empty-state">
+      <mat-icon class="empty-icon">inbox</mat-icon>
+      <h2>لا توجد حركات</h2>
+      <p>لا توجد حركات في الفترة المحددة</p>
+    </div>
     }
 
   </mat-dialog-content>

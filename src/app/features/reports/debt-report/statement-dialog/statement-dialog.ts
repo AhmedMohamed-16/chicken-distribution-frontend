@@ -20,244 +20,67 @@ import { BuyerStatementSummary, DateRange, FarmStatementSummary, StatementDialog
 import { Observable } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction.pipe';
+import { AccountStatementComponent } from '../../../../shared/components/account-statement/account-statement.component';
 
 @Component({
   selector: 'app-statement-dialog',
+  standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule,
-    MatCardModule,
-    MatDividerModule,
-    MatChipsModule
+    AccountStatementComponent
   ],
-  templateUrl: './statement-dialog.html',
-  styleUrl: './statement-dialog.scss',
+  template: `
+    <div class="dialog-header d-flex justify-content-between align-items-center p-3">
+      <h2 mat-dialog-title class="m-0">كشف حساب تفصيلي</h2>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <mat-dialog-content class="mat-typography p-0">
+      <app-account-statement 
+        [entityType]="data.entityType.toUpperCase()" 
+        [entityId]="data.entityId"
+        [entityName]="data.entityName">
+      </app-account-statement>
+    </mat-dialog-content>
+    
+    <mat-dialog-actions align="end" class="p-2 no-print">
+      <button mat-button (click)="close()">إغلاق</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    :host {
+      display: block;
+      direction: rtl;
+    }
+    .dialog-header {
+      border-bottom: 1px solid #eee;
+    }
+    mat-dialog-content {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      mat-dialog-content {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+    }
+  `]
 })
-export class StatementDialog implements OnInit {
+export class StatementDialog {
   private dialogRef = inject(MatDialogRef<StatementDialog>);
-  private debtService = inject(DebtReportService);
   public data = inject<StatementDialogData>(MAT_DIALOG_DATA);
-  public utils = inject(ReportUtilitiesService);
-
-  // Signals for reactive state
-  loading = signal(false);
-  error = signal<string | null>(null);
-  transactions = signal<StatementTransaction[]>([]);
-  summary = signal<FarmStatementSummary | BuyerStatementSummary | null>(null);
-
-  formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
-formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
-formatPercentage = (value: number | undefined | null, decimals?: number) => this.utils.formatPercentage(value, decimals);
-formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDateTime(date);
-
-  // Date range form
-  dateRangeForm = new FormGroup({
-    from: new FormControl<Date | null>(null),
-    to: new FormControl<Date | null>(null)
-  });
-
-  // Table columns
-  displayedColumns = ['date', 'type', 'description', 'amount', 'paid_now', 'balance_change', 'running_balance'];
-
-  // Computed values
-  hasData = computed(() => this.transactions().length > 0);
-
-  ngOnInit(): void {
-    this.loadStatement();
-  }
-
-  loadStatement(): void {
-    this.loading.set(true);
-    this.error.set(null);
-
-    const dateRange = this.getDateRange();
-
-    const request$ = this.data.entityType === 'farm'
-      ? this.debtService.getFarmStatement(this.data.entityId, dateRange)
-      : this.debtService.getBuyerStatement(this.data.entityId, dateRange) as Observable<any>;
-
-    request$.subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.transactions.set(response.data.statement);
-          this.summary.set(response.data.summary);
-        }
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.message);
-        this.loading.set(false);
-      }
-    });
-  }
-
-  applyDateFilter(): void {
-    this.loadStatement();
-  }
-
-  clearDateFilter(): void {
-    this.dateRangeForm.reset();
-    this.loadStatement();
-  }
-
-  private getDateRange(): { from: string; to: string } | undefined {
-    const startDate = this.dateRangeForm.value.from;
-    const endDate = this.dateRangeForm.value.to;
-
-    if (!startDate && !endDate) {
-      return undefined;
-    }
-
-    return {
-      from: startDate ? this.formatDate(startDate) : '',
-      to: endDate ? this.formatDate(endDate) : ''
-    };
-  }
-
-  private formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
-
-
-  getTransactionTypeLabel(type: string): string {
-    const labels: { [key: string]: string } = {
-      'PURCHASE': 'شراء',
-      'SALE': 'بيع',
-      'PAYMENT': 'دفع',
-      'RECEIPT': 'استلام'
-    };
-    return labels[type] || type;
-  }
-
-  getBalanceClass(balance: number): string {
-    if (balance > 0) return 'positive-balance';
-    if (balance < 0) return 'negative-balance';
-    return 'zero-balance';
-  }
-
-
-  /**
-   * تصدير كشف الحساب إلى ملف Excel بالعربية مع تنسيق احترافي
-   */
-  exportToExcel(): void {
-    const transactions = this.transactions();
-    const summary = this.summary();
-
-    // إنشاء Workbook
-    const wb = XLSX.utils.book_new();
-
-    // ===== إعداد بيانات الملخص =====
-    const summaryData: any[][] = [
-      ['كشف حساب: ' + this.data.entityName],
-      ['التاريخ: ' + this.formatDateTime(new Date())],
-      []
-    ];
-
-    if (summary) {
-      summaryData.push(['ملخص الحساب']);
-      summaryData.push([]);
-
-      if ('opening_balance' in summary) {
-        summaryData.push(['الرصيد الافتتاحي', this.formatCurrency(summary.opening_balance) + ' جنيه']);
-      }
-
-      if ('total_purchases' in summary && summary.total_purchases) {
-        summaryData.push(['إجمالي المشتريات', this.formatCurrency(summary.total_purchases) + ' جنيه']);
-      }
-
-      if ('total_sales' in summary && (summary as BuyerStatementSummary).total_sales) {
-        summaryData.push(['إجمالي المبيعات', this.formatCurrency((summary as BuyerStatementSummary).total_sales) + ' جنيه']);
-      }
-
-      if ('total_payments' in summary && summary.total_payments) {
-        summaryData.push(['إجمالي المدفوعات', this.formatCurrency(summary.total_payments) + ' جنيه']);
-      }
-
-      if ('closing_balance' in summary) {
-        summaryData.push(['الرصيد الختامي', this.formatCurrency(summary.closing_balance) + ' جنيه']);
-      }
-
-      summaryData.push([]);
-      summaryData.push([]);
-    }
-
-    // ===== إعداد بيانات المعاملات =====
-    summaryData.push(['تفاصيل الحركات']);
-    summaryData.push([]);
-
-    // رؤوس الأعمدة
-    const headers = [
-      'التاريخ',
-      'النوع',
-      'الوصف',
-      'المبلغ',
-      'المدفوع',
-      'التغيير في الرصيد',
-      'الرصيد الجاري'
-    ];
-    summaryData.push(headers);
-
-    // بيانات المعاملات
-    transactions.forEach(transaction => {
-      summaryData.push([
-        this.formatDateTime(transaction.date),
-        this.getTransactionTypeLabel(transaction.type),
-        transaction.description || '-',
-        this.formatCurrency(transaction.amount) + ' جنيه',
-        this.formatCurrency(transaction.paid_now) + ' جنيه',
-        this.formatCurrency(transaction.balance_change) + ' جنيه',
-        this.formatCurrency(transaction.running_balance) + ' جنيه'
-      ]);
-    });
-
-    // إنشاء Worksheet
-    const ws = XLSX.utils.aoa_to_sheet(summaryData);
-
-    // ===== تنسيق العرض =====
-    const columnWidths = [
-      { wch: 20 },  // التاريخ
-      { wch: 12 },  // النوع
-      { wch: 30 },  // الوصف
-      { wch: 15 },  // المبلغ
-      { wch: 15 },  // المدفوع
-      { wch: 18 },  // التغيير
-      { wch: 18 }   // الرصيد الجاري
-    ];
-    ws['!cols'] = columnWidths;
-
-    // إضافة Worksheet إلى Workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'كشف الحساب');
-
-    // حفظ الملف
-    const fileName = `كشف_حساب_${this.data.entityName}_${this.formatDateForFileName(new Date())}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-  }
-
-  /**
-   * تنسيق التاريخ لاسم الملف
-   */
-  private formatDateForFileName(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
 
   close(): void {
     this.dialogRef.close();
-  }
-
-  get totalSales(): number {
-    return Number((this.summary() as any)?.total_sales ?? 0);
   }
 }

@@ -312,3 +312,33 @@ mat-divider {
   margin-left: 0;
   margin-right: 0.5rem;
 }
+
+/* ===============================
+   TRANSPORT LOSS INTEGRATION
+   =============================== */
+.transport-loss-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.loss-badge {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid #ffcdd2;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.transport-loss-container button {
+  height: 48px;
+  border-radius: 8px;
+  border-width: 2px;
+}

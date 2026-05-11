@@ -24,11 +24,12 @@ export class FormDialog {
   constructor(@Inject(MAT_DIALOG_DATA) public data: Farm) {}
 
 
-  form = this.fb.nonNullable.group({
+form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     owner_name: [''],
     phone: [''],
-    location: ['']
+    location: [''],
+    current_balance: [0, [Validators.min(-999999), Validators.max(999999)]]
   });
 
   ngOnInit(): void {

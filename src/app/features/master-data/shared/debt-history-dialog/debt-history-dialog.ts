@@ -78,6 +78,7 @@
 import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
@@ -107,7 +108,8 @@ interface DebtHistoryItem {
     MatTableModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatButtonModule
+    MatButtonModule,
+    FormsModule
   ],
   templateUrl: './debt-history-dialog.html',
   styleUrl: './debt-history-dialog.css',
@@ -120,6 +122,9 @@ export class DebtHistoryDialog implements OnInit {
   loading = signal(true);
   dataSource = signal<any[]>([]);
   currentDebt = signal(0);
+  openingBalance = signal(0);
+  startDate = signal<string>('');
+  endDate = signal<string>('');
 private utils = inject(ReportUtilitiesService);
  formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
 formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);
@@ -138,21 +143,27 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
   ) {}
 
   ngOnInit(): void {
+    this.loadHistory();
+  }
+
+  loadHistory(): void {
+    this.loading.set(true);
+    const params: any = {};
+    if (this.startDate()) params.startDate = this.startDate();
+    if (this.endDate()) params.endDate = this.endDate();
+
     const request$ =
       this.data.entityType === 'buyer'
-        ? this.buyerService.getDebtHistory(this.data.id)
-        : this.farmService.getDebtHistory(this.data.id);
+        ? this.buyerService.getDebtHistory(this.data.id, params)
+        : this.farmService.getDebtHistory(this.data.id, params);
 
     request$.subscribe({
       next: (res: any) => {
-        // Set current debt
-        this.currentDebt.set(
-          this.data.entityType === 'buyer'
-            ? res.data.current_debt
-            : res.data.current_balance
-        );
+        // Set balances
+        this.currentDebt.set(res.data.current_balance || res.data.current_debt || 0);
+        this.openingBalance.set(res.data.opening_balance || 0);
 
-        // Map history items واخد أول 30 صف فقط
+        // Map history items
         const history = res.data.history.map((item: DebtHistoryItem) => {
           if (item.type === 'transaction') {
             return {
@@ -163,7 +174,6 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
               debt_after: item.debt_after
             };
           } else {
-            // Payment
             return {
               date: item.date,
               type: 'payment',
@@ -176,7 +186,6 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
 
         this.dataSource.set(history);
         this.loading.set(false);
-        console.log("dataSource", this.dataSource());
       },
       error: (err) => {
         console.error('Error loading debt history:', err);
@@ -184,4 +193,9 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
       }
     });
   }
+
+  onDateChange(): void {
+    this.loadHistory();
+  }
+
 }

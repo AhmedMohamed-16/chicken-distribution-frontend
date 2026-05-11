@@ -1,0 +1,265 @@
+<div class="salaries-container">
+
+    <!-- Header -->
+    <div class="header-row">
+        <div class="title-section">
+            <h2 class="page-title">إدارة المرتبات</h2>
+            <p class="subtitle">تتبع صرف مرتبات الموظفين</p>
+        </div>
+
+        @if (canManage()) {
+        <div class="header-actions">
+            <button
+                mat-raised-button
+                color="primary"
+                class="add-button"
+                (click)="openRecordDialog()">
+
+                <mat-icon>add_circle</mat-icon>
+                <span>صرف مرتب</span>
+            </button>
+        </div>
+        }
+    </div>
+
+    <!-- Filters -->
+    <mat-card class="filter-card">
+        <mat-card-content>
+
+            <form [formGroup]="filterForm" class="filter-form">
+
+                <div class="filter-grid">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>الموظف</mat-label>
+
+                        <mat-select
+                            formControlName="employee_id"
+                            (selectionChange)="onFilterChange()">
+
+                            <mat-option [value]="null">
+                                كل الموظفين
+                            </mat-option>
+
+                            @for (emp of employees(); track emp.id) {
+                            <mat-option [value]="emp.id">
+                                {{ emp.name }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>الشهر</mat-label>
+
+                        <mat-select
+                            formControlName="month"
+                            (selectionChange)="onFilterChange()">
+
+                            <mat-option [value]="null">
+                                كل الأشهر
+                            </mat-option>
+
+                            @for (month of monthNames; track month; let i = $index) {
+                            <mat-option [value]="i + 1">
+                                {{ month }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>السنة</mat-label>
+
+                        <input
+                            matInput
+                            type="number"
+                            formControlName="year"
+                            (input)="onFilterChange()">
+                    </mat-form-field>
+
+                </div>
+
+            </form>
+
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Summary -->
+    <mat-card class="summary-card">
+        <mat-card-content>
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <div class="icon-circle">
+                        <mat-icon>payments</mat-icon>
+                    </div>
+
+                    <div class="summary-details">
+                        <span class="label">
+                            إجمالي المرتبات المدفوعة هذا الشهر
+                        </span>
+
+                        <span class="value">
+                            {{ formatCurrency(totalPaidThisMonth()) }}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Table Card -->
+    <mat-card class="table-card mat-elevation-z2">
+
+        @if (isLoading()) {
+        <div class="loading-shade">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        }
+
+        <div class="table-wrapper">
+
+            <table
+                mat-table
+                [dataSource]="salaries()"
+                class="salaries-table">
+
+                <!-- Employee -->
+                <ng-container matColumnDef="employee">
+                    <th mat-header-cell *matHeaderCellDef>
+                        الموظف
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        <div class="cell-primary">
+                            {{ getEmployeeName(salary.employee_id) }}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Month -->
+                <ng-container matColumnDef="month">
+                    <th mat-header-cell *matHeaderCellDef>
+                        الشهر
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        {{ getMonthName(salary.period_month) }}
+                    </td>
+                </ng-container>
+
+                <!-- Year -->
+                <ng-container matColumnDef="year">
+                    <th mat-header-cell *matHeaderCellDef>
+                        السنة
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        {{ salary.period_year }}
+                    </td>
+                </ng-container>
+
+                <!-- Amount -->
+                <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef>
+                        المبلغ
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        <span class="amount-text">
+                            {{ formatCurrency(salary.amount) }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Payment Method -->
+                <ng-container matColumnDef="payment_method">
+                    <th mat-header-cell *matHeaderCellDef>
+                        طريقة الدفع
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        {{ getPaymentMethodName(salary.payment_method) }}
+                    </td>
+                </ng-container>
+
+                <!-- Date -->
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef>
+                        التاريخ
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        {{ formatDate(salary.payment_date) }}
+                    </td>
+                </ng-container>
+
+                <!-- Created By -->
+                <ng-container matColumnDef="created_by">
+                    <th mat-header-cell *matHeaderCellDef>
+                        بواسطة
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+                        {{ salary.created_by || '-' }}
+                    </td>
+                </ng-container>
+
+                <!-- Actions -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>
+                        إجراءات
+                    </th>
+
+                    <td mat-cell *matCellDef="let salary">
+
+                        <div class="action-buttons">
+
+                            <button
+                                mat-icon-button
+                                color="primary"
+                                matTooltip="ملخص الموظف"
+                                (click)="openSummaryDialog(salary)">
+
+                                <mat-icon>analytics</mat-icon>
+                            </button>
+
+                        </div>
+
+                    </td>
+                </ng-container>
+
+                <tr
+                    mat-header-row
+                    *matHeaderRowDef="displayedColumns; sticky: true">
+                </tr>
+
+                <tr
+                    mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                    class="salary-row">
+                </tr>
+
+            </table>
+
+        </div>
+
+        @if (!isLoading() && salaries().length === 0) {
+        <div class="empty-state">
+            <mat-icon>work_off</mat-icon>
+
+            <h3>لا توجد سجلات مرتبات</h3>
+
+            <p>
+                لم يتم العثور على أي بيانات مطابقة للفلاتر الحالية
+            </p>
+        </div>
+        }
+
+    </mat-card>
+
+</div>

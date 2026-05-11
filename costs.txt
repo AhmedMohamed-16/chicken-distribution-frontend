@@ -1,0 +1,1414 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { ActivatedRoute, Router } from '@angular/router';
+import { OperationService } from '../../../../core/services/operation.service';
+import { CostCategoryService } from '../../../../core/services/cost-category.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CostCategory, DailyCost, DailyOperation } from '../../../../core/models';
+import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { CostPaymentDialogComponent } from '../cost-payment-dialog/cost-payment-dialog.component';
+import { PaymentMethodSelectorComponent } from '../../../../shared/components/payment-method-selector/payment-method-selector.component';
+import { PersonSelectorComponent } from '../../../../shared/components/person-selector/person-selector.component';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { computed } from '@angular/core';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+@Component({
+  selector: 'app-daily-costs',
+  imports: [ CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatDialogModule,
+    PaymentMethodSelectorComponent,
+    PersonSelectorComponent,
+    MatChipsModule,
+    MatTooltipModule
+],
+  templateUrl: './daily-costs.html',
+  styleUrl: './daily-costs.css',
+})
+export class DailyCosts implements OnInit {
+  // private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  // private operationService = inject(OperationService);
+  private snackBar = inject(MatSnackBar);
+  private costCategoryService = inject(CostCategoryService);
+  private dialog = inject(MatDialog);
+  loading = signal(false);
+
+  submitting = signal(false);
+  operationId = signal<number>(0);
+  // categories = signal<any[]>([]);
+private fb = inject(FormBuilder);
+  private costService = inject(OperationService);
+
+  operation = signal<DailyOperation | null>(null);
+  costCategories = signal<CostCategory[]>([]);
+  costs = signal<DailyCost[]>([]);
+  selectedCategory = signal<CostCategory | null>(null);
+
+
+
+  costForm = this.fb.nonNullable.group({
+    cost_category_id: [null as number | null, Validators.required],
+    amount: [0, [Validators.required, Validators.min(0.01)]],
+    description: [''],
+    vehicle_id: [null as number | null],  // Conditionally required
+
+    // NEW: Payment metadata
+    paid_amount: [0, [Validators.min(0)]],
+    payment_method: ['CASH'],
+    safe_id: [null as number | null],
+    paid_by_person_type: [null as string | null],
+    paid_by_person_id: [null as number | null]
+
+  });
+
+  // ✅ Compute visibility for payment method selector
+  paidAmountSignal = toSignal(this.costForm.get('paid_amount')!.valueChanges, { initialValue: 0 });
+  showPaymentSelector = computed(() => (this.paidAmountSignal() || 0) > 0);
+
+  // ✅ Compute remaining amount for UI hint
+  amountSignal = toSignal(this.costForm.get('amount')!.valueChanges, { initialValue: 0 });
+  remainingAmount = computed(() => {
+    const total = this.amountSignal() || 0;
+    const paid = this.paidAmountSignal() || 0;
+    return total - paid;
+  });
+private utils = inject(ReportUtilitiesService);
+ formatNumber = (num: number | undefined | null|string, decimals?: number) => this.utils.formatNumber(num, decimals);
+
+  ngOnInit() {
+    this.operationId.set(+this.route.snapshot.params['id']);
+    this.loadOperation();
+    this.loadCategories();
+    // ✅ Watch category changes to enforce vehicle selection
+    this.costForm.get('cost_category_id')?.valueChanges.subscribe(id => {
+      const category = this.costCategories().find(c => c.id === id);
+      this.selectedCategory.set(category || null);
+
+      // ✅ Make vehicle_id required for vehicle costs
+      if (category?.is_vehicle_cost) {
+        this.costForm.get('vehicle_id')?.setValidators([Validators.required]);
+      } else {
+        this.costForm.get('vehicle_id')?.clearValidators();
+        this.costForm.patchValue({ vehicle_id: null });
+      }
+
+      this.costForm.get('vehicle_id')?.updateValueAndValidity();
+    });
+  }
+  // ngOnInit(): void {
+  //   this.operationId.set(+this.route.snapshot.params['id']);
+  //   this.loadCategories();
+
+  // }
+  loadOperation(): void {
+this.loading.set(true);
+    this.costService.getOperation(this.operationId()).subscribe({
+      next: (res: any) => {
+        // إذا API بيرجع { data: [] } أو مصفوفة مباشرة
+        this.operation.set(res?.data ?? res);
+        console.log(this.operation());
+
+        this.loading.set(false);
+      },
+      error: () => {
+        this.snackBar.open('فشل تحميل العمليه', 'حسناً', { duration: 3000 });
+        this.loading.set(false);
+      }
+    });
+  }
+  loadCategories(): void {
+    this.loading.set(true);
+    this.costCategoryService.getAll().subscribe({
+      next: (res: any) => {
+        // إذا API بيرجع { data: [] } أو مصفوفة مباشرة
+        this.costCategories.set(res?.data ?? res);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.snackBar.open('فشل تحميل فئات التكاليف', 'حسناً', { duration: 3000 });
+        this.loading.set(false);
+      }
+    });
+  }
+
+  // onSubmit(): void {
+  //   if (this.costForm.invalid) return;
+
+  //   this.submitting.set(true);
+  //   const payload = this.costForm.getRawValue();
+
+  //   this.operationService.recordCost(this.operationId(), payload as any).subscribe({
+  //     next: () => {
+  //       this.snackBar.open('تم تسجيل التكلفة بنجاح', 'حسناً', { duration: 3000 });
+  //       this.router.navigate(['/operations/daily', this.operationId()]);
+  //     },
+  //     error: (error:HttpErrorResponse) => {
+  //       this.submitting.set(false);
+  //       this.snackBar.open(error.error?.message||'فشل تسجيل التكلفة', 'حسناً', { duration: 3000 });
+  //     }
+  //   });
+  // }
+
+  onSubmit() {
+    if (!this.costForm.valid || !this.operation()) return;
+    this.submitting.set(true);
+    const data = {
+      cost_category_id: this.costForm.value.cost_category_id!,
+      vehicle_id: this.costForm.value.vehicle_id || undefined,
+      amount: this.costForm.value.amount!,
+      description: this.costForm.value.description || undefined,
+      paid_amount: this.costForm.value.paid_amount || 0,
+      payment_method: this.costForm.value.payment_method || 'CASH',
+      safe_id: this.costForm.value.safe_id || undefined
+    };
+
+    this.costService.recordCost(this.operation()!.id, data).subscribe({
+      next: (cost:any) => {
+        this.snackBar.open('تم تسجيل التكلفة بنجاح', 'حسناً', { duration: 3000 });
+        this.costs.update(list => [...list, cost.data]);
+        this.costForm.reset();
+        console.log("costs",this.costs());
+
+         this.submitting.set(false);
+      },
+      error: (error:HttpErrorResponse) =>{
+        this.submitting.set(false);
+        console.error(error.error?.message);
+        this.snackBar.open(error.error?.message||'فشل تسجيل التكلفة', 'حسناً', { duration: 3000 });
+
+      }
+    });
+  }
+
+  getVehicleName(vehicleId: number): string {
+    return this.operation()?.vehicles?.find(v => v.id === vehicleId)?.name || '';
+  }
+  cancel(): void {
+    this.router.navigate(['/operations/daily', this.operationId()]);
+  }
+
+  // ✅ Status helper for table
+  getStatusInfo(cost: DailyCost) {
+    if (cost.is_paid || cost.paid_amount >= cost.amount) {
+      return { label: 'مدفوع', color: 'success' };
+    }
+    if (cost.paid_amount > 0) {
+      return { label: 'جزئي', color: 'warning' };
+    }
+    return { label: 'غير مدفوع', color: 'error' };
+  }
+
+  // ✅ Record payment after recording cost
+  openPaymentDialog(cost: DailyCost): void {
+    const dialogRef = this.dialog.open(CostPaymentDialogComponent, {
+      width: '500px',
+      data: { cost }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadOperation(); // Reload to get updated costs and balances
+      }
+    });
+  }
+}
+
+
+<div class="costs-container">
+  <h2>تسجيل التكاليف اليومية</h2>
+
+  <form [formGroup]="costForm" (ngSubmit)="onSubmit()">
+
+    <!-- Cost Category -->
+    <mat-form-field>
+      <mat-label>فئة التكلفة</mat-label>
+      <mat-select formControlName="cost_category_id">
+        <mat-option *ngFor="let cat of costCategories()" [value]="cat.id">
+          {{ cat.name }}
+          <span *ngIf="cat.is_vehicle_cost" class="vehicle-badge">(تكلفة مركبة)</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- ✅ VEHICLE SELECTOR (shown only for vehicle costs) -->
+    <mat-form-field *ngIf="selectedCategory()?.is_vehicle_cost">
+      <mat-label>المركبة</mat-label>
+      <mat-select formControlName="vehicle_id">
+        <mat-option *ngFor="let v of operation()?.vehicle_operations" [value]="v.vehicle?.id">
+          {{ v.vehicle?.name }} - {{ formatNumber(v.vehicle?.plate_number) }}-{{v.vehicle?.id}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="costForm.get('vehicle_id')?.hasError('required')">
+        يجب اختيار المركبة لتكاليف المركبات
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Amount & Payment -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>المبلغ الإجمالي (جنيه)</mat-label>
+        <input matInput type="number" formControlName="amount" step="0.01">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>المبلغ المدفوع الآن (جنيه)</mat-label>
+        <input matInput type="number" formControlName="paid_amount" step="0.01">
+        <mat-hint *ngIf="remainingAmount() > 0">
+          المتبقي سيُسجل كدين: {{ remainingAmount() | number:'1.2-2' }} جنيه
+        </mat-hint>
+        <mat-hint *ngIf="remainingAmount() === 0 && amountSignal() > 0">
+          ✅ تم دفع كامل المبلغ
+        </mat-hint>
+      </mat-form-field>
+    </div>
+
+    <!-- ✅ PAYMENT SELECTOR (shown only if paid_amount > 0) -->
+    @if (showPaymentSelector()) {
+    <div class="payment-metadata-section">
+      <app-payment-method-selector [parentForm]="costForm">
+      </app-payment-method-selector>
+      <app-person-selector [parentForm]="costForm" typeControlName="paid_by_person_type"
+        idControlName="paid_by_person_id">
+      </app-person-selector>
+    </div>
+
+    <!-- <div class="payment-metadata-section" required>
+          <app-payment-method-selector
+            [label]="selectedFarmBalanceType() !== 'RECEIVABLE' ? 'طريقة الدفع' : 'طريقة الاستلام'"
+            [parentForm]="loadingForm">
+          </app-payment-method-selector> -->
+
+    <!-- </div> -->
+
+    }
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>الوصف (اختياري)</mat-label>
+      <textarea matInput formControlName="description" rows="2"></textarea>
+    </mat-form-field>
+
+    <div class="button-group">
+      <button mat-raised-button color="primary" type="submit" [disabled]="costForm.invalid || submitting()">
+        @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+        تسجيل التكلفة
+        }
+      </button>
+      <button mat-button type="button" (click)="cancel()">
+        إلغاء
+      </button>
+    </div>
+  </form>
+
+  <!-- Costs List -->
+  <div class="costs-list">
+    <h3>التكاليف المسجلة للمهمة</h3>
+    <table mat-table [dataSource]="costs()" class="mat-elevation-z2">
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>الفئة</th>
+        <td mat-cell *matCellDef="let cost">
+          {{ cost.category?.name }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>المركبة</th>
+        <td mat-cell *matCellDef="let cost">
+          @if (cost.vehicle_id) {
+          {{ cost.vehicle?.name }}
+          } @else {
+          <span class="shared-cost">عامة</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>إجمالي المبلغ</th>
+        <td mat-cell *matCellDef="let cost">{{ cost.amount | number:'1.2-2' }} ج</td>
+      </ng-container>
+
+      <ng-container matColumnDef="paid">
+        <th mat-header-cell *matHeaderCellDef>المدفوع</th>
+        <td mat-cell *matCellDef="let cost">
+          <span [class.text-success]="cost.is_paid">
+            {{ cost.paid_amount | number:'1.2-2' }} ج
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>الحالة</th>
+        <td mat-cell *matCellDef="let cost">
+          @let status = getStatusInfo(cost);
+          <span class="status-chip" [class]="status.color">
+            {{ status.label }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+        <td mat-cell *matCellDef="let cost">
+          @if (!cost.is_paid && cost.remaining_amount > 0) {
+          <button mat-icon-button color="primary" (click)="openPaymentDialog(cost)" matTooltip="تسجيل دفعة">
+            <mat-icon>payments</mat-icon>
+          </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['category', 'vehicle', 'amount', 'paid', 'status', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['category', 'vehicle', 'amount', 'paid', 'status', 'actions']"></tr>
+    </table>
+  </div>
+</div>
+
+
+.costs-container {
+  direction: rtl;
+  padding: 16px;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+.costs-container h2 {
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.costs-container h3 {
+  margin: 28px 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* =========================
+   Form (Mobile)
+========================= */
+
+.costs-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.costs-container mat-form-field {
+  width: 100%;
+}
+
+/* Vehicle badge inside select */
+.vehicle-badge {
+  font-size: 0.75rem;
+  color: #777;
+  margin-inline-start: 6px;
+  font-style: italic;
+}
+
+/* =========================
+   Buttons (Mobile)
+========================= */
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.button-group button {
+  width: 100%;
+  min-height: 44px; /* touch target */
+  font-size: 0.95rem;
+}
+
+.button-group mat-spinner {
+  vertical-align: middle;
+}
+
+/* =========================
+   Costs List / Table (Mobile)
+========================= */
+
+.costs-list {
+  margin-top: 32px;
+  width: 100%;
+  overflow-x: auto; /* ✅ horizontal scroll on mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+.costs-list table {
+  width: 100%;
+  min-width: 520px; /* forces scroll on small screens */
+  border-collapse: collapse;
+  background: #fafafa;
+}
+
+.costs-list th,
+.costs-list td {
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.costs-list th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.costs-list td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.costs-list tr:last-child td {
+  border-bottom: none;
+}
+
+.costs-list tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Shared cost text */
+.shared-cost {
+  color: #999;
+  font-style: italic;
+}
+
+/* =========================
+   Tablet ≥ 768px
+========================= */
+
+@media (min-width: 768px) {
+  .costs-container {
+    padding: 20px;
+    max-width: 900px;
+  }
+
+  .costs-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .costs-container h3 {
+    font-size: 1.2rem;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .button-group button {
+    width: auto;
+    min-width: 160px;
+  }
+
+  .costs-list th,
+  .costs-list td {
+    font-size: 0.9rem;
+    padding: 14px 12px;
+  }
+}
+
+/* =========================
+   Desktop ≥ 1024px
+========================= */
+
+@media (min-width: 1024px) {
+  .costs-container {
+    max-width: 1000px;
+  }
+
+  .costs-list table {
+    min-width: 100%;
+  }
+
+  .costs-list th,
+  .costs-list td {
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================
+   Payment & Status Styles
+========================= */
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+.payment-metadata-section {
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed #ccc;
+  margin-bottom: 20px;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-chip.success {
+  background-color: #e6f4ea;
+  color: #1e8e3e;
+  border: 1px solid #ceead6;
+}
+
+.status-chip.warning {
+  background-color: #fef7e0;
+  color: #f9ab00;
+  border: 1px solid #feefc3;
+}
+
+.status-chip.error {
+  background-color: #fce8e6;
+  color: #d93025;
+  border: 1px solid #fad2cf;
+}
+
+.text-success {
+  color: #1e8e3e;
+  font-weight: 500;
+}
+
+.full-width {
+  width: 100%;
+}
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { OperationService } from '../../../../core/services/operation.service';
+import { DailyCost } from '../../../../core/models';
+import { PaymentMethodSelectorComponent } from '../../../../shared/components/payment-method-selector/payment-method-selector.component';
+import { PersonSelectorComponent } from '../../../../shared/components/person-selector/person-selector.component';
+
+@Component({
+  selector: 'app-cost-payment-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    PaymentMethodSelectorComponent,
+    PersonSelectorComponent
+  ],
+  templateUrl: './cost-payment-dialog.component.html',
+  styles: [`
+    .dialog-content {
+      display: flex;
+      direction: rtl;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 400px;
+      padding-top: 20px;
+    }
+    .full-width { width: 100%; }
+    .amount-info {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+  `]
+})
+export class CostPaymentDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private operationService = inject(OperationService);
+  private snackBar = inject(MatSnackBar);
+  private dialogRef = inject(MatDialogRef<CostPaymentDialogComponent>);
+
+  submitting = signal(false);
+
+  paymentForm = this.fb.group({
+    amount: [0, [Validators.required, Validators.min(0.01)]],
+    payment_method: ['CASH', Validators.required],
+    paid_by_person_type: [null as string | null, Validators.required],
+    paid_by_person_id: [null as number | null, Validators.required],
+    safe_id: [null as number | null],
+    notes: ['']
+  });
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { cost: DailyCost }) {}
+
+  ngOnInit(): void {
+    if (this.data.cost) {
+      const remaining = this.data.cost.remaining_amount;
+      this.paymentForm.get('amount')?.setValidators([
+        Validators.required,
+        Validators.min(0.01),
+        Validators.max(remaining)
+      ]);
+      this.paymentForm.patchValue({ amount: remaining });
+    }
+  }
+
+  onSubmit(): void {
+    if (this.paymentForm.invalid) return;
+
+    this.submitting.set(true);
+    const payload = this.paymentForm.value;
+
+    this.operationService.recordCostPayment(this.data.cost.id, payload).subscribe({
+      next: () => {
+        this.snackBar.open('تم تسجيل الدفعة بنجاح', 'حسناً', { duration: 3000 });
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        this.submitting.set(false);
+        this.snackBar.open(error.error?.message || 'فشل تسجيل الدفعة', 'حسناً', { duration: 3000 });
+      }
+    });
+  }
+
+  onCancel(): void {
+    this.dialogRef.close(false);
+  }
+}
+
+<h2 mat-dialog-title style="text-align: right;">تسجيل دفعة للمصروف</h2>
+
+<mat-dialog-content>
+  <div class="dialog-content">
+    <div class="amount-info">
+      <p><strong>المصروف:</strong> {{ data.cost.category?.name }}</p>
+      <p><strong>إجمالي المبلغ:</strong> {{ data.cost.amount | number:'1.2-2' }} جنيه</p>
+      <p><strong>المبلغ المتبقي:</strong> {{ data.cost.remaining_amount | number:'1.2-2' }} جنيه</p>
+    </div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>المبلغ المراد دفعه (جنيه)</mat-label>
+        <input matInput type="number" formControlName="amount" step="0.01">
+        <mat-error *ngIf="paymentForm.get('amount')?.hasError('max')">
+          المبلغ لا يمكن أن يتجاوز المتبقي
+        </mat-error>
+        <mat-error
+          *ngIf="paymentForm.get('amount')?.hasError('required') || paymentForm.get('amount')?.hasError('min')">
+          المبلغ مطلوب ويجب أن يكون أكبر من 0
+        </mat-error>
+      </mat-form-field>
+
+      <app-payment-method-selector [parentForm]="paymentForm">
+      </app-payment-method-selector>
+      <app-person-selector [parentForm]="paymentForm" typeControlName="paid_by_person_type"
+        idControlName="paid_by_person_id">
+      </app-person-selector>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>ملاحظات إضافية</mat-label>
+        <textarea matInput formControlName="notes" rows="2"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="gap: 10px;">
+  <button mat-button (click)="onCancel()" [disabled]="submitting()">إلغاء</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="paymentForm.invalid || submitting()">
+    <mat-spinner diameter="20" *ngIf="submitting()"></mat-spinner>
+    <span *ngIf="!submitting()">تأكيد الدفع</span>
+  </button>
+</mat-dialog-actions>
+
+recordCost(
+    operation_id: number,
+    data: DailyCostRequest
+  ): Observable<ApiResponse<DailyCost>> {
+    return this.http.post<ApiResponse<DailyCost>>(
+      `${this.apiUrl}/${operation_id}/cost`,
+      data
+    );
+  }
+
+  recordCostPayment(
+    costId: number,
+    data: any
+  ): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${environment.apiUrl}/daily-costs/${costId}/payment`,
+      data
+    );
+  }
+export interface CostCategory {
+  id: number;
+  name: string;
+  description?: string;
+  is_vehicle_cost: boolean;
+  category_type: string;
+
+}
+export interface DailyCost {
+  id: number;
+  daily_operation_id: number;
+  vehicle_id?: number;
+  cost_category_id: number;
+  cost_category?: CostCategory;
+  amount: number;
+  description?: string;
+  recorded_at: string;
+
+  // Payment fields
+  paid_amount: number;
+  is_paid: boolean;
+  remaining_amount: number;
+
+  cost_id: number;
+  category: CostCategory;
+  vehicle?: Vehicle;
+  cost_details: {
+    amount: number;
+    description: string;
+    allocation: string;
+    affects_vehicle_partners: boolean;
+  };
+  operation_id?: number;
+}
+
+export interface DailyOperation {
+  id: number;
+  operation_date: string;
+  vehicles?: Vehicle[];
+  vehicle_operations?: VehicleOperation[];
+  user_id: number;
+  status: 'OPEN' | 'CLOSED';
+  notes?: string;
+  created_at: string;
+  closed_at?: string;
+  farm_transactions?: FarmTransaction[];
+  sale_transactions?: SaleTransaction[];
+  transport_losses?: TransportLoss[];
+  daily_costs?: DailyCost[];
+  profit_distribution?: ProfitDistribution;
+
+
+  user?: User;
+  vehicle?: Vehicle; // Primary vehicle (deprecated)
+
+}"
+
+
+--------backend-------------------
+
+router.post('/daily-operations/:id/cost',
+  authenticate,
+  requirePermissions(['RECORD_COST']),
+  operationController.recordDailyCost
+);
+
+router.get('/daily-costs/unpaid',
+  authenticate,
+  requirePermissions(['VIEW_COSTS', 'RECORD_COST'], { requireAll: false }),
+  operationController.getUnpaidCosts
+);
+
+router.post('/daily-costs/:id/payment',
+  authenticate,
+  requirePermissions(['RECORD_COST']),
+  operationController.recordCostPayment
+);
+
+exports.getUnpaidCosts = async (req, res) => {
+  try {
+    const unpaidCosts = await DailyCost.findAll({
+      where: sequelize.literal('paid_amount < amount'),
+      include: [
+        { model: CostCategory, as: 'category' },
+        { model: DailyOperation, as: 'operation', attributes: ['operation_date', 'status'] },
+        { model: Vehicle, as: 'vehicle', attributes: ['name', 'plate_number'] }
+      ],
+      order: [['recorded_at', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      count: unpaidCosts.length,
+      data: unpaidCosts
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching unpaid costs',
+      error: error.message
+    });
+  }
+};
+
+exports.recordCostPayment = async (req, res) => {
+  const dbTransaction = await sequelize.transaction();
+  try {
+    const { id } = req.params; // daily_cost_id
+    const {
+      amount,
+      payment_date = new Date(),
+      safe_id,
+      payment_method = 'CASH',
+      notes,
+      paid_by_person_type,
+      paid_by_person_id
+    } = req.body;
+
+    const cost = await DailyCost.findByPk(id, { transaction: dbTransaction });
+    if (!cost) {
+      await dbTransaction.rollback();
+      return res.status(404).json({ success: false, message: 'التكلفة غير موجودة' });
+    }
+
+    const parsedAmount = parseFloat(amount) || 0;
+    if (parsedAmount <= 0) {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'يجب أن يكون مبلغ الدفع أكبر من صفر' });
+    }
+
+    const current_paid = parseFloat(cost.paid_amount) || 0;
+    const total_amount = parseFloat(cost.amount) || 0;
+    const remaining = total_amount - current_paid;
+
+    if (parsedAmount > remaining) {
+      await dbTransaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `المبلغ المدفوع (${parsedAmount}) يتجاوز المبلغ المتبقي (${remaining})`,
+        remaining
+      });
+    }
+
+    // Create payment record
+    const payment = await CostDebtPayment.create({
+      daily_cost_id: id,
+      amount: parsedAmount,
+      payment_date,
+      paid_by_user_id: req.user ? req.user.id : null,
+      paid_by_person_type,
+      paid_by_person_id,
+      payment_method,
+      safe_id,
+      notes
+    }, { transaction: dbTransaction });
+
+    // Update DailyCost paid_amount
+    await cost.update({
+      paid_amount: current_paid + parsedAmount
+    }, { transaction: dbTransaction });
+
+    // Financial Logging
+    await logTransaction({
+      transaction_type: 'EXPENSE',
+      direction: 'OUT',
+      amount: parsedAmount,
+      safe_id,
+      reference_type: 'CostDebtPayment',
+      reference_id: payment.id,
+      daily_operation_id: cost.daily_operation_id,
+      performed_by_user_id: req.user ? req.user.id : null,
+      paid_by_person_type,
+      paid_by_person_id,
+      payment_method, 
+      notes: notes || `دفعة من حساب تكلفة رقم ${id}`
+    }, dbTransaction);
+
+    // Update Safe
+    if (safe_id) {
+      const safe = await Safe.findByPk(safe_id, { transaction: dbTransaction });
+      if (safe) {
+        await safe.updateBalance(-parsedAmount, dbTransaction);
+      }
+    }
+
+    await dbTransaction.commit();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        payment,
+        new_paid_total: current_paid + parsedAmount,
+        remaining: remaining - parsedAmount,
+        is_fully_paid: (current_paid + parsedAmount) >= total_amount
+      }
+    });
+
+  } catch (error) {
+    if (dbTransaction) await dbTransaction.rollback();
+    res.status(500).json({
+      success: false,
+      message: 'Error recording cost payment',
+      error: error.message
+    });
+  }
+};
+
+exports.recordDailyCost = async (req, res) => {
+  const dbTransaction = await sequelize.transaction();
+
+  try {
+    const { 
+      vehicle_id, 
+      cost_category_id, 
+      amount, 
+      description,
+      paid_amount = 0,
+      payment_method = 'CASH',
+      safe_id, 
+      paid_by_person_type,
+      paid_by_person_id
+    } = req.body;
+
+    const parsedAmount = parseFloat(amount) || 0;
+    const parsedPaidAmount = parseFloat(paid_amount) || 0;
+
+    if (parsedPaidAmount < 0) {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'المبلغ المدفوع لا يمكن أن يكون سالباً' });
+    }
+
+    if (parsedPaidAmount > parsedAmount) {
+      await dbTransaction.rollback();
+      return res.status(400).json({ success: false, message: 'المبلغ المدفوع لا يمكن أن يتجاوز مبلغ التكلفة الإجمالي' });
+    }
+
+    // ✅ تحقق من العملية
+    const operation = await DailyOperation.findByPk(req.params.id, { transaction: dbTransaction });
+    if (!operation || operation.status === 'CLOSED') {
+      await dbTransaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'العملية غير موجودة أو مغلقة بالفعل'
+      });
+    }
+
+    let vehicleAssignment;
+    // ✅ لو تم تمرير vehicle_id، تحقق أن المركبة مسجلة في العملية
+    if (vehicle_id) {
+      vehicleAssignment = await VehicleOperation.findOne({
+        where: {
+          daily_operation_id: req.params.id,
+          vehicle_id,
+          status: 'ACTIVE'
+        },
+        transaction: dbTransaction
+      });
+
+      if (!vehicleAssignment) {
+        await dbTransaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: `Vehicle ${vehicle_id} is not assigned to this operation`
+        });
+      }
+    }
+
+    // ✅ إنشاء التكلفة
+    const cost = await DailyCost.create({
+      daily_operation_id: req.params.id,
+      vehicle_id: vehicle_id || null,
+      vehicle_operation_id: vehicleAssignment ? vehicleAssignment.id : null,
+      cost_category_id,
+      amount: parsedAmount,
+      paid_amount: parsedPaidAmount,
+      description,
+      paid_by_user_id:  (req.user ? req.user.id : null),
+      paid_by_person_type,
+      paid_by_person_id,
+      payment_method,
+      safe_id
+    }, { transaction: dbTransaction });
+
+    // ✅ لو في دفع، سجل المعاملة المالية وحدّث الخزينة
+    if (parsedPaidAmount > 0) {
+      await logTransaction({
+        transaction_type: 'EXPENSE',
+        direction: 'OUT',
+        amount: parsedPaidAmount,
+        safe_id,
+        reference_type: 'DailyCost',
+        reference_id: cost.id,
+        daily_operation_id: operation.id,
+        performed_by_user_id: req.user ? req.user.id : null,
+        paid_by_person_type,
+        paid_by_person_id,
+        payment_method, 
+        notes: `دفع تكلفة: ${description || 'بدون وصف'}`
+      }, dbTransaction);
+
+      if (safe_id) {
+        const safe = await Safe.findByPk(safe_id, { transaction: dbTransaction });
+        if (!safe) {
+          await dbTransaction.rollback();
+          return res.status(400).json({ success: false, message: 'Safe not found' });
+        }
+        await safe.updateBalance(-parsedPaidAmount, dbTransaction);
+      }
+    }
+
+    // Reload to include category
+    const costWithCategory = await DailyCost.findByPk(cost.id, {
+      include: [
+        { model: CostCategory, as: 'category' },
+        { model: Vehicle, as: 'vehicle' }
+      ],
+      transaction: dbTransaction
+    });
+
+    await dbTransaction.commit();
+
+    res.status(201).json({
+      success: true,
+      data: costWithCategory
+    });
+  } catch (error) {
+    if (dbTransaction) await dbTransaction.rollback();
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      error: error.message
+    });
+  }
+};
+
+
+
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const CostDebtPayment = sequelize.define('CostDebtPayment', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  daily_cost_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'daily_costs',
+      key: 'id'
+    }
+  },
+  amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false
+  },
+  payment_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: false
+  },
+  paid_by_user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  paid_by_person_type: {
+    type: DataTypes.ENUM('EMPLOYEE', 'PARTNER', 'EXTERNAL'),
+    allowNull: true
+  },
+  paid_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  payment_method: {
+    type: DataTypes.ENUM('CASH', 'INSTAPAY', 'BANK', 'VODAFONE_CASH'),
+    defaultValue: 'CASH'
+  },
+  safe_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'safes',
+      key: 'id'
+    }
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+}, {
+  tableName: 'cost_debt_payments',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false,
+  underscored: true,
+  indexes: [
+    { fields: ['daily_cost_id'] },
+    { fields: ['payment_date'] }
+  ]
+});
+
+module.exports = CostDebtPayment;
+
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const CostCategory = sequelize.define('CostCategory', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  is_vehicle_cost: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  tableName: 'cost_categories',
+  timestamps: false
+});
+
+module.exports = CostCategory;
+
+
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const DailyCost = sequelize.define('DailyCost', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  daily_operation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'daily_operations',
+      key: 'id'
+    }
+  },
+  vehicle_id: {  // ✅ NEW FIELD
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'vehicles',
+      key: 'id'
+    }
+  },
+  cost_category_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'cost_categories',
+      key: 'id'
+    }
+  },
+  amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false
+  },
+  paid_amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false,
+    defaultValue: 0
+  },
+  remaining_amount: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      const amount = parseFloat(this.getDataValue('amount')) || 0;
+      const paid = parseFloat(this.getDataValue('paid_amount')) || 0;
+      return Math.max(0, amount - paid);
+    }
+  },
+  is_paid: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      const amount = parseFloat(this.getDataValue('amount')) || 0;
+      const paid = parseFloat(this.getDataValue('paid_amount')) || 0;
+      return paid >= amount;
+    }
+  },
+  paid_by_user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  paid_by_person_type: {
+    type: DataTypes.ENUM( 'EMPLOYEE', 'PARTNER', 'EXTERNAL'),
+    allowNull: true
+  },
+  paid_by_person_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  payment_method: {
+    type: DataTypes.ENUM('CASH', 'INSTAPAY', 'BANK', 'VODAFONE_CASH'),
+    defaultValue: 'CASH'
+  },
+  safe_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'safes',
+      key: 'id'
+    }
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  vehicle_operation_id: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  references: {
+    model: 'vehicle_operations',
+    key: 'id'
+  }
+}
+
+}, {
+  tableName: 'daily_costs',
+  timestamps: true,
+  createdAt: 'recorded_at',
+  updatedAt: false,
+  underscored: true,
+  indexes: [
+    { fields: ['daily_operation_id'] },
+    { fields: ['vehicle_id', 'daily_operation_id'] }  // ✅ NEW INDEX
+  ]
+});
+
+module.exports = DailyCost;
+
+
+
+  const { DataTypes } = require('sequelize');
+  const { sequelize } = require('../config/database');
+
+  const DailyOperation = sequelize.define('DailyOperation', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    operation_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id'
+      }
+    },
+    status: {
+      type: DataTypes.ENUM('OPEN', 'CLOSED'),
+      defaultValue: 'OPEN'
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    closed_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    }
+  }, {
+    tableName: 'daily_operations',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false, underscored: true,
+    indexes: [
+      {
+        fields: ['operation_date']
+      }
+    ]
+  });
+  // ✅ NEW: Add instance methods for vehicle management
+  DailyOperation.prototype.addVehicle = async function(vehicleId) {
+    const VehicleOperation = sequelize.models.VehicleOperation;
+    return await VehicleOperation.create({
+      daily_operation_id: this.id,
+      vehicle_id: vehicleId
+    });
+  };
+
+  DailyOperation.prototype.getVehicles = async function() {
+    const VehicleOperation = sequelize.models.VehicleOperation;
+    const Vehicle = sequelize.models.Vehicle;
+    
+    const vehicleOps = await VehicleOperation.findAll({
+      where: { daily_operation_id: this.id },
+      include: [{ model: Vehicle, as: 'vehicles' }]
+    });
+    
+    return vehicleOps.map(vo => vo.vehicle);
+  };
+
+  DailyOperation.prototype.removeVehicle = async function(vehicleId) {
+    const VehicleOperation = sequelize.models.VehicleOperation;
+    return await VehicleOperation.destroy({
+      where: {
+        daily_operation_id: this.id,
+        vehicle_id: vehicleId
+      }
+    });
+  };
+  module.exports = DailyOperation;

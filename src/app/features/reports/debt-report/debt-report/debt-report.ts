@@ -225,6 +225,7 @@ import { StatementDialog } from '../statement-dialog/statement-dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import * as XLSX from 'xlsx';
 import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
+import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction.pipe';
 
 @Component({
   selector: 'app-debt-report',
@@ -240,7 +241,7 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     MatProgressSpinnerModule,
     MatBadgeModule,
     MatDialogModule,
-    MatChipsModule
+    MatChipsModule, 
   ],
   templateUrl: './debt-report.html',
   styleUrls: ['./debt-report.scss']
@@ -260,14 +261,25 @@ export class DebtReport implements OnInit {
   // Buyer debt signals
   buyerLoading = signal(false);
   buyerError = signal<string | null>(null);
-  buyerTotalDebt = signal(0);
-  buyerCount = signal(0);
-  buyers = signal<Buyer[]>([]);
+  buyerSummary = signal<any | null>(null);
+  buyerReceivables = signal<Buyer[]>([]);
+  buyerPayables = signal<Buyer[]>([]);
 
   // Computed values
   hasReceivables = computed(() => this.farmReceivables().length > 0);
   hasPayables = computed(() => this.farmPayables().length > 0);
-  hasBuyerDebts = computed(() => this.buyers().length > 0);
+  hasBuyerReceivables = computed(() => this.buyerReceivables().length > 0);
+  hasBuyerPayables = computed(() => this.buyerPayables().length > 0);
+
+  // Buyer computed properties - using only API current_balance values
+  buyerCount = computed(() => this.buyerReceivables().length + this.buyerPayables().length);
+  buyerTotalDebt = computed(() => {
+    const receivablesTotal = this.buyerReceivables().reduce((sum, b) => sum + (b.current_balance || 0), 0);
+    const payablesTotal = this.buyerPayables().reduce((sum, b) => sum + (b.current_balance || 0), 0);
+    return receivablesTotal + payablesTotal;
+  });
+  hasBuyerDebts = computed(() => this.buyerReceivables().length > 0 || this.buyerPayables().length > 0);
+  buyers = computed(() => [...this.buyerReceivables(), ...this.buyerPayables()]);
 
   // Table columns
   farmColumns = ['name', 'phone', 'balance', 'actions'];
@@ -308,9 +320,9 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
     this.debtService.getBuyerDebts().subscribe({
       next: (response) => {
         if (response.success) {
-          this.buyerTotalDebt.set(response.data.total_debt);
-          this.buyerCount.set(response.data.buyers_count);
-          this.buyers.set(response.data.buyers);
+          this.buyerSummary.set(response.data.summary);
+          this.buyerReceivables.set(response.data.receivables.buyers);
+          this.buyerPayables.set(response.data.payables.buyers);
         }
         this.buyerLoading.set(false);
       },
@@ -333,7 +345,8 @@ openFarmStatement(farm: Farm): void {
     entityType: 'farm',
     entityId: farm.id,
     entityName: farm.name,
-    currentBalance: farm.current_balance
+    currentBalance: farm.current_balance,
+    balanceType: farm.balance_type || 'SETTLED'  // Added - use API field, no calculation
   };
 
   this.dialog.open(StatementDialog, {
@@ -352,7 +365,8 @@ openBuyerStatement(buyer: Buyer): void {
     entityType: 'buyer',
     entityId: buyer.id,
     entityName: buyer.name,
-    currentBalance: buyer.total_debt
+    currentBalance: buyer.current_balance,
+    balanceType: buyer.balance_type || 'SETTLED'  // Added - use API field, no calculation
   };
 
   this.dialog.open(StatementDialog, {
@@ -372,22 +386,9 @@ openBuyerStatement(buyer: Buyer): void {
     maximumFractionDigits: 2
   }).format(amount);
 }
-  getBalanceTypeClass(balanceType: string): string {
-    return balanceType.toLowerCase();
-  }
-
-  getBalanceTypeLabel(balanceType: string): string {
-    const labels: { [key: string]: string } = {
-      'RECEIVABLE': 'مطلوب منهم',
-      'PAYABLE': 'مطلوب لهم',
-      'SETTLED': 'مسدد'
-    };
-    return labels[balanceType] || balanceType;
-  }
-
-  abs(value: number): number {
-    return Math.abs(value);
-  }
+  // REMOVED: getBalanceTypeClass() - now uses BalanceDirectionPipe
+  // REMOVED: getBalanceTypeLabel() - now uses BalanceDirectionPipe
+  // REMOVED: abs() - now uses absolute_balance from API, no component calculation
 
   /**
    * تصدير تقرير ديون المزارع إلى Excel بالعربية
@@ -434,12 +435,20 @@ openBuyerStatement(buyer: Buyer): void {
         ['اسم المزرعة', 'رقم الهاتف', 'المبلغ المطلوب', 'نوع الرصيد']
       ];
 
+      // Balance type labels map (replaces getBalanceTypeLabel)
+      const balanceLabels: { [key: string]: string } = {
+        'RECEIVABLE': 'مطلوب منهم',
+        'PAYABLE': 'مطلوب لهم',
+        'SETTLED': 'مسدد'
+      };
+
       receivables.forEach(farm => {
         receivablesData.push([
           farm.name,
           farm.phone || '-',
-          this.formatCurrency(farm.current_balance) + ' جنيه',
-          this.getBalanceTypeLabel(farm.balance_type || 'RECEIVABLE')
+          // Using absolute_balance from API - NO calculation in component
+          this.formatCurrency(farm.absolute_balance || farm.current_balance) + ' جنيه',
+          balanceLabels[farm.balance_type || 'RECEIVABLE'] || farm.balance_type
         ]);
       });
 
@@ -465,12 +474,20 @@ openBuyerStatement(buyer: Buyer): void {
         ['اسم المزرعة', 'رقم الهاتف', 'المبلغ المطلوب', 'نوع الرصيد']
       ];
 
+      // Balance labels defined in this scope too
+      const payableLabels: { [key: string]: string } = {
+        'RECEIVABLE': 'مطلوب منهم',
+        'PAYABLE': 'مطلوب لهم',
+        'SETTLED': 'مسدد'
+      };
+
       payables.forEach(farm => {
         payablesData.push([
           farm.name,
           farm.phone || '-',
-          this.formatCurrency(Math.abs(farm.current_balance)) + ' جنيه',
-          this.getBalanceTypeLabel(farm.balance_type || 'PAYABLE')
+          // Using absolute_balance from API - NO component calculation
+          this.formatCurrency(farm.absolute_balance ?? 0) + ' جنيه',
+          payableLabels[farm.balance_type || 'PAYABLE'] || farm.balance_type
         ]);
       });
 
@@ -497,11 +514,11 @@ openBuyerStatement(buyer: Buyer): void {
    * تصدير تقرير ديون المشترين إلى Excel بالعربية
    */
   exportBuyerDebtsToExcel(): void {
-    const buyers = this.buyers();
-    const totalDebt = this.buyerTotalDebt();
-    const count = this.buyerCount();
+    const summary = this.buyerSummary();
+    const receivables = this.buyerReceivables();
+    const payables = this.buyerPayables();
 
-    if (buyers.length === 0) {
+    if (!summary) {
       console.error('لا توجد بيانات للتصدير');
       return;
     }
@@ -513,47 +530,103 @@ openBuyerStatement(buyer: Buyer): void {
       ['تقرير ديون المشترين'],
       ['التاريخ: ' + this.formatDateTime(new Date())],
       [],
-      ['الملخص'],
+      ['الملخص المالي'],
       [],
-      ['إجمالي ديون المشترين', this.formatCurrency(totalDebt) + ' جنيه'],
-      ['عدد المشترين المدينين', count.toString()],
-      []
+      ['إجمالي المطلوب منهم', this.formatCurrency(summary.total_receivables) + ' جنيه'],
+      ['عدد المشترين المدينين', summary.receivables_count.toString()],
+      [],
+      ['إجمالي المطلوب لهم', this.formatCurrency(summary.total_payables) + ' جنيه'],
+      ['عدد المشترين الدائنين', summary.payables_count.toString()],
+      [],
+      ['صافي الموقف', this.formatCurrency(summary.net_position) + ' جنيه'],
+      ['الحالة', summary.net_position > 0 ? 'لصالحنا' : summary.net_position < 0 ? 'علينا' : 'متوازن']
     ];
 
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
     wsSummary['!cols'] = [{ wch: 25 }, { wch: 20 }];
     XLSX.utils.book_append_sheet(wb, wsSummary, 'الملخص');
 
-    // ===== Sheet 2: قائمة المشترين =====
-    const buyersData: any[][] = [
-      ['قائمة المشترين المدينين'],
-      [],
-      ['اسم المشتري', 'رقم الهاتف', 'العنوان', 'المبلغ المستحق', 'حالة الدين']
-    ];
+    // ===== Sheet 2: المشترين المدينين =====
+    if (receivables.length > 0) {
+      const receivablesData: any[][] = [
+        ['المشترين المدينين (مطلوب منهم)'],
+        [],
+        ['اسم المشتري', 'رقم الهاتف', 'العنوان', 'المبلغ المستحق', 'حالة الدين']
+      ];
 
-    buyers.forEach(buyer => {
-      buyersData.push([
-        buyer.name,
-        buyer.phone || '-',
-        buyer.address || '-',
-        this.formatCurrency(buyer.total_debt) + ' جنيه',
-        buyer.debt_status || 'مدين'
+      // Balance type labels for buyers (includes CREDIT)
+      const buyerBalanceLabels: { [key: string]: string } = {
+        'RECEIVABLE': 'مطلوب منه',
+        'CREDIT': 'رصيد لصالحه',
+        'SETTLED': 'مسدد'
+      };
+
+      receivables.forEach(buyer => {
+        receivablesData.push([
+          buyer.name,
+          buyer.phone || '-',
+          buyer.address || '-',
+          // Using absolute_balance from API - NO calculation in component
+          this.formatCurrency(buyer.absolute_balance || buyer.current_balance) + ' جنيه',
+          buyerBalanceLabels[buyer.balance_type || 'RECEIVABLE'] || buyer.balance_type
+        ]);
+      });
+
+      // إضافة صف الإجمالي
+      receivablesData.push([]);
+      receivablesData.push([
+        'الإجمالي',
+        '',
+        '',
+        this.formatCurrency(summary.total_receivables) + ' جنيه',
+        ''
       ]);
-    });
 
-    // إضافة صف الإجمالي
-    buyersData.push([]);
-    buyersData.push([
-      'الإجمالي',
-      '',
-      '',
-      this.formatCurrency(totalDebt) + ' جنيه',
-      ''
-    ]);
+      const wsReceivables = XLSX.utils.aoa_to_sheet(receivablesData);
+      wsReceivables['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsReceivables, 'المطلوب منهم');
+    }
 
-    const wsBuyers = XLSX.utils.aoa_to_sheet(buyersData);
-    wsBuyers['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsBuyers, 'المشترين');
+    // ===== Sheet 3: المشترين الدائنين =====
+    if (payables.length > 0) {
+      const payablesData: any[][] = [
+        ['المشترين الدائنين (مطلوب لهم)'],
+        [],
+        ['اسم المشتري', 'رقم الهاتف', 'العنوان', 'المبلغ المستحق', 'حالة الدين']
+      ];
+
+      // Balance labels for buyers in this scope
+      const buyerPayableLabels: { [key: string]: string } = {
+        'RECEIVABLE': 'مطلوب منه',
+        'CREDIT': 'رصيد لصالحه',
+        'SETTLED': 'مسدد'
+      };
+
+      payables.forEach(buyer => {
+        payablesData.push([
+          buyer.name,
+          buyer.phone || '-',
+          buyer.address || '-',
+          // Using absolute_balance from API - NO component calculation
+          this.formatCurrency(buyer.absolute_balance ?? 0) + ' جنيه',
+          buyerPayableLabels[buyer.balance_type || 'CREDIT'] || buyer.balance_type
+        ]);
+      });
+
+      // إضافة صف الإجمالي
+      payablesData.push([]);
+      payablesData.push([
+        'الإجمالي',
+        '',
+        '',
+        this.formatCurrency(summary.total_payables) + ' جنيه',
+        ''
+      ]);
+
+      const wsPayables = XLSX.utils.aoa_to_sheet(payablesData);
+      wsPayables['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsPayables, 'المطلوب لهم');
+    }
 
     // حفظ الملف
     const fileName = `تقرير_ديون_المشترين_${this.formatDateForFileName(new Date())}.xlsx`;

@@ -249,3 +249,44 @@ button.mat-icon-button {
 [dir="rtl"] .no-vehicles {
   flex-direction: row-reverse;
 }
+
+/* ===============================
+   Investment Breakdown Styling
+================================ */
+.investment-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.investment-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.investment-breakdown .total-inv {
+  color: #666;
+}
+
+.investment-breakdown .vehicle-inv {
+  color: #d32f2f;
+  font-size: 11px;
+}
+
+.investment-breakdown .net-inv {
+  border-top: 1px solid #eee;
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.deduction {
+  font-weight: 500;
+}
+
+.success-text {
+  color: #2e7d32;
+}
+

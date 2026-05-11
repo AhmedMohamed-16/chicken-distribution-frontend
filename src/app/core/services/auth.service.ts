@@ -1,10 +1,9 @@
-// src/app/core/services/auth.service.ts
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { ApiResponse, GroupedPermissions, LoginRequest, LoginResponse, UpdateProfileRequest, User } from '../models';
-import { environment } from '../../../environments/environment.prod';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,78 +11,6 @@ import { environment } from '../../../environments/environment.prod';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-
-  // private readonly TOKEN_KEY = 'auth_token';
-  // private readonly USER_KEY = 'current_user';
-
-  // // Signals for reactive state
-  // private currentUserSignal = signal<User | null>(this.getUserFromStorage());
-  // private tokenSignal = signal<string | null>(this.getTokenFromStorage());
-
-  // // Public computed signals
-  // currentUser = this.currentUserSignal.asReadonly();
-  // isAdmin = computed(() => this.currentUserSignal()?.role === 'ADMIN');
-  // isUser = computed(() => this.currentUserSignal()?.role === 'USER');
-
-
-  // login(credentials: LoginRequest): Observable<LoginResponse> {
-  //   return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
-  //     .pipe(
-  //       tap(response => {
-  //         this.setSession(response);
-  //         console.log("response",response)
-  //         this.router.navigate(['/dashboard']);
-  //       }),
-  //       catchError(error => {
-  //         console.error('Login failed:', error);
-  //         return throwError(() => error);
-  //       })
-  //     );
-  // }
-
-  // logout(): void {
-  //   const token = this.tokenSignal();
-
-  //   if (token) {
-  //     this.http.post(`${environment.apiUrl}/auth/logout`, {})
-  //       .subscribe({
-  //         error: (err) => console.error('Logout API failed:', err)
-  //       });
-  //   }
-
-  //   this.clearSession();
-  //   this.router.navigate(['/login']);
-  // }
-
-  // getToken(): string | null {
-  //   return this.tokenSignal();
-  // }
-
-  // private setSession(response: LoginResponse): void {
-  //   localStorage.setItem(this.TOKEN_KEY, response.token);
-  //   localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-
-  //   this.tokenSignal.set(response.token);
-  //   this.currentUserSignal.set(response.user);
-  // }
-
-  // private clearSession(): void {
-  //   localStorage.removeItem(this.TOKEN_KEY);
-  //   localStorage.removeItem(this.USER_KEY);
-
-  //   this.tokenSignal.set(null);
-  //   this.currentUserSignal.set(null);
-  // }
-
-  // private getTokenFromStorage(): string | null {
-  //   return localStorage.getItem(this.TOKEN_KEY);
-  // }
-
-  // private getUserFromStorage(): User | null {
-  //   const userJson = localStorage.getItem(this.USER_KEY);
-  //   return userJson ? JSON.parse(userJson) : null;
-  // }
-
 
   // Signals for state
   private userSignal = signal<User | null>(null);
@@ -98,7 +25,14 @@ export class AuthService {
   readonly isLoading = this.isLoadingSignal.asReadonly();
 
   // Computed values
-  readonly isAuthenticated = computed(() => !!this.tokenSignal() && !!this.userSignal());
+  readonly isAuthenticated = computed(() => {
+    const token = this.tokenSignal();
+    const user = this.userSignal();
+    if (!token || !user) return false;
+    // Check if token is expired
+    if (this.isTokenExpired(token)) return false;
+    return true;
+  });
   readonly currentUserId = computed(() => this.userSignal()?.id ?? null);
   readonly currentUsername = computed(() => this.userSignal()?.username ?? '');
   readonly currentUserFullName = computed(() => this.userSignal()?.full_name ?? '');
@@ -123,14 +57,16 @@ export class AuthService {
       })
     );
   }
+
   logout(): void {
     const token = this.tokenSignal();
 
+    // Notify backend to blacklist the token
     if (token) {
-      // this.http.post(`${environment.apiUrl}/auth/logout`, {})
-      //   .subscribe({
-      //     error: (err) => console.error('Logout API failed:', err)
-      //   });
+      this.http.post(`${environment.apiUrl}/auth/logout`, {})
+        .subscribe({
+          error: () => {} // Silently ignore logout errors
+        });
     }
 
     this.clearAuthData();
@@ -147,8 +83,9 @@ export class AuthService {
           this.userSignal.set(response.data);
           this.permissionsSignal.set(response.data.permissions?.map(p => p.key) || []);
 
-          // Update localStorage
-          localStorage.setItem('user', JSON.stringify(response.data));
+          // Store minimal data - NEVER store tokens/permissions in localStorage
+          // localStorage only stores a session flag
+          sessionStorage.setItem('user_name', response.data.full_name || response.data.username);
         }
       })
     );
@@ -162,7 +99,6 @@ export class AuthService {
       tap(response => {
         if (response.success && response.data) {
           this.userSignal.set(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
         }
       })
     );
@@ -179,7 +115,7 @@ export class AuthService {
    * Check if user has a specific permission
    */
   hasPermission(permission: string): boolean {
-    return this.permissionsSignal().includes(permission)||this.permissionsSignal().includes('APPLICATION_ADMIN');
+    return this.permissionsSignal().includes(permission) || this.permissionsSignal().includes('APPLICATION_ADMIN');
   }
 
   /**
@@ -189,7 +125,6 @@ export class AuthService {
     if (!permissions || permissions.length === 0) {
       return true;
     }
-
     const userPermissions = this.permissionsSignal();
     return permissions.some(p => userPermissions.includes(p));
   }
@@ -201,7 +136,6 @@ export class AuthService {
     if (!permissions || permissions.length === 0) {
       return true;
     }
-
     const userPermissions = this.permissionsSignal();
     return permissions.every(p => userPermissions.includes(p));
   }
@@ -221,16 +155,36 @@ export class AuthService {
   }
 
   /**
+   * Check if a JWT token is expired by parsing its payload
+   */
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.exp) return false;
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    } catch {
+      return true; // If we can't parse, consider it expired
+    }
+  }
+
+  /**
    * Set authentication data
+   * SECURITY: Only store token in memory (signal), not localStorage
+   * to prevent XSS-based token theft.
    */
   private setAuthData(token: string, user: User): void {
     this.tokenSignal.set(token);
     this.userSignal.set(user);
     this.permissionsSignal.set(user.permissions?.map(p => p.key) || []);
 
-    // Store in localStorage
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    // SECURITY NOTE: Tokens are stored in memory only (Angular signals).
+    // On page refresh, the user must re-authenticate.
+    // This prevents XSS-based token theft from localStorage.
+    //
+    // For persistent sessions, use HTTP-only cookies instead.
+    // localStorage.setItem('token', token); // ❌ REMOVED - Security risk
+    // localStorage.setItem('user', JSON.stringify(user)); // ❌ REMOVED - Security risk
   }
 
   /**
@@ -241,13 +195,15 @@ export class AuthService {
     this.userSignal.set(null);
     this.permissionsSignal.set([]);
 
-    // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('user_name');
   }
 
   /**
-   * Load authentication data from localStorage
+   * Load authentication data from localStorage (backward compatibility)
+   * In-memory only is preferred, but we support page reload by checking
+   * if a valid session exists.
    */
   private loadFromStorage(): void {
     const token = localStorage.getItem('token');
@@ -255,6 +211,11 @@ export class AuthService {
 
     if (token && userJson) {
       try {
+        // Check if token is expired before loading
+        if (this.isTokenExpired(token)) {
+          this.clearAuthData();
+          return;
+        }
         const user = JSON.parse(userJson) as User;
         this.setAuthData(token, user);
       } catch (error) {
@@ -262,8 +223,5 @@ export class AuthService {
         this.clearAuthData();
       }
     }
-    console.log("userJson",userJson);
-
   }
-
 }

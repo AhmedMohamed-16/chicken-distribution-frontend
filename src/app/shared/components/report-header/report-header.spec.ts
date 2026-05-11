@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReportHeader } from './report-header';
+import { SharedReportHeaderComponent } from './report-header';
 
 describe('ReportHeader', () => {
-  let component: ReportHeader;
-  let fixture: ComponentFixture<ReportHeader>;
+  let component: SharedReportHeaderComponent;
+  let fixture: ComponentFixture<SharedReportHeaderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReportHeader]
+      imports: [SharedReportHeaderComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ReportHeader);
+    fixture = TestBed.createComponent(SharedReportHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,219 @@
+<section class="finance-dashboard">
+    <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
+
+    <div class="content" [class.loading]="isLoading()">
+        <div class="section">
+            <h2>لوحة المالية</h2>
+            <p>نظرة عامة على الحسابات المالية والخزن والمخاطر الحالية</p>
+            <div class="operation-counts" *ngIf="financialSummary().total_operations_count > 0">
+                <span class="count-badge total">
+                    <mat-icon>assignment</mat-icon>
+                    العمليات: {{ financialSummary().total_operations_count }}
+                </span>
+                <span class="count-badge closed">
+                    <mat-icon>lock</mat-icon>
+                    مغلقة: {{ financialSummary().closed_operations_count }}
+                </span>
+                <span class="count-badge open">
+                    <mat-icon>lock_open</mat-icon>
+                    مفتوحة: {{ financialSummary().open_operations_count }}
+                </span>
+            </div>
+        </div>
+
+        <div class="card-row">
+            <h3>أرصدة الخزن</h3>
+            <div class="safe-cards">
+                <mat-card *ngFor="let safe of safeCounters()" class="safe-card"
+                    [style.borderColor]="getSafeColor(safe.current_balance)" (click)="safeCardClicked()"
+                    matTooltip="اذهب إلى سجل الخزن">
+                    <div class="safe-card-header">
+                        <span>{{ safe.name }}</span>
+                        <span class="safe-type">{{ getSafeTypeLabel(safe.type) }}</span>
+                    </div>
+                    <div class="safe-count" [style.color]="getSafeColor(safe.current_balance)">
+                        {{ formatCurrency(safe.current_balance) }}
+                    </div>
+                    <div class="safe-sub">
+                        <span>دخول اليوم: {{ formatCurrency(safe.total_in_today) }}</span>
+                        <span>خروج اليوم: {{ formatCurrency(safe.total_out_today) }}</span>
+                    </div>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- ملخص اليوم الأساسي -->
+        <div class="card-row">
+            <div class="row-header">
+                <mat-icon>insights</mat-icon>
+                <h3>ملخص اليوم</h3>
+            </div>
+            <div class="summary-cards">
+                <mat-card class="summary-card sales">
+                    <div class="card-icon"><mat-icon>trending_up</mat-icon></div>
+                    <div class="card-content">
+                        <span>إجمالي المبيعات</span>
+                        <h3>{{ formatCurrency(financialSummary().total_sales) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card purchases">
+                    <div class="card-icon"><mat-icon>shopping_cart</mat-icon></div>
+                    <div class="card-content">
+                        <span>إجمالي المشتريات</span>
+                        <h3>{{ formatCurrency(financialSummary().total_purchases) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card costs">
+                    <div class="card-icon"><mat-icon>payments</mat-icon></div>
+                    <div class="card-content">
+                        <span>إجمالي التكاليف</span>
+                        <h3>{{ formatCurrency(financialSummary().total_costs) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card vehicle-costs">
+                    <div class="card-icon"><mat-icon>local_shipping</mat-icon></div>
+                    <div class="card-content">
+                        <span>تكاليف السيارات</span>
+                        <h3>{{ formatCurrency(financialSummary().vehicle_costs) }}</h3>
+                    </div>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- تفصيل الخسائر -->
+        <div class="card-row">
+            <div class="row-header">
+                <mat-icon>warning</mat-icon>
+                <h3>تفصيل الخسائر</h3>
+            </div>
+            <div class="summary-cards">
+                <mat-card class="summary-card losses">
+                    <div class="card-icon"><mat-icon>warning</mat-icon></div>
+                    <div class="card-content">
+                        <span>إجمالي الخسائر</span>
+                        <h3>{{ formatCurrency(financialSummary().total_losses) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card losses-transport">
+                    <div class="card-icon"><mat-icon>directions_car</mat-icon></div>
+                    <div class="card-content">
+                        <span>خسائر النقل</span>
+                        <h3>{{ formatCurrency(financialSummary().transport_losses) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card losses-sale">
+                    <div class="card-icon"><mat-icon>storefront</mat-icon></div>
+                    <div class="card-content">
+                        <span>خسائر البيع</span>
+                        <h3>{{ formatCurrency(financialSummary().sale_losses) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card losses-farm">
+                    <div class="card-icon"><mat-icon>agriculture</mat-icon></div>
+                    <div class="card-content">
+                        <span>خسائر بمسؤولية المزرعة</span>
+                        <h3>{{ formatCurrency(financialSummary().lossesWithFarm) }}</h3>
+                    </div>
+                </mat-card>
+                <mat-card class="summary-card losses-no-farm">
+                    <div class="card-icon"><mat-icon>report_problem</mat-icon></div>
+                    <div class="card-content">
+                        <span>خسائر بدون مزرعة</span>
+                        <h3>{{ formatCurrency(financialSummary().lossesWithoutFarm) }}</h3>
+                    </div>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- الخصومات والديون والربح -->
+        <div class="card-row">
+            <div class="row-header">
+                <mat-icon>analytics</mat-icon>
+                <h3>الملخص المالي التفصيلي</h3>
+            </div>
+            <div class="summary-cards">
+                <!-- الخصومات -->
+                <mat-card class="summary-card discount">
+                    <div class="card-icon"><mat-icon>sell</mat-icon></div>
+                    <div class="card-content">
+                        <span>إجمالي الخصومات</span>
+                        <h3>{{ formatCurrency(financialSummary().total_discount) }}</h3>
+                        <div class="card-sub-items">
+                            <small>خصم مبيعات: {{ formatCurrency(financialSummary().total_sales_discount) }}</small>
+                            <small>خصم مشتريات: {{ formatCurrency(financialSummary().total_purchase_discount) }}</small>
+                        </div>
+                    </div>
+                </mat-card>
+
+                <!-- الديون المحصلة -->
+                <mat-card class="summary-card received">
+                    <div class="card-icon"><mat-icon>call_received</mat-icon></div>
+                    <div class="card-content">
+                        <span>الديون المحصلة</span>
+                        <h3 class="positive">{{ formatCurrency(financialSummary().total_debts_received) }}</h3>
+                        <div class="card-sub-items">
+                            <small>من المبيعات: {{ formatCurrency(financialSummary().debts_received_from_sales) }}</small>
+                            <small>من المشتريات: {{ formatCurrency(financialSummary().debts_received_from_purchases) }}</small>
+                            <small>من التكاليف: {{ formatCurrency(financialSummary().debts_received_from_costs) }}</small>
+                        </div>
+                    </div>
+                </mat-card>
+
+                <!-- الديون المسددة -->
+                <mat-card class="summary-card paid">
+                    <div class="card-icon"><mat-icon>call_made</mat-icon></div>
+                    <div class="card-content">
+                        <span>الديون المسددة</span>
+                        <h3 class="negative">{{ formatCurrency(financialSummary().total_debts_paid) }}</h3>
+                        <div class="card-sub-items">
+                            <small>من المبيعات: {{ formatCurrency(financialSummary().debts_paid_from_sales) }}</small>
+                            <small>من المشتريات: {{ formatCurrency(financialSummary().debts_paid_from_purchases) }}</small>
+                            <small>من التكاليف: {{ formatCurrency(financialSummary().debts_paid_from_costs) }}</small>
+                        </div>
+                    </div>
+                </mat-card>
+
+                <!-- صافي الربح -->
+                <mat-card class="summary-card profit">
+                    <div class="card-icon"><mat-icon>account_balance_wallet</mat-icon></div>
+                    <div class="card-content">
+                        <span>صافي الربح التقديري</span>
+                        <h3 [class.positive]="financialSummary().net_profit >= 0" [class.negative]="financialSummary().net_profit < 0">
+                            {{ formatCurrency(financialSummary().net_profit) }}
+                        </h3>
+                    </div>
+                </mat-card>
+            </div>
+        </div>
+
+        <div class="card-row alerts-row">
+            <h3>تنبيهات / عناصر انتباه</h3>
+            <div class="alerts-chip-row">
+                <button mat-flat-button color="warn" class="alert-chip" (click)="navigateTo('/finance/advances')">
+                    السلف غير المُرجَعة
+                    <span class="badge">{{ pendingAdvancesCount() }}</span>
+                </button>
+
+                <button mat-flat-button color="primary" class="alert-chip" (click)="navigateTo('/master-data/buyers')">
+                    الديون المستحقة من المشترين
+                    <span class="badge">{{ buyersDebtCount() }}</span>
+                </button>
+
+                <button mat-flat-button color="accent" class="alert-chip" (click)="navigateTo('/master-data/farms')">
+                    ديوننا للمزارع
+                    <span class="badge">{{ farmsPayablesCount() }}</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-row actions-row" *ngIf="isAdmin()">
+            <h3>إجراءات سريعة</h3>
+            <div class="actions-buttons">
+                <button mat-raised-button color="primary" (click)="openSafeTransfer()">تحويل بين الخزن</button>
+                <button mat-raised-button color="warn" (click)="navigateTo('/reports/statement')">كشوف الحسابات</button>
+                <button mat-raised-button color="accent" (click)="navigateTo('/finance/advances')">منح سلفة</button>
+            </div>
+        </div>
+    </div>
+</section>
+

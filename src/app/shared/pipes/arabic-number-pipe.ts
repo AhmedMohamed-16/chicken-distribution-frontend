@@ -15,16 +15,17 @@ export class ArabicNumberPipe implements PipeTransform {
     value: number | string | null | undefined,
     fractionDigits: number = 2
   ): string {
-
     if (value === null || value === undefined || value === '') return '';
 
+    if (typeof value === 'number') {
+      return value
+        .toLocaleString('ar-EG', {
+          minimumFractionDigits: fractionDigits,
+          maximumFractionDigits: fractionDigits
+        })
+        .replace(/\d/g, (d) => this.arabicNumbers[+d]);
+    }
 
-  if (typeof value === 'number') {
-    return value
-      .toLocaleString('ar-EG', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })
-      .replace(/\d/g, d => this.arabicNumbers[+d]);
-  } else {
-    return String(value).replace(/\d/g, d => this.arabicNumbers[+d]);
+    return String(value).replace(/\d/g, (d) => this.arabicNumbers[+d]);
   }
-}
 }

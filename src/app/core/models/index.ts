@@ -410,7 +410,9 @@ export interface Vehicle {
   };
 
   vehicle_operations?: VehicleOperation[];
-
+  is_fully_invested?: boolean;
+  payment_source?: 'safe' | 'partners';
+  safe_id?: number;
 }
 // export interface VehicleOperation {
 //   id: number;
@@ -461,7 +463,7 @@ export interface Farm {
   isDebtor?: boolean;
   isCreditor?: boolean;
   absoluteBalance?: number;
-  balance_display?: string;
+  display_balance?: string;
 
   // ✅ Backward compatibility (optional, will be removed eventually)
   total_debt?: number; // Alias for current_balance (deprecated)
@@ -509,18 +511,42 @@ export interface FarmDebtPayment {
 
 
 
+// export interface Buyer {
+//   id: number;
+//   name: string;
+//   phone?: string;
+//   address?: string;
+//   total_debt: number;
+//   created_at: string;
+//   debt_status: string;
+// debt_display?: string;
+
+// }
 export interface Buyer {
   id: number;
   name: string;
   phone?: string;
   address?: string;
-  total_debt: number;
+
+  // ── Primary field (replaces total_debt) ───────────────────────────────────
+  current_balance: number;          // positive = owes us, negative = we owe them
+
+  // ── Computed by backend getterMethods ─────────────────────────────────────
+  balance_type:    'RECEIVABLE' | 'CREDIT' | 'SETTLED';
+  display_balance: string;          // human-readable Arabic string
+  is_debtor:       boolean;         // current_balance > 0
+  is_creditor:     boolean;         // current_balance < 0
+  absolute_balance: number;         // Math.abs(current_balance)
+
+  // ── Kept for backward compatibility (backend sends both) ──────────────────
+  // Remove these once all templates are migrated
+  total_debt:      number;          // @deprecated — alias for current_balance
+  debt_status:     string;          // @deprecated — use balance_type
+  // balance_display removed - use display_balance
+  debt_display?:    string;
+
   created_at: string;
-  debt_status: string;
-debt_display?: string;
-
 }
-
 // ============================================
 // BUYER DEBT PAYMENT
 // ============================================
@@ -568,7 +594,33 @@ export interface CostCategory {
   description?: string;
   is_vehicle_cost: boolean;
   category_type: string;
+  
+  // ✅ NEW: Cost Balances integration
+  current_balance?: number;
+  balance_type?: 'RECEIVABLE' | 'PAYABLE' | 'SETTLED';
+  is_debtor?: boolean;
+  is_creditor?: boolean;
+  absolute_balance?: number;
+  display_balance?: string;
+}
 
+export interface CostLedgerEntry {
+  type: 'COST_INC' | 'TO_CATEGORY' | 'FROM_CATEGORY';
+  date: string;
+  amount: number;
+  balance_impact: number;
+  description: string;
+  running_balance: number;
+  record: any;
+}
+
+export interface CostSummary {
+  total_receivables: number;
+  total_payables: number;
+  net_position: number;
+  receivables_count: number;
+  payables_count: number;
+  position_type: 'NET_RECEIVABLE' | 'NET_PAYABLE' | 'BALANCED';
 }
 
 export interface VehicleOperation {
@@ -700,6 +752,13 @@ export interface FarmTransaction {
   operation_id?: number;
 
 }
+export interface SaleWeight {
+  id?: number;
+  sale_transaction_id?: number;
+  weight_number: number;
+  weight_value: number;
+}
+
 
 export interface SaleTransaction {
   id: number;
@@ -708,92 +767,122 @@ export interface SaleTransaction {
   buyer_id: number;
   chicken_type_id: number;
   sequence_number: number;
-  loaded_cages_weight: number;
-  empty_cages_weight: number;
-  cage_count: number;
-  net_chicken_weight: number;
-  price_per_kg: number;
-  total_amount: number;
-  paid_amount: number;
-  remaining_amount: number;
-  old_debt_paid: number;
-  transaction_time: string;
 
+  // New weight fields
+  gross_total_weight: number;
+  dead_weight: number;
+  empty_cages_weight: number;
+  total_deductions: number;
+  net_weight: number;
+
+  // Pricing fields
+  price_per_kg: number;
+  subtotal_amount: number;
+  discount_amount: number;
+  final_amount: number;
+
+  // Payment fields
+  paid_amount: number;
+  debt_applied_amount: number;
+
+  // Backward-compat aliases (kept on the model)
+  total_amount: number;
+  remaining_amount: number;
+
+  transaction_time: string;
   vehicle_operation_id: number;
+
   // Relationships
-    buyer?: Buyer;
+  buyer?: Buyer;
   chicken_type?: ChickenType;
   vehicle?: Vehicle;
   vehicle_operation?: VehicleOperation;
 
-  transaction_id: number;
+  // Weight readings
+  weights?: SaleWeight[];
 
-  weighing: {
-    loaded_cages_weight: number;
+  transaction_id: number;
+  operation_id?: number;
+  notes?: string;
+
+  // Nested shapes from backend (keep for display compatibility)
+  weighing?: {
+    gross_total_weight: number;
+    dead_weight: number;
     empty_cages_weight: number;
-    cage_count: number;
-    net_chicken_weight: number;
+    total_deductions: number;
+    net_weight: number;
   };
-  pricing: {
+  pricing?: {
     price_per_kg: number;
-    total_amount: number;
+    subtotal_amount: number;
+    discount_amount: number;
+    final_amount: number;
     paid_amount: number;
     remaining_amount: number;
-    old_debt_paid: number;
     payment_percentage: string;
   };
-  debt_info: {
+  debt_info?: {
     status: string;
     buyer_debt_change: number;
     is_full_payment: boolean;
     has_remaining_debt: boolean;
-    paid_old_debt: boolean;
+    debt_auto_applied: boolean;
     net_debt_impact: string;
   };
-  notes?: string;
-
-
-  operation_id?: number;
-
-
 }
+
 // ============================================
 // BUYER BALANCE INFO
 // ============================================
+
 export interface BuyerBalanceInfo {
   buyer_id: number;
   buyer_name: string;
   previous_balance: number;
   new_balance: number;
   is_settled: boolean;
-
-  // ✅ Detailed breakdown
   changes?: {
-    old_debt_paid: number;
-    new_transaction_debt: number;
-    net_change: number;
+    new_sale_debt: number;
+    debt_auto_paid: number;
   };
 }
 
 // ============================================
 // SALE RESPONSE
 // ============================================
+
 export interface SaleResponse {
   success: boolean;
   message: string;
   data: {
-    transaction?: SaleTransaction; // Optional for debt-only payments
+    transaction?: SaleTransaction;
+    calculation?: {
+      weights: number[];
+      gross_total_weight: number;
+      deductions: {
+        dead_weight: number;
+        empty_cages_weight: number;
+        total_deductions: number;
+      };
+      net_weight: number;
+      price_per_kg: number;
+      subtotal_amount: number;
+      discount_amount: number;
+      final_amount: number;
+    };
+    payment?: {
+      paid_amount: number;
+      covered_sale: number;
+      debt_applied: number;
+      remaining_on_sale: number;
+    };
     balance_info: BuyerBalanceInfo;
     debt_payment?: {
       id: number;
       amount: number;
       date: string;
       description: string;
-    };
-    payment?: {
-      id: number;
-      amount: number;
-      date: string;
     };
   };
 }
@@ -847,7 +936,13 @@ export interface DailyCost {
   amount: number;
   description?: string;
   recorded_at: string;
-    cost_id: number;
+
+  // Payment fields
+  paid_amount: number;
+  is_paid: boolean;
+  remaining_amount: number;
+
+  cost_id: number;
   category: CostCategory;
   vehicle?: Vehicle;
   cost_details: {
@@ -856,10 +951,7 @@ export interface DailyCost {
     allocation: string;
     affects_vehicle_partners: boolean;
   };
-
-
-   operation_id?: number;
-
+  operation_id?: number;
 }
 
 export interface ProfitDistribution {
@@ -867,29 +959,63 @@ export interface ProfitDistribution {
   daily_operation_id?: number;
   vehicle_summaries: VehicleProfitSummary[];
   total_revenue: number;
+  sale_losses?: number;
+  transport_losses?: number;
   total_purchases: number;
   total_losses: number;
+  losses_with_farm?: number;
+  losses_without_farm?: number;
   lossesWithFarm?: number;
   lossesWithoutFarm?: number;
   total_costs: number;
   vehicle_costs: number;
   net_profit: number;
+
+  /**
+   * Gross profit = net_profit + vehicle_costs.
+   * This is the distribution base used by the fixed ProfitService.
+   * Each partner's base_profit_share is calculated from gross_profit,
+   * then only their owned vehicle costs are deducted.
+   */
+  gross_profit?: number;
+
   calculated_at: string;
   partner_profits: PartnerProfit[];
 
+  // ── New Financial Breakdowns ──────────────────────────────────────
+  discounts: {
+    total_sales_discount: number;
+    /** camelCase alias — same value as total_sales_discount */
+    totalSalesDiscount?: number;
+    total_purchase_discount: number;
+    total: number;
+  };
+
+  debts_paid: {
+    from_sales: number;
+    from_purchases: number;
+    from_costs: number;
+    total: number;
+  };
+
+  debts_received: {
+    from_sales: number;
+    from_purchases: number;
+    from_costs: number;
+    total: number;
+  };
+
   distribution_id: number;
-   totals: {
+  totals: {
     total_revenue: number;
     total_purchases: number;
     total_losses: number;
     total_costs: number;
     vehicle_costs: number;
     net_profit: number;
-
   };
-
-
 }
+
 
 export interface VehicleProfitSummary {
   vehicle_id: number;
@@ -906,21 +1032,51 @@ export interface PartnerProfit {
   id: number;
   profit_distribution_id: number;
   partner_id: number;
+
+  /** Populated by the backend when loading saved PartnerProfit rows. */
   partner?: Partner;
+
+  /**
+   * Direct name string returned by ProfitService.distributeToPartners().
+   * Use partner?.name ?? partner_name for display.
+   */
+  partner_name?: string;
+
   vehicle_id?: number;
+
+  /**
+   * Base share calculated from GROSS profit (before vehicle cost deduction).
+   * gross_profit = net_profit + total_vehicle_costs
+   * base_profit_share = gross_profit × investment_percentage%
+   */
   base_profit_share: number;
+
+  /**
+   * Only the costs of vehicles this partner OWNS in this operation.
+   * For Case A (owns vehicles): sum(owned vehicle costs) × share%
+   * For Case B (no vehicles):   total_vehicle_costs × share%
+   */
   vehicle_cost_share: number;
+
+  /** final_profit = base_profit_share - vehicle_cost_share */
   final_profit: number;
-profit_percentage: string;
+
+  profit_percentage: string;
+
   profit_breakdown: {
-      base_profit_share: number;
-      vehicle_cost_share: number;
-      final_profit: number;
-      profit_percentage: string;
-    };
+    base_profit_share: number;
+    vehicle_cost_share: number;
+    final_profit: number;
+    profit_percentage: string;
+  };
+
+  /**
+   * IDs of vehicles this partner owns in this specific operation.
+   * Empty array = partner owns no vehicles (Case B).
+   */
+  owned_vehicles_in_operation?: number[];
 
   operations_count?: number;
-
 }
 export interface DebtPaymentInfo {
   id: number;
@@ -960,21 +1116,25 @@ export interface FarmLoadingRequest {
   price_per_kg?: number; // Optional for debt-only payments
   paid_amount?: number; // Optional for debt-only payments
   old_balance_paid?: number; // Payment toward old balance
+  discount_amount?: number; // Payment toward old balance
   is_debt_payment_only?: boolean; // ✅ NEW: Flag for debt-only transactions
+  received_by_person_id?: number;
+  paid_by_person_id?: number;
 }
 
 
 export interface SaleRequest {
   buyer_id: number;
-  chicken_type_id: number;
-  loaded_cages_weight: number;
-  empty_cages_weight: number;
-  cage_count: number;
-  price_per_kg: number;
-  paid_amount: number;
-  old_debt_paid?: number;
   vehicle_id?: number;
-  is_debt_payment_only?: boolean; // ✅ NEW: Flag for debt-only transactions
+  chicken_type_id?: number;
+  weights?: number[];
+  empty_cages_weight?: number;
+  dead_weight?: number;
+  price_per_kg?: number;
+  discount_amount?: number;
+  paid_amount?: number;
+  old_debt_paid?: number;
+  is_debt_payment_only?: boolean;
 }
 
 export interface TransportLossRequest {
@@ -990,6 +1150,9 @@ export interface DailyCostRequest {
   cost_category_id: number;
   amount: number;
   description?: string;
+  paid_amount?: number;
+  payment_method?: string;
+  safe_id?: number;
 }
 
 export interface DailyReport {
@@ -1008,10 +1171,26 @@ export interface DailyReport {
   losses: TransportLoss[];
   vehicle_count: number;
   vehicles: Vehicle[];
-  vehicle_breakdown: any[];
+  vehicle_breakdown: VehicleDailyBreakdown[];  // Typed instead of any[]
   status: 'OPEN' | 'CLOSED';
-  profit_distribution: ProfitDistribution; // ✅ أضف هذا
+  profit_distribution: ProfitDistribution;
 
+}
+
+// Added: Detailed vehicle breakdown per day
+export interface VehicleDailyBreakdown {
+  vehicle_id: number;
+  vehicle_name: string;
+  plate_number?: string;
+  purchases: number;
+  revenue: number;
+  costs: number;
+  losses: number;
+  net_profit: number;
+  transactions_count: {
+    farm_transactions: number;
+    sale_transactions: number;
+  };
 }
 export interface ReportResponse{
 operation_date:string;
@@ -1101,12 +1280,16 @@ export interface VehicleBreakdown {
   purchases: number;
   revenue: number;
   losses: number;
- lossesWithFarm: number;
-    lossesWithoutFarm: number;
-
+  lossesWithFarm: number;
+  lossesWithoutFarm: number;
+  transport_losses: number;
+  sale_losses: number;
   vehicle_costs: number;
   other_costs: number;
   net_profit: number;
+  // Optional computed fields (may be provided by API or computed in component)
+  total_costs?: number;
+  profit_margin_percentage?: string;
 }
 
 export interface OperationSummary {
@@ -1211,12 +1394,31 @@ export interface EnhancedDailyReport {
         total_amount: number;
         vehicle_costs_total: number;
         other_costs_total: number;
+        total_paid: number;        // Added - sum of paid_amount
+        total_unpaid: number;      // Added - costs not yet paid
       };
     };
   };
   debt_movements: {
     farm_payments: DebtPayment[];
     buyer_payments: DebtPayment[];
+  };
+  cash_basis_summary?: {          // Added - matches backend structure
+    revenue: {
+      total_billed: number;
+      actually_received: number;
+      pending_receivable: number;
+    };
+    purchases: {
+      total_billed: number;
+      actually_paid: number;
+      pending_payable: number;
+    };
+    costs: {
+      total_recorded: number;
+      actually_paid: number;
+      pending_payment: number;
+    };
   };
   profit_distribution?: ProfitDistribution;
 
@@ -1281,6 +1483,7 @@ export interface PeriodReportResponse {
   cost_breakdown: CostBreakdown;
   vehicle_performance: VehiclePerformance;
   debt_position: DebtPosition;
+  cash_flow_summary: CashFlowSummary;  // Added - now uses paid_amount for costs
   operational_metrics: OperationalMetrics;
   highlights_and_alerts: HighlightsAndAlerts;
   period_comparison: PeriodComparison;
@@ -1432,15 +1635,21 @@ export interface FarmDebtPosition {
   total_receivables: number;
   total_payables: number;
   net_position: number;
-  position_type: 'NET_RECEIVABLE' | 'NET_PAYABLE' | 'BALANCED';
+  balance_type: 'RECEIVABLE' | 'PAYABLE' | 'SETTLED';  // Standardized naming
   farms_with_balance: number;
   largest_debtor: LargestDebtor | null;
+  detailed_farms?: Farm[];  // Optional detailed list with current_balance
 }
 
 export interface BuyerDebtPosition {
-  total_outstanding: number;
+  total_outstanding: number;    // Total positive balances (owe us)
+  total_credits: number;        // Total negative balances (we owe them)
+  net_position: number;         // outstanding - credits
+  balance_type: 'NET_RECEIVABLE' | 'NET_CREDIT' | 'BALANCED';  // Standardized naming
   buyers_with_debt: number;
+  buyers_with_credit: number;
   largest_debtor: LargestDebtor | null;
+  detailed_buyers?: Buyer[];    // Optional detailed list with current_balance
 }
 
 export interface LargestDebtor {
@@ -1455,6 +1664,50 @@ export interface DebtSummary {
   total_receivables: number;
   total_payables: number;
   net_working_capital: number;
+}
+
+// =========================
+// CASH FLOW SUMMARY
+// =========================
+export interface CashFlowSummary {
+  cash_basis: {
+    cash_in: {
+      sales_cash_received: number;
+      old_debts_collected: number;
+      total_cash_in: number;
+    };
+    cash_out: {
+      purchases_cash_paid: number;
+      costs_paid: number;  // Sum of paid_amount, not total cost amount
+      total_cash_out: number;
+      costs_breakdown: {
+        total_recorded: number;      // Full cost amounts
+        actually_paid: number;       // Sum of paid_amount
+        remaining_unpaid: number;    // Recorded - Paid
+        payment_rate_percentage: number;
+      };
+    };
+    net_cash_flow: number;
+    cash_flow_status: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL' | string;
+  };
+  accrual_basis: {
+    total_revenue: number;
+    total_expenses: number;
+    net_profit: number;
+  };
+  credit_activity: {
+    credit_extended_to_buyers: number;
+    credit_used_from_farms: number;
+    credit_extended_by_farms: number;
+    net_credit_position: number;
+  };
+  non_cash_expenses: {
+    transport_losses: number;
+  };
+  reconciliation: {
+    difference_cash_vs_accrual: number;
+    explanation: string;
+  };
 }
 
 // =========================
@@ -2088,11 +2341,14 @@ export interface FarmDebtSummary {
 export interface FarmBalancesResponse {
   success: boolean;
   data: {
+    report_type?: string;
     summary: FarmDebtSummary;
     receivables: {
+      count: number;
       farms: Farm[];
     };
     payables: {
+      count: number;
       farms: Farm[];
     };
   };
@@ -2100,31 +2356,66 @@ export interface FarmBalancesResponse {
 
 
 
+export interface BuyerDebtSummary {
+  total_receivables: number;
+  total_payables: number;
+  net_position: number;
+  receivables_count: number;
+  payables_count: number;
+  total_buyers_with_balance: number;
+}
+
 export interface BuyerDebtsResponse {
   success: boolean;
   data: {
-    total_debt: number;
-    buyers_count: number;
-    buyers: Buyer[];
+    report_type?: string;
+    summary: BuyerDebtSummary;
+    receivables: {
+      count: number;
+      buyers: Buyer[];
+    };
+    payables: {
+      count: number;
+      buyers: Buyer[];
+    };
   };
 }
 
 export interface StatementTransaction {
   date: string;
-  type: 'PURCHASE' | 'SALE' | 'PAYMENT' | 'RECEIPT';
+  entry_type: 'PURCHASE' | 'SALE' | 'PAYMENT' | 'OLD_DEBT_PAYMENT';
+  reference_id: number;
+  reference_type: string;
   description: string;
   amount: number;
   paid_now: number;
   balance_change: number;
-  running_balance: number;
+  balance_after: number;  // Backend field name
+  running_balance?: number;  // Optional - may not always be present
+  details?: {
+    transaction_time?: string;
+    notes?: string;
+    payment_direction?: string;
+  };
 }
 
 export interface FarmStatementSummary {
   opening_balance: number;
+  opening_balance_type: 'RECEIVABLE' | 'PAYABLE' | 'SETTLED';
   total_purchases: number;
-  total_payments: number;
+  paid_during_purchases: number;
+  credit_used_in_purchases: number;
+  new_debt_from_purchases: number;
+  payments_received_from_farm: number;
+  payments_made_to_farm: number;
+  net_payments: number;
+  net_change: number;
   closing_balance: number;
-   total_sales: number;
+  closing_balance_type: 'RECEIVABLE' | 'PAYABLE' | 'SETTLED';
+  transaction_count: number;
+  payment_count: number;
+  total_payments: number;
+  total_entries: number;
 }
 
 export interface FarmStatementResponse {
@@ -2139,16 +2430,26 @@ export interface FarmStatementResponse {
 export interface BuyerStatementSummary {
   opening_balance: number;
   total_sales: number;
+  paid_during_sales: number;
+  new_debt_from_sales: number;
+  old_debt_paid_in_sales: number;
+  standalone_payments: number;
   total_payments: number;
+  net_change: number;
   closing_balance: number;
-  total_purchases: number;
-
+  sale_count: number;
+  payment_count: number;
+  total_entries: number;
 }
 
 export interface BuyerStatementResponse {
   success: boolean;
   data: {
     buyer: Buyer;
+    period?: {
+      start_date: string;
+      end_date: string;
+    };
     summary: BuyerStatementSummary;
     statement: StatementTransaction[];
   };
@@ -2161,6 +2462,11 @@ export interface StatementDialogData {
   entityId: number;
   entityName: string;
   currentBalance: number;
+  balanceType: 'RECEIVABLE' | 'PAYABLE' | 'CREDIT' | 'SETTLED';  // Added for pipe usage
+  statementPeriod?: {  // Optional period filter
+    start_date?: string;
+    end_date?: string;
+  };
 }
 
 
@@ -2372,3 +2678,13 @@ export interface ApiError {
   statusCode?: number;
 }
 
+export * from './employee.model';
+export * from './safe.model';
+export * from './financial-transaction.model';
+export * from './loss.model';
+export * from './advance.model';
+export * from './custody.model';
+export * from './salary.model';
+export * from './partner-profit.model';
+export * from './payment-metadata.model';
+export * from './person.model';

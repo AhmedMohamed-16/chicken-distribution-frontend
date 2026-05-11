@@ -111,9 +111,22 @@
 
           <!-- Investment Amount Column -->
           <ng-container matColumnDef="investment_amount">
-            <th mat-header-cell *matHeaderCellDef>مبلغ الاستثمار</th>
+            <th mat-header-cell *matHeaderCellDef>رأس المال</th>
             <td mat-cell *matCellDef="let partner">
-              {{formatCurrency( partner.investment_amount ) }} ج
+              <div class="investment-breakdown">
+                <div class="total-inv" matTooltip="إجمالي مبلغ الاستثمار">
+                  <span>إجمالي:</span>
+                  <strong>{{formatCurrency(partner.investment_amount)}}</strong>
+                </div>
+                <div class="vehicle-inv" *ngIf="partner.total_vehicle_investment > 0" matTooltip="المبلغ المستثمر في المركبات">
+                  <span>مركبات:</span>
+                  <span class="deduction">-{{formatCurrency(partner.total_vehicle_investment)}}</span>
+                </div>
+                <div class="net-inv" matTooltip="صافي الاستثمار المستخدم لحساب النسبة">
+                  <span>الصافي:</span>
+                  <strong class="success-text">{{formatCurrency(partner.net_investment)}}</strong>
+                </div>
+              </div>
             </td>
           </ng-container>
 

@@ -1,0 +1,65 @@
+<h2 mat-dialog-title style="text-align: right;">تسجيل دفعة للمصروف</h2>
+
+<mat-dialog-content>
+  <div class="dialog-content">
+
+    <!-- Cost Summary -->
+    <div class="amount-info">
+      <p><strong>المصروف:</strong> {{ data.cost.category.name }}</p>
+      <p><strong>إجمالي المبلغ:</strong> {{ data.cost.amount | number:'1.2-2' }} جنيه</p>
+      <p><strong>المدفوع:</strong> {{ data.cost.paid_amount | number:'1.2-2' }} جنيه</p>
+      <p><strong>المتبقي:</strong> {{ data.cost.remaining_amount | number:'1.2-2' }} جنيه</p>
+    </div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+
+      <!-- Payment Amount -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>المبلغ المراد دفعه (جنيه)</mat-label>
+        <input matInput type="number" formControlName="amount" step="0.01" min="0.01">
+        <mat-error
+          *ngIf="paymentForm.get('amount')?.hasError('required') || paymentForm.get('amount')?.hasError('min')">
+          المبلغ مطلوب ويجب أن يكون أكبر من 0
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Overpayment Warning -->
+      @if (isOverpaying()) {
+      <div class="overpay-warning">
+        <mat-icon>warning_amber</mat-icon>
+        <span>
+          المبلغ المُدخل أكبر من المتبقي ({{ data.cost.remaining_amount | number:'1.2-2' }} ج).
+          سيُسجَّل الفرق كرصيد زائد للفئة.
+        </span>
+      </div>
+      }
+
+      <!-- FIX: Use safe amount from form value with nullish coalescing -->
+      <app-payment-source-selector [amount]="paymentForm.value.amount ?? 0" [personType]="currentPersonType()"
+        [personId]="currentPersonId()" [paymentLabel]="'طريقة الدفع'" [label]="'مصدر الدفع'" [isDebtPaymentOnly]="true"
+        [balance]="selectedCostBalance()" [operationType]="'COST'" [parentForm]="paymentForm"
+        (selectionChange)="paymentSource.set($event)">
+      </app-payment-source-selector>
+
+      <app-person-selector [parentForm]="paymentForm" typeControlName="paid_by_person_type"
+        idControlName="paid_by_person_id">
+      </app-person-selector>
+
+      <!-- Notes -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>ملاحظات إضافية</mat-label>
+        <textarea matInput formControlName="notes" rows="2"></textarea>
+      </mat-form-field>
+
+    </form>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="gap: 10px;">
+  <button mat-button (click)="onCancel()" [disabled]="submitting()">إلغاء</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()"
+    [disabled]="paymentForm.invalid || submitting() || !paymentSource()">
+    <mat-spinner diameter="20" *ngIf="submitting()"></mat-spinner>
+    <span *ngIf="!submitting()">تأكيد الدفع</span>
+  </button>
+</mat-dialog-actions>

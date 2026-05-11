@@ -32,7 +32,6 @@
             </select>
           </div>
 
-
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">عدد النتائج</label>
             <select [(ngModel)]="pageSizeModel" (ngModelChange)="onPageSizeChange()"
@@ -73,15 +72,17 @@
             <td mat-cell *matCellDef="let farm">{{ farm.location || '-' }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="total_debt">
-            <th mat-header-cell *matHeaderCellDef>الدين</th>
+          <ng-container matColumnDef="current_balance">
+            <th mat-header-cell *matHeaderCellDef>الرصيد الحالي</th>
             <td mat-cell *matCellDef="let farm">
-              <mat-chip [ngClass]="farm.current_balance > 0 ? 'debt-chip green' : 'debt-chip red'">
+              <mat-chip
+                [ngClass]="farm.current_balance > 0 ? 'debt-chip green' : farm.current_balance < 0 ? 'debt-chip red' : 'debt-chip gray'">
                 {{ formatCurrency(Math.abs(farm.current_balance)) }}
-                {{ farm.current_balance > 0 ? '' : 'ج عليا' }}
+                @if (farm.current_balance > 0) { ج له }
+                @else if (farm.current_balance < 0) { ج عليه }
+                @else { متساوي }
               </mat-chip>
             </td>
-
           </ng-container>
 
           <ng-container matColumnDef="actions">

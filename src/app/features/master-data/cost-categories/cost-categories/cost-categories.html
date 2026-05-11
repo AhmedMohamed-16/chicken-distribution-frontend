@@ -145,6 +145,16 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="current_balance">
+          <th mat-header-cell *matHeaderCellDef>الرصيد</th>
+          <td mat-cell *matCellDef="let cat">
+            <span [ngClass]="cat.current_balance > 0 ? 'badge debt-chip green' : (cat.current_balance < 0 ? 'badge debt-chip red' : 'badge debt-chip gray')">
+              {{ formatNumber(Math.abs(cat.current_balance || 0), 2) }}
+              {{ cat.current_balance > 0 ? 'لينا' : (cat.current_balance < 0 ? 'عليا' : '') }}
+            </span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="usage_count">
           <th mat-header-cell *matHeaderCellDef>عدد الاستخدامات</th>
           <td mat-cell *matCellDef="let cat">
@@ -155,6 +165,9 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
           <td mat-cell *matCellDef="let cat">
+            <button mat-icon-button (click)="viewLedger(cat)" matTooltip="تاريخ الحساب">
+              <mat-icon>history_edu</mat-icon>
+            </button>
             <button mat-icon-button (click)="edit(cat)" matTooltip="تعديل">
               <mat-icon>edit</mat-icon>
             </button>

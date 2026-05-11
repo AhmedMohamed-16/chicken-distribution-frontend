@@ -2,8 +2,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, Farm, PaginatedResponse, PaginationParams } from '../models';
-import { environment } from '../../../environments/environment.prod';
+import { ApiResponse, Buyer, CostCategory, Farm, PaginatedResponse, PaginationParams } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -58,8 +58,13 @@ export class FarmService {
    * Get debt history for a farm
    * Returns both transactions and payments
    */
-  getDebtHistory(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/debt-history`);
+  getDebtHistory(id: number, params?: any): Observable<any> {
+    let httpParams = new HttpParams();
+    if (params?.startDate) httpParams = httpParams.set('startDate', params.startDate);
+    if (params?.endDate) httpParams = httpParams.set('endDate', params.endDate);
+    if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+    
+    return this.http.get(`${this.apiUrl}/${id}/debt-history`, { params: httpParams });
   }
 
   /**
@@ -118,28 +123,33 @@ export class FarmService {
   /**
    * Get balance color class for UI
    */
-  getBalanceColorClass(farm: Farm): string {
-    const balance = farm.current_balance;
-    if (balance > 0) return 'text-green-600'; // Receivable (good)
-    if (balance < 0) return 'text-red-600'; // Payable (we owe)
-    return 'text-gray-600'; // Settled
-  }
+ getBalanceColorClass(entity: Farm | Buyer | CostCategory) {
+  const balance = entity.current_balance ?? 0;
+
+  return {
+    'text-green-600': balance > 0,
+    'text-red-600': balance < 0,
+    'text-gray-600': balance === 0,
+  };
+}
 
   /**
    * Format balance for display
    */
-  formatBalance(farm: Farm): string {
-    const balance = Math.abs(farm.current_balance);
-    const formatted = balance.toFixed(2);
+ formatBalance(farm: Farm | Buyer | CostCategory): string {
+  const currentBalance = farm.current_balance ?? 0;
 
-    if (farm.current_balance > 0) {
-      return `لنا${formatted} ج.م`; // Farm owes us
-    } else if (farm.current_balance < 0) {
-      return `علينا${formatted} ج.م`; // We owe farm
-    } else {
-      return '0.00 ج.م';
-    }
+  const balance = Math.abs(currentBalance);
+  const formatted = balance.toFixed(2);
+
+  if (currentBalance > 0) {
+    return `لنا ${formatted} ج.م`;
+  } else if (currentBalance < 0) {
+    return `علينا ${formatted} ج.م`;
+  } else {
+    return '0.00 ج.م';
   }
+}
 
   /**
    * Get detailed balance description

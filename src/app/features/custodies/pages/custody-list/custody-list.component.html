@@ -1,0 +1,337 @@
+<div class="custody-container">
+  <div class="header-row">
+    <div class="title-section">
+      <h2>إدارة العهد</h2>
+      <p class="subtitle">تتبع عهد الموظفين والشركاء والمدفوعات والمبالغ المتبقية</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add_circle</mat-icon>
+        عهدة جديدة
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-item">
+          <div class="icon-circle blue">
+            <mat-icon>list_alt</mat-icon>
+          </div>
+          <div class="summary-details">
+            <span class="label">العهد النشطة</span>
+            <span class="value">{{ activeCustodies().length }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-item">
+          <div class="icon-circle" [class]="totalUnaccounted() > 0 ? 'red' : 'green'">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div class="summary-details">
+            <span class="label">إجمالي غير محاسَب</span>
+            <span class="value" [style.color]="totalUnaccounted() > 0 ? '#C0392B' : '#27AE60'">
+              {{ formatCurrency(totalUnaccounted()) }}
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-item">
+          <div class="icon-circle orange">
+            <mat-icon>money_off</mat-icon>
+          </div>
+          <div class="summary-details">
+            <span class="label">إجمالي الصادر</span>
+            <span class="value">{{ formatCurrency(totalIssued()) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-item">
+          <div class="icon-circle yellow">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="summary-details">
+            <span class="label">عهد متأخرة</span>
+            <span class="value">{{ overdueOpenCount() }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card mat-elevation-z1">
+    <form [formGroup]="filtersForm" class="filters-form">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>الحالة</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="ALL">الكل</mat-option>
+          <mat-option value="OPEN">مفتوحة</mat-option>
+          <mat-option value="PARTIAL">جزئية</mat-option>
+          <mat-option value="RECONCILED">محاسَبة</mat-option>
+          <mat-option value="CLOSED">مغلقة</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>النوع</mat-label>
+        <mat-select formControlName="personType">
+          <mat-option value="ALL">الكل</mat-option>
+          <mat-option value="EMPLOYEE">موظف</mat-option>
+          <mat-option value="PARTNER">شريك</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>البحث</mat-label>
+        <input matInput formControlName="search" placeholder="البحث بالاسم أو الوصف...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- Error Message -->
+  @if (custodyService.error()) {
+  <div class="error-message">
+    <mat-icon>error</mat-icon>
+    <span>{{ custodyService.error() }}</span>
+  </div>
+  }
+
+  <mat-tab-group (selectedTabChange)="onTabChange($event)" class="custody-tabs" animationDuration="0ms">
+    <!-- Active Tab -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <mat-icon class="tab-icon">timer</mat-icon>
+        العهد النشطة
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="table-card mat-elevation-z3">
+          <div class="loading-shade" *ngIf="isLoading()">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+
+          <div class="table-responsive-wrapper">
+            <table mat-table [dataSource]="activePageItems()" class="custody-table">
+              <ng-container matColumnDef="recipient">
+                <th mat-header-cell *matHeaderCellDef>المستلم</th>
+                <td mat-cell *matCellDef="let custody">
+                  <div class="recipient-cell">
+                    <span class="recipient-name">{{ custody.recipient_name || 'غير محدد' }}</span>
+                    <span class="person-type-badge" [class]="getPersonTypeClass(custody.given_to_person_type)">
+                      {{ getPersonTypeLabel(custody.given_to_person_type) }}
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>تاريخ الإصدار</th>
+                <td mat-cell *matCellDef="let custody">{{ formatDate(custody.custody_date) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>المبلغ المُصدَر</th>
+                <td mat-cell *matCellDef="let custody" class="amount-cell">
+                  {{ formatCurrency(custody.amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="spent">
+                <th mat-header-cell *matHeaderCellDef>المصروف</th>
+                <td mat-cell *matCellDef="let custody" class="spent-cell">
+                  {{ formatCurrency(custody.spent_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="returned">
+                <th mat-header-cell *matHeaderCellDef>المُرجَع</th>
+                <td mat-cell *matCellDef="let custody" class="returned-cell">
+                  {{ formatCurrency(custody.returned_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="unaccounted">
+                <th mat-header-cell *matHeaderCellDef>غير محاسَب</th>
+                <td mat-cell *matCellDef="let custody" class="unaccounted-cell"
+                  [class.positive]="custody.unaccounted_amount <= 0" [class.negative]="custody.unaccounted_amount > 0">
+                  {{ custody.unaccounted_amount > 0 ? '' : '✓ ' }}{{ formatCurrency(custody.unaccounted_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>الحالة</th>
+                <td mat-cell *matCellDef="let custody">
+                  <app-custody-status-badge [status]="custody.status" />
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+                <td mat-cell *matCellDef="let custody">
+                  <div class="action-buttons">
+                    <button mat-icon-button color="primary" matTooltip="عرض التفاصيل" (click)="goToStatement(custody.id)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    @if (isActionAllowed(custody.status) && custody.unaccounted_amount > 0) {
+                    <button mat-icon-button color="accent" matTooltip="تسجيل إرجاع"
+                      (click)="openReturnDialog(custody.id, custody.unaccounted_amount)">
+                      <mat-icon>reply</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" matTooltip="تسجيل صرف"
+                      (click)="openSpendingDialog(custody.id, custody.unaccounted_amount)">
+                      <mat-icon>payments</mat-icon>
+                    </button>
+                    }
+                    <button mat-icon-button color="warn"
+                      [matTooltip]="custody.unaccounted_amount > 0 ? 'يجب إرجاع أو صرف المبلغ غير المحاسب أولاً' : 'تسوية وإغلاق'"
+                      (click)="openSettleDialog(custody)">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns" class="custody-row"></tr>
+            </table>
+          </div>
+
+          <div class="pagination-controls" *ngIf="activeTotalPages() > 1">
+            <button mat-button color="primary" (click)="previousActivePage()" [disabled]="activePage() === 1">
+              <mat-icon>chevron_left</mat-icon>
+              السابق
+            </button>
+            <span>صفحة {{ activePage() }} من {{ activeTotalPages() }}</span>
+            <button mat-button color="primary" (click)="nextActivePage()"
+              [disabled]="activePage() === activeTotalPages()">
+              التالي
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+
+          <div class="empty-state" *ngIf="!isLoading() && activeCustodies().length === 0">
+            <mat-icon>check_circle</mat-icon>
+            <p>لا توجد عهد نشطة حالياً. كل العهد تم إغلاقها!</p>
+          </div>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- History Tab -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <mat-icon class="tab-icon">history</mat-icon>
+        سجل العهد
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="table-card mat-elevation-z3">
+          <div class="loading-shade" *ngIf="isLoading()">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+
+          <div class="table-responsive-wrapper">
+            <table mat-table [dataSource]="historyPageItems()" class="custody-table">
+              <ng-container matColumnDef="recipient">
+                <th mat-header-cell *matHeaderCellDef>المستلم</th>
+                <td mat-cell *matCellDef="let custody">
+                  <div class="recipient-cell">
+                    <span class="recipient-name">{{ custody.recipient_name || 'غير محدد' }}</span>
+                    <span class="person-type-badge" [class]="getPersonTypeClass(custody.given_to_person_type)">
+                      {{ getPersonTypeLabel(custody.given_to_person_type) }}
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>تاريخ الإصدار</th>
+                <td mat-cell *matCellDef="let custody">{{ formatDate(custody.custody_date) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>المبلغ المُصدَر</th>
+                <td mat-cell *matCellDef="let custody" class="amount-cell">
+                  {{ formatCurrency(custody.amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="spent">
+                <th mat-header-cell *matHeaderCellDef>المصروف</th>
+                <td mat-cell *matCellDef="let custody" class="spent-cell">
+                  {{ formatCurrency(custody.spent_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="returned">
+                <th mat-header-cell *matHeaderCellDef>المُرجَع</th>
+                <td mat-cell *matCellDef="let custody" class="returned-cell">
+                  {{ formatCurrency(custody.returned_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="unaccounted">
+                <th mat-header-cell *matHeaderCellDef>غير محاسَب</th>
+                <td mat-cell *matCellDef="let custody" class="unaccounted-cell"
+                  [class.positive]="custody.unaccounted_amount <= 0" [class.negative]="custody.unaccounted_amount > 0">
+                  {{ formatCurrency(custody.unaccounted_amount) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>الحالة</th>
+                <td mat-cell *matCellDef="let custody">
+                  <app-custody-status-badge [status]="custody.status" />
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+                <td mat-cell *matCellDef="let custody">
+                  <button mat-icon-button color="primary" matTooltip="عرض التفاصيل" (click)="goToStatement(custody.id)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns" class="closed-row"></tr>
+            </table>
+          </div>
+
+          <div class="pagination-controls" *ngIf="historyTotalPages() > 1">
+            <button mat-button color="primary" (click)="previousHistoryPage()" [disabled]="historyPage() === 1">
+              <mat-icon>chevron_left</mat-icon>
+              السابق
+            </button>
+            <span>صفحة {{ historyPage() }} من {{ historyTotalPages() }}</span>
+            <button mat-button color="primary" (click)="nextHistoryPage()"
+              [disabled]="historyPage() === historyTotalPages()">
+              التالي
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+
+          <div class="empty-state" *ngIf="!isLoading() && historyCustodies().length === 0">
+            <mat-icon>history_toggle_off</mat-icon>
+            <p>سجل العهد فارغ</p>
+          </div>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

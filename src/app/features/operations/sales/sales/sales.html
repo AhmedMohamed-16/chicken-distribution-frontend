@@ -30,8 +30,10 @@
                 @for (buyer of buyers(); track buyer.id) {
                 <mat-option [value]="buyer.id">
                   {{ buyer.name }}
-                  @if (buyer.total_debt > 0) {
-                  <span class="debt-indicator">(دين: {{ buyer.total_debt }} ج)</span>
+                  @if (buyer.current_balance > 0) {
+                    <span class="debt-indicator">(دين: {{ buyer.current_balance }} ج)</span>
+                  } @else if (buyer.current_balance < 0) {
+                    <span class="credit-indicator">(له: {{ Math.abs(buyer.current_balance) }} ج)</span>
                   }
                 </mat-option>
                 }
@@ -164,13 +166,11 @@
 
     <mat-card-content>
       @if (loading()) {
-      <div class="loading-spinner">
-        <mat-spinner></mat-spinner>
-      </div>
+      <div class="loading-spinner"><mat-spinner></mat-spinner></div>
       } @else {
       <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
 
-        <!-- ✅ NEW: Payment Mode Toggle -->
+        <!-- ── Mode toggle ─────────────────────────────────────────────── -->
         <div class="mode-toggle-section">
           <mat-slide-toggle formControlName="is_debt_payment_only" color="primary">
             <strong>استلام دفع فقط (بدون بيع)</strong>
@@ -178,13 +178,13 @@
           <p class="mode-hint">
             {{ isDebtPaymentOnly()
             ? 'سيتم تسجيل استلام دفع فقط بدون عملية بيع'
-            : 'تسجيل عملية بيع عادية مع إمكانية استلام دفع للديون السابقة' }}
+            : 'تسجيل عملية بيع عادية مع إمكانية تسوية رصيد سابق' }}
           </p>
         </div>
 
         <mat-divider></mat-divider>
 
-        <!-- Buyer Selection (Always Required) -->
+        <!-- ── Buyer selection ────────────────────────────────────────── -->
         <div class="form-section">
           <h3>بيانات محل الفراخ</h3>
           <mat-form-field class="form-field" appearance="outline">
@@ -193,29 +193,48 @@
               @for (buyer of buyers(); track buyer.id) {
               <mat-option [value]="buyer.id">
                 {{ buyer.name }}
-                @if (buyer.total_debt > 0) {
-                <span class="debt-indicator">(دين: {{ formatCurrency(buyer.total_debt) }} ج)</span>
+                <!-- @if ((buyer.current_balance) > 0) {
+                  <span class="debt-indicator">
+                  (  {{ formatCurrency(buyer.current_balance) }} ج)
+                  </span>
                 }
+                @if ((buyer.current_balance) < 0) {
+                  <span class="credit-indicator">
+                  ( {{ formatCurrency(Math.abs(buyer.current_balance)) }} ج)
+                  </span>
+                } -->
+                @let balance = buyer.current_balance;
+                @if (balance !== 0) {
+                <span [class]="getBalanceTypeClass(buyer)">
+                  ({{ formatBalance(buyer) }})
+                </span>
+                }
+
               </mat-option>
               }
             </mat-select>
             <mat-error>محل الفراخ مطلوب</mat-error>
           </mat-form-field>
 
-          <!-- Debt Warning -->
-          @if (selectedBuyerDebt() > 0) {
+          @if (selectedBuyerBalance() > 0) {
           <div class="debt-warning">
+            <mat-icon>warning</mat-icon>
+            <strong>{{ getBalanceWarningMessage() }}</strong>
+          </div>
+          }
+
+          @if (weOweBuyer()) {
+          <div class="credit-info">
             <mat-icon>info</mat-icon>
-            <strong>{{ getDebtWarningMessage() }}</strong>
+            <strong>{{ getBalanceWarningMessage() }}</strong>
           </div>
           }
         </div>
 
-        <!-- ✅ Sale Section (Hidden in Debt-Only Mode) -->
         @if (!isDebtPaymentOnly()) {
         <mat-divider></mat-divider>
 
-        <!-- Vehicle Selection -->
+        <!-- ── Vehicle selection ──────────────────────────────────── -->
         <div class="form-section">
           <h3>المركبة</h3>
           <mat-form-field class="form-field" appearance="outline">
@@ -223,12 +242,10 @@
             <mat-select formControlName="vehicle_id" (selectionChange)="onVehicleChange($event)">
               @for (vehicle of activeVehicles(); track vehicle.id) {
               <mat-option [value]="vehicle.id">
-                {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number )}}
+                {{ vehicle.name }} - {{ formatNumber(vehicle.plate_number) }}
               </mat-option>
               }
-              @empty {
-              <mat-option disabled>لا توجد مركبات نشطة</mat-option>
-              }
+              @empty { <mat-option disabled>لا توجد مركبات نشطة</mat-option> }
             </mat-select>
             <mat-error>اختيار المركبة مطلوب</mat-error>
           </mat-form-field>
@@ -236,7 +253,7 @@
 
         <mat-divider></mat-divider>
 
-        <!-- Chicken Type -->
+        <!-- ── Chicken type ───────────────────────────────────────── -->
         <div class="form-section">
           <h3>نوع الفراخ</h3>
           <mat-form-field class="form-field" appearance="outline">
@@ -252,115 +269,217 @@
 
         <mat-divider></mat-divider>
 
-        <!-- Weighing Section -->
+        <!-- ── Weighing ───────────────────────────────────────────── -->
         <div class="form-section">
           <h3>الوزن</h3>
-          <div class="form-row">
-            <mat-form-field class="form-field" appearance="outline">
-              <mat-label>اجمالي وزن الأقفاص فاضية (كجم)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="empty_cages_weight">
-              <mat-error>الوزن مطلوب</mat-error>
-            </mat-form-field>
 
-            <mat-form-field class="form-field" appearance="outline">
-              <mat-label>عدد الأقفاص</mat-label>
-              <input matInput type="number" formControlName="cage_count">
-              <mat-error>العدد مطلوب</mat-error>
-            </mat-form-field>
+          <div class="weight-entries-header">
+            <span class="weight-label">قراءات الميزان</span>
+            <button mat-stroked-button color="primary" type="button" (click)="addWeightEntry()">
+              <mat-icon>add</mat-icon> إضافة قراءة
+            </button>
           </div>
 
-          <div class="form-row">
-            <mat-form-field class="form-field" appearance="outline">
-              <mat-label>اجمالي وزن الأقفاص مليانة (كجم)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="loaded_cages_weight">
-              <mat-error>الوزن مطلوب</mat-error>
+          @for (weight of weightEntries(); track $index) {
+          <div class="weight-entry-row">
+            <mat-form-field class="form-field weight-field" appearance="outline">
+              <mat-label>قراءة {{ $index + 1 }} (كجم)</mat-label>
+              <input matInput type="number" step="0.01" min="0" [value]="weight"
+                (input)="updateWeightEntry($index, +$any($event.target).value)">
+              <mat-hint>الوزن الإجمالي بالأقفاص</mat-hint>
             </mat-form-field>
+            @if (weightEntries().length > 1) {
+            <button mat-icon-button color="warn" type="button" (click)="removeWeightEntry($index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            }
           </div>
+          }
+
+          <div class="calculated-value info">
+            <mat-icon>scale</mat-icon>
+            <strong>إجمالي الوزن الخام: {{ formatNumber(grossTotalWeight(), 2) }} كجم</strong>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="deductions-section">
+            <h4>المنقصات</h4>
+            <div class="form-row">
+              <mat-form-field class="form-field" appearance="outline">
+                <mat-label>وزن الفارغ (كجم)</mat-label>
+                <input matInput type="number" step="0.01" min="0" formControlName="empty_cages_weight">
+                <mat-hint>إجمالي وزن الأقفاص المُرجَعة</mat-hint>
+              </mat-form-field>
+              <div class="transport-loss-container">
+                <button mat-stroked-button color="warn" type="button" (click)="openTransportLossDialog()">
+                  <mat-icon>report_problem</mat-icon> تسجيل فاقد البيع
+                </button>
+                @if ((saleForm.get('dead_weight')?.value ?? 0) > 0) {
+                <span class="loss-badge">
+                  {{ formatNumber(saleForm.get('dead_weight')?.value ?? 0, 2) }} كجم نافق
+                </span>
+                }
+              </div>
+            </div>
+            <div class="calculated-value warning">
+              <mat-icon>remove_circle_outline</mat-icon>
+              <strong>إجمالي المنقصات: {{ formatNumber(totalDeductions(), 2) }} كجم</strong>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
 
           <div class="calculated-value success">
-            <mat-icon>scale</mat-icon>
-            <strong>صافي وزن الفراخ: {{formatNumber( netSaleWeight(),2) }} كجم</strong>
+            <mat-icon>verified</mat-icon>
+            <strong>صافي وزن الفراخ: {{ formatNumber(netSaleWeight(), 2) }} كجم</strong>
           </div>
         </div>
 
         <mat-divider></mat-divider>
 
-        <!-- Pricing Section -->
+        <!-- ── Pricing & payment ──────────────────────────────────── -->
         <div class="form-section">
           <h3>التسعير والدفع</h3>
+
           <div class="form-row">
             <mat-form-field class="form-field" appearance="outline">
               <mat-label>سعر البيع للكيلو (جنيه)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="price_per_kg">
+              <input matInput type="number" step="0.01" min="0" formControlName="price_per_kg">
               <mat-error>السعر مطلوب</mat-error>
             </mat-form-field>
-
             <mat-form-field class="form-field" appearance="outline">
-              <mat-label>المبلغ المدفوع (جنيه)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="paid_amount" [max]="totalSaleAmount()">
-              <mat-hint>الحد الأقصى: {{formatCurrency( totalSaleAmount()) }} جنيه</mat-hint>
-
-              <mat-error>المبلغ غير صحيح</mat-error>
+              <mat-label>الخصم (جنيه)</mat-label>
+              <input matInput type="number" step="0.01" min="0" formControlName="discount_amount">
+              <mat-hint>اختياري</mat-hint>
             </mat-form-field>
+          </div>
+
+          <div class="calculated-value">
+            <mat-icon>calculate</mat-icon>
+            <strong>الإجمالي قبل الخصم: {{ formatCurrency(subtotalAmount()) }} جنيه</strong>
           </div>
 
           <div class="calculated-value info">
             <mat-icon>payments</mat-icon>
-            <strong>إجمالي البيع: {{ formatCurrency(totalSaleAmount()) }} جنيه</strong>
+            <strong>إجمالي البيع (بعد الخصم): {{ formatCurrency(totalSaleAmount()) }} جنيه</strong>
           </div>
+
+          <mat-divider></mat-divider>
+
+          <mat-form-field class="form-field" appearance="outline">
+            <mat-label>المبلغ المدفوع (جنيه)</mat-label>
+            <input matInput type="number" step="0.01" min="0" formControlName="paid_amount">
+            <mat-hint>يمكن أن يتجاوز إجمالي البيع — الزيادة تُسجَّل كرصيد علينا</mat-hint>
+          </mat-form-field>
+
+          <!-- Payment Metadata (Added) -->
+          <!-- <div class="payment-metadata-section">
+            <app-payment-method-selector [parentForm]="saleForm">
+            </app-payment-method-selector>
+
+            <app-person-selector label="الشخص الذي استلم" [parentForm]="saleForm" typeControlName="person_type"
+              idControlName="received_by_person_id">
+            </app-person-selector>
+          </div> -->
 
           <div class="calculated-value" [class.warning]="remainingSaleAmount() > 0">
             <mat-icon>{{ remainingSaleAmount() > 0 ? 'warning' : 'check_circle' }}</mat-icon>
             <strong>المتبقي من البيع: {{ formatCurrency(remainingSaleAmount()) }} جنيه</strong>
           </div>
+
+          @if (debtAutoApplied() > 0) {
+          <div class="calculated-value success">
+            <mat-icon>auto_mode</mat-icon>
+            <strong>سيتم سداد {{ formatCurrency(debtAutoApplied()) }} جنيه تلقائياً من الرصيد المستحق</strong>
+          </div>
+          }
+
+          @if (creditAutoApplied() > 0) {
+          <div class="calculated-value info">
+            <mat-icon>auto_mode</mat-icon>
+            <strong>سيتم تطبيق {{ formatCurrency(creditAutoApplied()) }} جنيه من الرصيد الدائن تلقائياً</strong>
+          </div>
+          }
         </div>
         }
 
-        <!-- ✅ Old Debt Payment Section (Conditional) -->
+        <!-- ── Old balance payment section ───────────────────────────────
+               RESTORED: shown for both normal sales and debt-only mode
+               when buyer has any non-zero balance.
+
+               Updated from old version:
+                 - formControlName: old_debt_paid → old_balance_paid
+                 - label: updated to reflect bi-directional balance
+                 - hint: updated to show direction (FROM_BUYER / TO_BUYER)
+                 - projected balance: replaces old newTotalDebt() display
+          ─────────────────────────────────────────────────────────────── -->
         @if (shouldShowPaymentField()) {
         <mat-divider></mat-divider>
-
         <div class="form-section">
           <h3>
             <mat-icon>account_balance_wallet</mat-icon>
-            تسديد الديون السابقة
+            {{ buyerOwesUs() ? 'استلام دفع من الرصيد المستحق' : 'دفع الرصيد الدائن للمشتري' }}
           </h3>
 
           <mat-form-field class="form-field" appearance="outline">
-            <mat-label>استلام دفع من محل الفراخ (جنيه)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="old_debt_paid" [max]="maxPaymentAmount()"
+            <mat-label>
+              {{ buyerOwesUs() ? 'استلام دفع من محل الفراخ (جنيه)' : 'دفع للمشتري (جنيه)' }}
+            </mat-label>
+            <input matInput type="number" step="0.01" formControlName="old_balance_paid"
               [required]="isPaymentRequired()">
-            <mat-hint>الحد الأقصى: {{ formatCurrency(maxPaymentAmount() ) }} جنيه</mat-hint>
+            <mat-hint>
+              {{ buyerOwesUs()
+              ? 'الرصيد الحالي: ' + formatCurrency(maxPaymentAmount()) + ' جنيه — الزيادة تُسجَّل رصيد دائن'
+              : 'الرصيد الدائن: ' + formatCurrency(maxPaymentAmount()) + ' جنيه — الزيادة تُسجَّل مستحق علينا' }}
+            </mat-hint>
+
             <mat-error>
-              @if (isPaymentRequired()) {
-              المبلغ مطلوب
-              } @else {
-              المبلغ غير صحيح
-              }
+              @if (isPaymentRequired()) { المبلغ مطلوب }
+              @else { المبلغ غير صحيح }
             </mat-error>
           </mat-form-field>
+        </div>
+        }
+        <!-- @if(!(isDebtPaymentOnly() && buyerOwesUs())){ -->
 
-          <!-- New Total Debt Display -->
-          <div class="calculated-value" [class.success]="newTotalDebt() === 0"
-            [class.warning]="newTotalDebt() > selectedBuyerDebt()"
-            [class.info]="newTotalDebt() < selectedBuyerDebt() && newTotalDebt() > 0">
-            <mat-icon>account_balance</mat-icon>
-            <strong>إجمالي الدين الجديد:
-              @if (newTotalDebt() > 0) {
-              <span class="text-red-600">{{ formatCurrency(newTotalDebt())}} ج.م</span>
-              <span class="hint-text">(محل الفراخ مدين لنا)</span>
+        <div class="payment-metadata-section">
+          <app-payment-source-selector [amount]="paymentSourceAmount()" [personType]="currentPersonType()"
+            [personId]="currentPersonId()" [paymentLabel]="paymentLabel" [label]="label"
+            [isDebtPaymentOnly]="isDebtPaymentOnly()" [balance]="selectedBuyerBalance()" [parentForm]="saleForm"
+            (selectionChange)="paymentSource.set($event)" [operationType]="'SALE'" />
+          <app-person-selector [label]="personLabel" [parentForm]="saleForm" typeControlName="person_type"
+            idControlName="received_by_person_id">
+          </app-person-selector>
+        </div>
+
+        <!-- } -->
+
+        <!-- ── Projected balance ──────────────────────────────────────── -->
+        @if (hasBalance() || !isDebtPaymentOnly()) {
+        <div class="calculated-value" [class.success]="projectedBalance() === 0"
+          [class.warning]="projectedBalance() > 0" [class.info]="projectedBalance() < 0">
+          <mat-icon>account_balance</mat-icon>
+          <strong>
+            الرصيد المتوقع بعد العملية:
+            @if (projectedBalance() > 0) {
+            <span class="text-warning">{{ formatCurrency(projectedBalance()) }} ج.م</span>
+            <span class="hint-text">(محل الفراخ مدين لنا)</span>
+            } @else if (projectedBalance() < 0) { <span class="text-info">{{ formatCurrency(absoluteProjectedBalance())
+              }} ج.م</span>
+              <span class="hint-text">(نحن مدينون للمشتري)</span>
               } @else {
-              <span class="text-green-600">0.00 ج.م</span>
+              <span class="text-success">0.00 ج.م</span>
               <span class="hint-text">✅ (مسوى)</span>
               }
-            </strong>
-          </div>
+          </strong>
         </div>
         }
 
-        <!-- Submit Buttons -->
+        <!-- ── Submit ─────────────────────────────────────────────────── -->
         <div class="button-group">
-          <button mat-raised-button color="primary" type="submit" [disabled]="saleForm.invalid || submitting()">
+          <button mat-raised-button color="primary" type="submit"
+            [disabled]="saleForm.invalid || submitting() || !isPaymentSourceValid()">
             @if (submitting()) {
             <mat-spinner diameter="20"></mat-spinner>
             } @else {
@@ -369,13 +488,13 @@
               {{ getSubmitButtonText() }}
             </ng-container>
             }
-
           </button>
           <button mat-button type="button" (click)="cancel()">
             <mat-icon>cancel</mat-icon>
             إلغاء
           </button>
         </div>
+
       </form>
       }
     </mat-card-content>

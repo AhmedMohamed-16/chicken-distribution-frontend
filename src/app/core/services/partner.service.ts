@@ -1,9 +1,9 @@
 // src/app/core/services/partner.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Partner } from '../models';
-import { environment } from '../../../environments/environment.prod';
+import {  Observable, tap } from 'rxjs';
+import { ApiResponse, Partner } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +12,9 @@ export class PartnerService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/partners`;
 
-  getAll(): Observable<Partner[]> {
-    return this.http.get<Partner[]>(this.apiUrl);
-  }
-
+  getAll(): Observable<ApiResponse<Partner[]>> {
+  return this.http.get<ApiResponse<Partner[]>>(this.apiUrl)
+}
   getById(id: number): Observable<Partner> {
     return this.http.get<Partner>(`${this.apiUrl}/${id}`);
   }

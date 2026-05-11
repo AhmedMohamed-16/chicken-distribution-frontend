@@ -1,0 +1,386 @@
+/* =========================================================
+   ROOT
+========================================================= */
+
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  width: min(100%, 900px);
+  max-width: 95vw;
+  max-height: 90vh;
+
+  overflow: hidden;
+
+  direction: rtl;
+
+  background: #ffffff;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  margin: 0;
+
+  color: #212121;
+
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.dialog-title mat-icon {
+  color: #1976d2;
+
+  flex-shrink: 0;
+}
+
+.dialog-subtitle {
+  margin: 0;
+
+  color: #757575;
+
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   SUMMARY CHIPS
+========================================================= */
+
+.summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.55rem 0.85rem;
+
+  border-radius: 999px;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.chip mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+.chip--count {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.chip--balance {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+.table-wrapper {
+  flex: 1;
+
+  min-height: 0;
+
+  padding: 0.75rem;
+}
+
+.table-scroll-x {
+  overflow-x: auto;
+  overflow-y: auto;
+
+  max-height: 420px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.transactions-table {
+  width: 100%;
+  min-width: 720px;
+
+  background: #ffffff;
+}
+
+.transactions-table .mat-mdc-header-row {
+  background: #fafafa;
+}
+
+.transactions-table .mat-mdc-header-cell {
+  color: #374151;
+
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.transactions-table .mat-mdc-cell {
+  padding-block: 0.9rem;
+
+  border-bottom-color: #eeeeee;
+
+  vertical-align: middle;
+}
+
+/* =========================================================
+   ROWS
+========================================================= */
+
+.data-row:nth-child(even) {
+  background: #fafcff;
+}
+
+.data-row:hover {
+  background: #f0f7ff;
+}
+
+/* =========================================================
+   DATE CELL
+========================================================= */
+
+.date-cell {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   CHIPS
+========================================================= */
+
+.transaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  min-height: 32px;
+
+  font-weight: 600;
+}
+
+.transaction-chip mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+/* =========================================================
+   AMOUNT
+========================================================= */
+
+.amount-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.amount-positive {
+  color: #2e7d32;
+}
+
+.amount-negative {
+  color: #d32f2f;
+}
+
+/* =========================================================
+   NOTES
+========================================================= */
+
+.notes-cell {
+  display: inline-block;
+
+  max-width: 240px;
+
+  overflow: hidden;
+
+  color: #6b7280;
+
+  font-size: 0.88rem;
+  line-height: 1.5;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   LOADING & EMPTY
+========================================================= */
+
+.spinner-wrap,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+
+  padding: 4rem 1.5rem;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+.empty-state mat-icon {
+  width: 3rem;
+  height: 3rem;
+
+  font-size: 3rem;
+
+  color: #bdbdbd;
+}
+
+.empty-state h3,
+.spinner-wrap p,
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state h3 {
+  color: #374151;
+
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.empty-state p {
+  max-width: 420px;
+
+  line-height: 1.7;
+}
+
+/* =========================================================
+   LOAD MORE
+========================================================= */
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+
+  padding: 1rem;
+}
+
+.load-more-btn {
+  width: 100%;
+  min-height: 46px;
+
+  border-radius: 0.9rem;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.dialog-actions {
+  display: flex;
+  justify-content: stretch;
+
+  padding: 1rem;
+}
+
+.close-btn {
+  width: 100%;
+  min-height: 46px;
+
+  border-radius: 0.9rem;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 768px) {
+
+  .dialog-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .summary-chips {
+    justify-content: flex-end;
+  }
+
+  .transactions-table {
+    min-width: 760px;
+  }
+
+  .load-more-btn {
+    width: auto;
+    min-width: 240px;
+  }
+
+  .dialog-actions {
+    justify-content: flex-end;
+  }
+
+  .close-btn {
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 1024px) {
+
+  .table-wrapper {
+    padding: 1rem;
+  }
+
+  .notes-cell {
+    max-width: 320px;
+  }
+
+  .transactions-table .mat-mdc-cell,
+  .transactions-table .mat-mdc-header-cell {
+    padding-inline: 1rem;
+  }
+}

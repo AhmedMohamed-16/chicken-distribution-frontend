@@ -85,7 +85,9 @@ private utils = inject(ReportUtilitiesService);
     this.vehicleService.getAll().subscribe({
       next: (data:any) => {
         console.log("data",data.data)
-        this.vehicles.set(data.data);
+        // ✅ Only show vehicles that are fully invested
+        const activeVehicles = (data.data || []).filter((v: any) => v.is_fully_invested);
+        this.vehicles.set(activeVehicles);
         console.log("this.vehicles",this.vehicles)
         this.loading.set(false);
       },

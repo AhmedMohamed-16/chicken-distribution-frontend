@@ -189,16 +189,17 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { OperationService } from '../../../../core/services/operation.service';
 import { ChickenTypeService } from '../../../../core/services/chicken-type.service';
 import { FarmService } from '../../../../core/services/farm.service';
 import { ChickenType, Farm } from '../../../../core/models';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitiesService';
-
+import { MatDividerModule } from '@angular/material/divider';
 interface VehicleStats {
-  vehicle_id: number;
-  vehicle_name: string;
+  id: number;
+  name: string;
   plate_number: string;
   empty_weight: number;
   status: string;
@@ -225,7 +226,9 @@ interface VehicleStats {
     MatProgressSpinnerModule,
     MatIconModule,
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule,
+    MatDialogModule
   ],
   templateUrl: './transport-losses.html',
   styleUrl: './transport-losses.css',
@@ -239,7 +242,9 @@ export class TransportLosses implements OnInit {
   private chickenTypeService = inject(ChickenTypeService);
   private farmService = inject(FarmService);
   private snackBar = inject(MatSnackBar);
-
+  protected dialogRef = inject(MatDialogRef<TransportLosses>, { optional: true });
+  private dialogData = inject(MAT_DIALOG_DATA, { optional: true });
+  saleType =signal(false);
   activeVehicles = signal<VehicleStats[]>([]);
   farms = signal<Farm[]>([]);
   loading = signal(false);
@@ -320,7 +325,33 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
   }
 
   ngOnInit(): void {
-    this.operationId.set(+this.route.snapshot.params['id']);
+    const id = this.dialogData?.operationId || +this.route.snapshot.params['id'];
+    this.operationId.set(id);
+
+    if (this.dialogData) {
+      this.lossForm.patchValue({
+        vehicle_id: this.dialogData.vehicle_id,
+        chicken_type_id: this.dialogData.chicken_type_id,
+        price_per_kg: this.dialogData.price_per_kg || 0,
+
+      });
+       this.saleType.set(this.dialogData.saleType||false)
+    }
+
+    // Aggressively relax validation for dialog mode since parent component (Sales)
+    // handles the final validation and submission.
+    if (this.dialogRef) {
+      const controlsToRelax = ['vehicle_id', 'chicken_type_id', 'price_per_kg'];
+      controlsToRelax.forEach(key => {
+        const control = this.lossForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.setValidators(null);
+          control.updateValueAndValidity();
+        }
+      });
+    }
+
     this.loadChickenTypes();
     this.loadActiveVehicles();
     this.loadFarms();
@@ -329,8 +360,9 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
   loadChickenTypes(): void {
     this.loading.set(true);
     this.chickenTypeService.getAll().subscribe({
-      next: (data: any) => {
-        this.chickenTypes.set(data.data);
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.chickenTypes.set(Array.isArray(data) ? data : []);
         this.loading.set(false);
       },
       error: () => {
@@ -345,7 +377,13 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
 
     this.operationService.getOperationVehicles(this.operationId()).subscribe({
       next: (response: any) => {
-        const vehicleStats: VehicleStats[] = response.data;
+        const rawData = response?.data ?? response;
+        const vehicleStats: VehicleStats[] = Array.isArray(rawData) ? rawData.map((v: any) => ({
+          ...v,
+          id: v.vehicle_id || v.id,
+          name: v.vehicle_name || v.name
+        })) : [];
+
         this.activeVehicles.set(vehicleStats);
         this.loading.set(false);
 
@@ -361,7 +399,7 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
         if (vehicleStats.length === 1) {
           queueMicrotask(() => {
             this.lossForm.patchValue({
-              vehicle_id: vehicleStats[0].vehicle_id
+              vehicle_id: vehicleStats[0].id
             });
           });
         }
@@ -375,8 +413,9 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
 
   loadFarms(): void {
     this.farmService.getAll().subscribe({
-      next: (data: any) => {
-        this.farms.set(data.data || []);
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.farms.set(Array.isArray(data) ? data : []);
       },
       error: () => {
         console.error('Failed to load farms');
@@ -399,17 +438,24 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
       return;
     }
 
-    this.submitting.set(true);
     const payload = this.lossForm.getRawValue();
 
+    // If running as a dialog, we DON'T save to DB.
+    // We just return the values to the caller (Sales).
+    if (this.dialogRef) {
+      this.dialogRef.close(this.lossForm.getRawValue());
+      return;
+    }
+
+    this.submitting.set(true);
     if (!payload.isFarmResponsible) {
       payload.farm_id = null;
     }
 
     this.operationService.recordLoss(this.operationId(), payload as any).subscribe({
       next: (response: any) => {
-        const vehicle = this.activeVehicles().find(v => v.vehicle_id === payload.vehicle_id);
-        let message = `تم تسجيل الخسارة للمركبة ${vehicle?.vehicle_name || ''} بنجاح`;
+        const vehicle = this.activeVehicles().find(v => v.id === payload.vehicle_id);
+        let message = `تم تسجيل الخسارة للمركبة ${vehicle?.name || ''} بنجاح`;
 
         if (response.data?.farm_balance_update) {
           const farmUpdate = response.data.farm_balance_update;
@@ -428,7 +474,11 @@ formatDateTime = (date: string | Date | undefined | null) => this.utils.formatDa
   }
 
   cancel(): void {
-    this.router.navigate(['/operations/daily', this.operationId()]);
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    } else {
+      this.router.navigate(['/operations/daily', this.operationId()]);
+    }
   }
 //   lossAmount = computed(() => {
 //   const weight = this.lossForm.get('dead_weight')?.value ?? 0;

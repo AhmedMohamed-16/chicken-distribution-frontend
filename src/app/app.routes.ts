@@ -113,6 +113,18 @@ export const routes: Routes = [
             canActivate: [permissionGuard],
             data: { permissions: [PERMISSIONS.CHICKEN_TYPES.MANAGE_CHICKEN_TYPES,PERMISSIONS.CHICKEN_TYPES.VIEW_CHICKEN_TYPES],requireAll: false },
             loadComponent: () => import('./features/master-data/chicken-types/chicken-types/chicken-types').then(m => m.ChickenTypes),
+          },
+          {
+            path: 'employees',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.EMPLOYEES.VIEW_EMPLOYEES, PERMISSIONS.EMPLOYEES.MANAGE_EMPLOYEES], requireAll: false, title: 'الموظفون' },
+            loadComponent: () => import('./features/master-data/employees/employees').then(m => m.Employees)
+          },
+          {
+            path: 'safes',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.SYSTEM.APPLICATION_ADMIN], requireAll: true, title: 'الخزن' },
+            loadComponent: () => import('./features/master-data/safes/safes').then(m => m.Safes)
           }
 
         ]
@@ -160,9 +172,64 @@ export const routes: Routes = [
           },
           {
             path: 'close-day/:id',
-             canActivate: [permissionGuard],
+            //  canActivate: [permissionGuard],
             data: { permissions: [PERMISSIONS.OPERATIONS.CLOSE_OPERATION] },
             loadComponent: () => import('./features/operations/close-day/close-day/close-day').then(m => m.CloseDay),
+          }
+        ]
+      },
+      {
+        path: 'custodies',
+        loadChildren: () =>
+          import('./features/custodies/custodies.routes')
+            .then(m => m.CUSTODY_ROUTES)
+      },
+      {
+        path: 'finance',
+        canActivate: [authGuard],
+        children: [
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full'
+          },
+          {
+            path: 'dashboard',
+            data: { title: 'لوحة المالية' },
+            loadComponent: () => import('./features/finance/finance-dashboard/finance-dashboard.component').then(m => m.FinanceDashboardComponent)
+          },
+          {
+            path: 'advances',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.ADVANCES.VIEW_ADVANCES], title: 'السلف' },
+            loadComponent: () => import('./features/finance/advances/advances.component').then(m => m.AdvancesComponent)
+          },
+          {
+            path: 'custody',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.CUSTODY.VIEW_CUSTODY], title: 'العهدة' },
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('./features/custodies/pages/custody-list/custody-list.component').then(m => m.CustodyListComponent)
+              },
+              {
+                path: ':id',
+                loadComponent: () => import('./features/custodies/pages/custody-statement/custody-statement.component').then(m => m.CustodyStatementComponent)
+              }
+            ]
+          },
+          {
+            path: 'salaries',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.SYSTEM.APPLICATION_ADMIN], title: 'المرتبات' },
+            loadComponent: () => import('./features/finance/salaries/salaries.component').then(m => m.SalariesComponent)
+          },
+          {
+            path: 'partner-profits',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.SYSTEM.APPLICATION_ADMIN], title: 'أرباح الشركاء' },
+            loadComponent: () => import('./features/finance/partner-profits/partner-profits.component').then(m => m.PartnerProfitsComponent)
           }
         ]
       },
@@ -174,7 +241,8 @@ export const routes: Routes = [
             PERMISSIONS.REPORTS.VIEW_DAILY_REPORT,
             PERMISSIONS.REPORTS.VIEW_PERIOD_REPORT,
             PERMISSIONS.REPORTS.VIEW_PROFIT_REPORT,
-            PERMISSIONS.REPORTS.VIEW_DEBT_REPORT
+            PERMISSIONS.REPORTS.VIEW_DEBT_REPORT,
+            PERMISSIONS.REPORTS.VIEW_STATEMENT_REPORT
           ],
           requireAll: false // User needs ANY of these permissions
         },
@@ -209,6 +277,18 @@ export const routes: Routes = [
             data: { permissions: [PERMISSIONS.REPORTS.VIEW_DEBT_REPORT] },
 
             loadComponent: () => import('./features/reports/debt-report/debt-report/debt-report').then(m => m.DebtReport)
+          },
+          {
+            path: 'statement',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.REPORTS.VIEW_STATEMENT_REPORT], title: 'كشف الحساب العام' },
+            loadComponent: () => import('./features/reports/statement-selector/statement-selector.component').then(m => m.StatementSelectorComponent)
+          },
+          {
+            path: 'statement/:entityType/:entityId',
+            canActivate: [permissionGuard],
+            data: { permissions: [PERMISSIONS.REPORTS.VIEW_STATEMENT_REPORT], title: 'كشف الحساب' },
+            loadComponent: () => import('./features/reports/statement-page/statement-page.component').then(m => m.StatementPageComponent)
           }
         ]
       },

@@ -56,7 +56,7 @@ totalPages = signal(0);
 
 private searchTimeout?: ReturnType<typeof setTimeout>;
 
-  displayedColumns = ['name', 'owner_name', 'phone', 'location', 'total_debt'];
+  displayedColumns = ['name', 'owner_name', 'phone', 'location', 'current_balance'];
 private utils = inject(ReportUtilitiesService);
  formatCurrency = (amount: number | undefined | null) => this.utils.formatCurrency(amount);
 formatNumber = (num: number | undefined | null, decimals?: number) => this.utils.formatNumber(num, decimals);

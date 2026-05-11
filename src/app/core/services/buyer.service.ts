@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { environment } from "../../../environments/environment.prod";
+import { environment } from "../../../environments/environment";
 import { Observable } from "rxjs";
 import { Buyer, PaginatedResponse, PaginationParams } from "../models";
 
@@ -51,7 +51,13 @@ export class BuyerService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  getDebtHistory(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/debt-history`);
+  getDebtHistory(id: number, params?: any): Observable<any> {
+    let httpParams = new HttpParams();
+    if (params?.startDate) httpParams = httpParams.set('startDate', params.startDate);
+    if (params?.endDate) httpParams = httpParams.set('endDate', params.endDate);
+    if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
+    
+    return this.http.get(`${this.apiUrl}/${id}/debt-history`, { params: httpParams });
   }
 }
+

@@ -37,12 +37,41 @@ export const PERMISSIONS = {
     RECORD_TRANSPORT_LOSS: 'RECORD_TRANSPORT_LOSS',
     RECORD_COST: 'RECORD_COST',
   },
+  EMPLOYEES: {
+    MANAGE_EMPLOYEES: 'MANAGE_EMPLOYEES',
+    VIEW_EMPLOYEES: 'VIEW_EMPLOYEES',
+  },
+  SAFES: {
+    MANAGE_SAFES: 'MANAGE_SAFES',
+    VIEW_SAFES: 'VIEW_SAFES',
+  },
+  ADVANCES: {
+    MANAGE_ADVANCES: 'MANAGE_ADVANCES',
+    VIEW_ADVANCES: 'VIEW_ADVANCES',
+  },
+  CUSTODY: {
+    MANAGE_CUSTODY: 'MANAGE_CUSTODY',
+    VIEW_CUSTODY: 'VIEW_CUSTODY',
+  },
+  SALARIES: {
+    MANAGE_SALARIES: 'MANAGE_SALARIES',
+    VIEW_SALARIES: 'VIEW_SALARIES',
+  },
+  LOSSES: {
+    MANAGE_LOSSES: 'MANAGE_LOSSES',
+    VIEW_LOSSES: 'VIEW_LOSSES',
+  },
+  FINANCIAL_TRANSACTIONS: {
+    VIEW_FINANCIAL_TRANSACTIONS: 'VIEW_FINANCIAL_TRANSACTIONS',
+  },
   REPORTS: {
     VIEW_DAILY_REPORT: 'VIEW_DAILY_REPORT',
     VIEW_PERIOD_REPORT: 'VIEW_PERIOD_REPORT',
     VIEW_PROFIT_REPORT: 'VIEW_PROFIT_REPORT',
     VIEW_DEBT_REPORT: 'VIEW_DEBT_REPORT',
-    // VIEW_FARM_BALANCES: 'VIEW_FARM_BALANCES',
+    VIEW_STATEMENT_REPORT: 'VIEW_STATEMENT_REPORT',
+    VIEW_PARTNER_PROFITS: 'VIEW_PARTNER_PROFITS',
+    MANAGE_PARTNER_WITHDRAWALS: 'MANAGE_PARTNER_WITHDRAWALS',
   },
 } as const;
 
@@ -99,12 +128,41 @@ export const PERMISSION_NAMES: Record<string, string> = {
   MANAGE_COST_CATEGORIES: 'إدارة فئات التكاليف',
   VIEW_COST_CATEGORIES: 'عرض فئات التكاليف',
 
+  // Employees
+  MANAGE_EMPLOYEES: 'إدارة الموظفين',
+  VIEW_EMPLOYEES: 'عرض الموظفين',
+
+  // Safes
+  MANAGE_SAFES: 'إدارة الخزن والحسابات',
+  VIEW_SAFES: 'عرض الخزن والحسابات',
+
+  // Advances
+  MANAGE_ADVANCES: 'إدارة السلف',
+  VIEW_ADVANCES: 'عرض السلف',
+
+  // Custody
+  MANAGE_CUSTODY: 'إدارة العهد',
+  VIEW_CUSTODY: 'عرض العهد',
+
+  // Salaries
+  MANAGE_SALARIES: 'إدارة المرتبات',
+  VIEW_SALARIES: 'عرض المرتبات',
+
+  // Losses
+  MANAGE_LOSSES: 'إدارة الخسائر والهالك',
+  VIEW_LOSSES: 'عرض الخسائر والهالك',
+
+  // Financial Transactions
+  VIEW_FINANCIAL_TRANSACTIONS: 'عرض المعاملات المالية',
+
   // Reports
   VIEW_DAILY_REPORT: 'عرض التقرير اليومي',
   VIEW_PERIOD_REPORT: 'عرض تقرير الفترة',
   VIEW_PROFIT_REPORT: 'عرض تقرير الأرباح',
   VIEW_DEBT_REPORT: 'عرض تقرير الديون',
-  // VIEW_FARM_BALANCES: 'عرض أرصدة المزارع',
+  VIEW_STATEMENT_REPORT: 'عرض كشف الحسابات',
+  VIEW_PARTNER_PROFITS: 'عرض أرباح الشركاء',
+  MANAGE_PARTNER_WITHDRAWALS: 'إدارة سحوبات الشركاء',
 };
 
 // Category display names (Arabic)
@@ -118,4 +176,11 @@ export const CATEGORY_NAMES: Record<string, string> = {
   REPORTS: 'التقارير',
   CHICKEN_TYPES: 'أنواع الفراخ',
   COST_CATEGORIES: 'فئات التكاليف',
+  EMPLOYEES: 'الموظفين',
+  SAFES: 'الخزن والحسابات',
+  ADVANCES: 'السلف',
+  CUSTODY: 'العهد',
+  SALARIES: 'المرتبات',
+  LOSSES: 'الخسائر',
+  FINANCIAL_TRANSACTIONS: 'المعاملات المالية',
 };
