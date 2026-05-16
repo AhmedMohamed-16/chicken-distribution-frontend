@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -10,13 +10,7 @@ import { ReportUtilitiesService } from '../../../../../../core/services/ReportUt
 
 @Component({
   selector: 'app-alerts-panel',
-  imports: [CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatButtonModule
-],
+  imports: [MatCardModule, MatIconModule, MatChipsModule, MatDividerModule, MatButtonModule],
   templateUrl: './alerts-panel.html',
   styleUrl: './alerts-panel.css',
     changeDetection: ChangeDetectionStrategy.OnPush

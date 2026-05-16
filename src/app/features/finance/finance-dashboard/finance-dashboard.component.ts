@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,7 +24,6 @@ import { MatGridListModule } from '@angular/material/grid-list';
   selector: 'app-finance-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -33,7 +32,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatDialogModule,
     MatSnackBarModule,
     MatGridListModule
-  ],
+],
   templateUrl: './finance-dashboard.component.html',
   styleUrls: ['./finance-dashboard.component.css']
 })

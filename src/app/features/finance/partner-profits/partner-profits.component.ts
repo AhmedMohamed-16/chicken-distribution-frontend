@@ -399,178 +399,184 @@ Math=Math
   ],
   template: `
     <div class="dialog-content">
-
-  <!-- =========================================
-       Header
-  ========================================== -->
-  <div class="dialog-header">
-
-    <div class="title-wrapper">
-      <div class="title-icon-wrap">
-        <mat-icon>account_balance_wallet</mat-icon>
+    
+      <!-- =========================================
+      Header
+      ========================================== -->
+      <div class="dialog-header">
+    
+        <div class="title-wrapper">
+          <div class="title-icon-wrap">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+    
+          <div class="title-content">
+            <h2 class="dialog-title">سحب أرباح</h2>
+    
+            <p class="dialog-subtitle">
+              تسجيل عملية سحب أرباح للشريك
+            </p>
+          </div>
+        </div>
+    
       </div>
-
-      <div class="title-content">
-        <h2 class="dialog-title">سحب أرباح</h2>
-
-        <p class="dialog-subtitle">
-          تسجيل عملية سحب أرباح للشريك
-        </p>
+    
+      <!-- =========================================
+      Summary Card
+      ========================================== -->
+      <div class="summary-info">
+    
+        <div class="summary-row">
+          <span class="summary-label">الشريك</span>
+    
+          <strong class="summary-value">
+            {{ partner.partner.name }}
+          </strong>
+        </div>
+    
+        <div class="summary-row">
+          <span class="summary-label">
+            الحد الأقصى المتاح للسحب
+          </span>
+    
+          <strong class="summary-balance">
+            {{ formatCurrency(partner.current_balance) }}
+          </strong>
+        </div>
+    
       </div>
+    
+      <!-- =========================================
+      Form
+      ========================================== -->
+      <form
+        [formGroup]="withdrawalForm"
+        class="withdrawal-form">
+    
+        <!-- Amount -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width">
+    
+          <mat-label>المبلغ</mat-label>
+    
+          <input
+            matInput
+            type="number"
+            min="0.01"
+            formControlName="amount" />
+    
+          <mat-hint>
+            الحد الأقصى:
+            {{ formatCurrency(partner.current_balance) }}
+            جنيه
+          </mat-hint>
+    
+          @if (withdrawalForm.get('amount')?.hasError('required')) {
+            <mat-error>
+              المبلغ مطلوب
+            </mat-error>
+          }
+    
+          @if (withdrawalForm.get('amount')?.hasError('max')) {
+            <mat-error>
+              المبلغ يتجاوز الحد الأقصى
+            </mat-error>
+          }
+    
+          @if (withdrawalForm.get('amount')?.hasError('min')) {
+            <mat-error>
+              المبلغ يجب أن يكون أكبر من صفر
+            </mat-error>
+          }
+    
+        </mat-form-field>
+    
+        <!-- Withdrawal Date -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width">
+    
+          <mat-label>تاريخ السحب</mat-label>
+    
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="withdrawal_date" />
+    
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker">
+          </mat-datepicker-toggle>
+    
+          <mat-datepicker #picker></mat-datepicker>
+    
+        </mat-form-field>
+    
+        <!-- Payment Method Selector -->
+        <div class="payment-section">
+          <app-payment-method-selector
+            [parentForm]="withdrawalForm">
+          </app-payment-method-selector>
+        </div>
+    
+        <!-- Notes -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width">
+    
+          <mat-label>ملاحظات (اختياري)</mat-label>
+    
+          <textarea
+            matInput
+            rows="4"
+            formControlName="notes">
+          </textarea>
+    
+          <mat-hint>
+            يمكنك إضافة تفاصيل إضافية حول عملية السحب
+          </mat-hint>
+    
+        </mat-form-field>
+    
+      </form>
+    
+      <!-- =========================================
+      Actions
+      ========================================== -->
+      <div class="dialog-actions">
+    
+        <button
+          mat-button
+          type="button"
+          class="cancel-btn"
+          (click)="cancel()">
+    
+          إلغاء
+        </button>
+    
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          class="submit-btn"
+          (click)="submit()"
+          [disabled]="withdrawalForm.invalid || submitting()">
+    
+          @if (submitting()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+            <mat-icon>check_circle</mat-icon>
+          }
+    
+          <span>تأكيد السحب</span>
+    
+        </button>
+    
+      </div>
+    
     </div>
-
-  </div>
-
-  <!-- =========================================
-       Summary Card
-  ========================================== -->
-  <div class="summary-info">
-
-    <div class="summary-row">
-      <span class="summary-label">الشريك</span>
-
-      <strong class="summary-value">
-        {{ partner.partner.name }}
-      </strong>
-    </div>
-
-    <div class="summary-row">
-      <span class="summary-label">
-        الحد الأقصى المتاح للسحب
-      </span>
-
-      <strong class="summary-balance">
-        {{ formatCurrency(partner.current_balance) }}
-      </strong>
-    </div>
-
-  </div>
-
-  <!-- =========================================
-       Form
-  ========================================== -->
-  <form
-    [formGroup]="withdrawalForm"
-    class="withdrawal-form">
-
-    <!-- Amount -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>المبلغ</mat-label>
-
-      <input
-        matInput
-        type="number"
-        min="0.01"
-        formControlName="amount" />
-
-      <mat-hint>
-        الحد الأقصى:
-        {{ formatCurrency(partner.current_balance) }}
-        جنيه
-      </mat-hint>
-
-      <mat-error *ngIf="withdrawalForm.get('amount')?.hasError('required')">
-        المبلغ مطلوب
-      </mat-error>
-
-      <mat-error *ngIf="withdrawalForm.get('amount')?.hasError('max')">
-        المبلغ يتجاوز الحد الأقصى
-      </mat-error>
-
-      <mat-error *ngIf="withdrawalForm.get('amount')?.hasError('min')">
-        المبلغ يجب أن يكون أكبر من صفر
-      </mat-error>
-
-    </mat-form-field>
-
-    <!-- Withdrawal Date -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>تاريخ السحب</mat-label>
-
-      <input
-        matInput
-        [matDatepicker]="picker"
-        formControlName="withdrawal_date" />
-
-      <mat-datepicker-toggle
-        matSuffix
-        [for]="picker">
-      </mat-datepicker-toggle>
-
-      <mat-datepicker #picker></mat-datepicker>
-
-    </mat-form-field>
-
-    <!-- Payment Method Selector -->
-    <div class="payment-section">
-      <app-payment-method-selector
-        [parentForm]="withdrawalForm">
-      </app-payment-method-selector>
-    </div>
-
-    <!-- Notes -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>ملاحظات (اختياري)</mat-label>
-
-      <textarea
-        matInput
-        rows="4"
-        formControlName="notes">
-      </textarea>
-
-      <mat-hint>
-        يمكنك إضافة تفاصيل إضافية حول عملية السحب
-      </mat-hint>
-
-    </mat-form-field>
-
-  </form>
-
-  <!-- =========================================
-       Actions
-  ========================================== -->
-  <div class="dialog-actions">
-
-    <button
-      mat-button
-      type="button"
-      class="cancel-btn"
-      (click)="cancel()">
-
-      إلغاء
-    </button>
-
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      class="submit-btn"
-      (click)="submit()"
-      [disabled]="withdrawalForm.invalid || submitting()">
-
-      @if (submitting()) {
-        <mat-spinner diameter="18"></mat-spinner>
-      } @else {
-        <mat-icon>check_circle</mat-icon>
-      }
-
-      <span>تأكيد السحب</span>
-
-    </button>
-
-  </div>
-
-</div>
-  `,
+    `,
   styles: [`
   /* =========================================================
    Host

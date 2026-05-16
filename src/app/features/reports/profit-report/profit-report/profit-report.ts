@@ -1118,7 +1118,7 @@
 //   }
 // }
 import { Component, signal, computed, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfitReportService } from '../../../../core/services/profitReport.service';
 import {
@@ -1145,7 +1145,6 @@ type ReportType = 'analysis' | 'summary' | 'leakage' | 'partners' | null;
 @Component({
   selector: 'app-profit-report',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
@@ -1156,7 +1155,7 @@ type ReportType = 'analysis' | 'summary' | 'leakage' | 'partners' | null;
     MatCardModule,
     MatTabsModule,
     MatProgressSpinnerModule
-  ],
+],
   templateUrl: './profit-report.html',
   styleUrls: ['./profit-report.css'],
   changeDetection: ChangeDetectionStrategy.OnPush

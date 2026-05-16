@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,9 +13,12 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'app-salary-summary-dialog',
   standalone: true,
   imports: [
-    CommonModule, MatDialogModule, MatTableModule, MatButtonModule,
-    MatProgressSpinnerModule,MatIcon
-  ],
+    MatDialogModule,
+    MatTableModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatIcon
+],
   templateUrl: './salary-summary-dialog.component.html',
   styles: [`
    /* =========================================================

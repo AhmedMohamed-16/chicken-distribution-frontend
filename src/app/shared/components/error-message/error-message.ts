@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-error-message',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './error-message.html',
   styleUrl: './error-message.css',
 })

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
- import { CommonModule } from '@angular/common';
+ 
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { DebtPosition as dept } from '../../../../../../core/models';
@@ -7,7 +7,7 @@ import { ReportUtilitiesService } from '../../../../../../core/services/ReportUt
 
 @Component({
   selector: 'app-debt-position',
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [MatCardModule, MatIconModule],
   templateUrl: './debt-position.html',
   styleUrl: './debt-position.css',
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -6,124 +6,139 @@
   <div class="dialog-content">
 
     <!-- CREATE MODE -->
-    <form [formGroup]="advanceForm" *ngIf="mode === 'CREATE'">
-      <app-person-selector 
-        [parentForm]="advanceForm" 
-        label="المستلف" 
-        idControlName="person_id" 
-        typeControlName="person_type">
-      </app-person-selector>
-
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>المبلغ</mat-label>
-          <input matInput type="number" formControlName="amount">
-          <mat-icon matSuffix color="primary">payments</mat-icon>
-          <mat-error *ngIf="advanceForm.get('amount')?.invalid">المبلغ مطلوب</mat-error>
+    @if (mode === 'CREATE') {
+      <form [formGroup]="advanceForm">
+        <app-person-selector
+          [parentForm]="advanceForm"
+          label="المستلف"
+          idControlName="person_id"
+          typeControlName="person_type">
+        </app-person-selector>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>المبلغ</mat-label>
+            <input matInput type="number" formControlName="amount">
+            <mat-icon matSuffix color="primary">payments</mat-icon>
+            @if (advanceForm.get('amount')?.invalid) {
+              <mat-error>المبلغ مطلوب</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>تاريخ السلفة</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="advance_date">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>تاريخ الإرجاع المتوقع (اختياري)</mat-label>
+          <input matInput [matDatepicker]="picker2" formControlName="expected_return_date">
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
         </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>تاريخ السلفة</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="advance_date">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
+        <app-payment-method-selector [parentForm]="advanceForm"></app-payment-method-selector>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>الوصف / السبب</mat-label>
+          <textarea matInput formControlName="description" rows="2" placeholder="أدخل سبب السلفة هنا..."></textarea>
         </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>تاريخ الإرجاع المتوقع (اختياري)</mat-label>
-        <input matInput [matDatepicker]="picker2" formControlName="expected_return_date">
-        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-        <mat-datepicker #picker2></mat-datepicker>
-      </mat-form-field>
-
-      <app-payment-method-selector [parentForm]="advanceForm"></app-payment-method-selector>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>الوصف / السبب</mat-label>
-        <textarea matInput formControlName="description" rows="2" placeholder="أدخل سبب السلفة هنا..."></textarea>
-      </mat-form-field>
-    </form>
+      </form>
+    }
 
     <!-- RETURN MODE -->
-    <form [formGroup]="returnForm" *ngIf="mode === 'RETURN' && advance">
-      <div class="info-box">
-        <p>المستلف: <span>{{ getPersonName() }}</span></p>
-        <p>إجمالي مبلغ السلفة: <span>{{ formatCurrency(advance.amount) }}</span></p>
-        <p>المتبقي الحالي: <span style="color: #e53e3e;">{{ formatCurrency(advance.amount - advance.returned_amount)
-            }}</span></p>
-      </div>
-
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>المبلغ المرتجع</mat-label>
-          <input matInput type="number" formControlName="amount">
-          <mat-icon matSuffix color="primary">account_balance_wallet</mat-icon>
-          <mat-hint>بحد أقصى {{ formatCurrency(advance.amount - advance.returned_amount) }}</mat-hint>
-          <mat-error *ngIf="returnForm.get('amount')?.hasError('max')">المبلغ يتجاوز المتبقي</mat-error>
-          <mat-error *ngIf="returnForm.get('amount')?.hasError('required')">المبلغ مطلوب</mat-error>
+    @if (mode === 'RETURN' && advance) {
+      <form [formGroup]="returnForm">
+        <div class="info-box">
+          <p>المستلف: <span>{{ getPersonName() }}</span></p>
+          <p>إجمالي مبلغ السلفة: <span>{{ formatCurrency(advance.amount) }}</span></p>
+          <p>المتبقي الحالي: <span style="color: #e53e3e;">{{ formatCurrency(advance.amount - advance.returned_amount)
+          }}</span></p>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>المبلغ المرتجع</mat-label>
+            <input matInput type="number" formControlName="amount">
+            <mat-icon matSuffix color="primary">account_balance_wallet</mat-icon>
+            <mat-hint>بحد أقصى {{ formatCurrency(advance.amount - advance.returned_amount) }}</mat-hint>
+            @if (returnForm.get('amount')?.hasError('max')) {
+              <mat-error>المبلغ يتجاوز المتبقي</mat-error>
+            }
+            @if (returnForm.get('amount')?.hasError('required')) {
+              <mat-error>المبلغ مطلوب</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>تاريخ الإرجاع</mat-label>
+            <input matInput [matDatepicker]="picker3" formControlName="return_date">
+            <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+            <mat-datepicker #picker3></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <app-payment-method-selector [parentForm]="returnForm"></app-payment-method-selector>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ملاحظات إضافية</mat-label>
+          <input matInput formControlName="notes" placeholder="ملاحظات حول دفعة الإرجاع...">
         </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>تاريخ الإرجاع</mat-label>
-          <input matInput [matDatepicker]="picker3" formControlName="return_date">
-          <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
-          <mat-datepicker #picker3></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <app-payment-method-selector [parentForm]="returnForm"></app-payment-method-selector>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>ملاحظات إضافية</mat-label>
-        <input matInput formControlName="notes" placeholder="ملاحظات حول دفعة الإرجاع...">
-      </mat-form-field>
-    </form>
+      </form>
+    }
 
     <!-- VIEW MODE -->
-    <div *ngIf="mode === 'VIEW'">
-      <div class="loading-shade" *ngIf="isLoading()">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
-
-      <div *ngIf="viewData()" class="history-section">
-        <div class="info-box">
-          <p>المستلف: <span>{{ viewData().person_name || viewData().employee?.full_name }}</span></p>
-          <p>إجمالي السلفة: <span>{{ formatCurrency(viewData().amount) }}</span></p>
-          <p>المتبقي: <span [style.color]="viewData().status === 'RETURNED' ? '#38a169' : '#e53e3e'">
-              {{ formatCurrency(viewData().amount - viewData().returned_amount) }}
-            </span></p>
-        </div>
-
-        <h4 style="margin: 20px 0 10px; font-weight: 700; color: #4a5568;">سجل الدفعات المستلمة</h4>
-        <div class="history-card">
-          <div class="history-item" *ngFor="let ret of viewData().returns">
-            <div class="date-side">
-              <mat-icon
-                style="font-size: 18px; width: 18px; height: 18px; margin-left: 8px; color: #718096;">calendar_today</mat-icon>
-              <span class="date">{{ ret.return_date | date:'dd/MM/yyyy' }}</span>
+    @if (mode === 'VIEW') {
+      <div>
+        @if (isLoading()) {
+          <div class="loading-shade">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        }
+        @if (viewData()) {
+          <div class="history-section">
+            <div class="info-box">
+              <p>المستلف: <span>{{ viewData().person_name || viewData().employee?.full_name }}</span></p>
+              <p>إجمالي السلفة: <span>{{ formatCurrency(viewData().amount) }}</span></p>
+              <p>المتبقي: <span [style.color]="viewData().status === 'RETURNED' ? '#38a169' : '#e53e3e'">
+                {{ formatCurrency(viewData().amount - viewData().returned_amount) }}
+              </span></p>
             </div>
-            <span class="method" style="color: #4a5568; font-size: 0.9rem;">{{ ret.payment_method }}</span>
-            <span class="amount">{{ formatCurrency(ret.amount) }}</span>
+            <h4 style="margin: 20px 0 10px; font-weight: 700; color: #4a5568;">سجل الدفعات المستلمة</h4>
+            <div class="history-card">
+              @for (ret of viewData().returns; track ret) {
+                <div class="history-item">
+                  <div class="date-side">
+                    <mat-icon
+                    style="font-size: 18px; width: 18px; height: 18px; margin-left: 8px; color: #718096;">calendar_today</mat-icon>
+                    <span class="date">{{ ret.return_date | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <span class="method" style="color: #4a5568; font-size: 0.9rem;">{{ ret.payment_method }}</span>
+                  <span class="amount">{{ formatCurrency(ret.amount) }}</span>
+                </div>
+              }
+              @if (!viewData().returns?.length) {
+                <div class="empty-state-small"
+                  style="padding: 30px; text-align: center; color: #a0aec0;">
+                  <mat-icon style="font-size: 40px; width: 40px; height: 40px; opacity: 0.3;">receipt_long</mat-icon>
+                  <p style="margin-top: 8px;">لا توجد دفعات مُرجعة لهذه السلفة</p>
+                </div>
+              }
+            </div>
           </div>
-          <div class="empty-state-small" *ngIf="!viewData().returns?.length"
-            style="padding: 30px; text-align: center; color: #a0aec0;">
-            <mat-icon style="font-size: 40px; width: 40px; height: 40px; opacity: 0.3;">receipt_long</mat-icon>
-            <p style="margin-top: 8px;">لا توجد دفعات مُرجعة لهذه السلفة</p>
-          </div>
-        </div>
+        }
       </div>
-    </div>
+    }
   </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" style="padding: 16px 24px;">
   <button mat-button (click)="onCancel()" [disabled]="submitting()">إلغاء</button>
-  <button mat-raised-button color="primary" *ngIf="mode !== 'VIEW'" (click)="onSubmit()"
-    [disabled]="(mode === 'CREATE' ? advanceForm.invalid : returnForm.invalid) || submitting()"
-    style="padding: 0 32px; font-weight: 700; height: 44px; border-radius: 8px;">
-    <mat-spinner diameter="20" *ngIf="submitting()" style="margin-left: 10px;"></mat-spinner>
-    <mat-icon *ngIf="!submitting()" style="margin-left: 8px;">check_circle</mat-icon>
-    {{ mode === 'CREATE' ? 'تأكيد منح السلفة' : 'تأكيد استلام المبلغ' }}
-  </button>
+  @if (mode !== 'VIEW') {
+    <button mat-raised-button color="primary" (click)="onSubmit()"
+      [disabled]="(mode === 'CREATE' ? advanceForm.invalid : returnForm.invalid) || submitting()"
+      style="padding: 0 32px; font-weight: 700; height: 44px; border-radius: 8px;">
+      @if (submitting()) {
+        <mat-spinner diameter="20" style="margin-left: 10px;"></mat-spinner>
+      }
+      @if (!submitting()) {
+        <mat-icon style="margin-left: 8px;">check_circle</mat-icon>
+      }
+      {{ mode === 'CREATE' ? 'تأكيد منح السلفة' : 'تأكيد استلام المبلغ' }}
+    </button>
+  }
 </mat-dialog-actions>

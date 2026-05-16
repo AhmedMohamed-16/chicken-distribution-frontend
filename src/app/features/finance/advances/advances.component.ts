@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -22,10 +22,17 @@ import { AdvanceDialogComponent } from './advance-dialog.component';
   selector: 'app-advances',
   standalone: true,
   imports: [
-    CommonModule, MatTabsModule, MatTableModule, MatCardModule,
-    MatButtonModule, MatIconModule, MatChipsModule, MatTooltipModule,
-    MatDialogModule, MatSnackBarModule, MatProgressSpinnerModule
-  ],
+    MatTabsModule,
+    MatTableModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTooltipModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
+],
   templateUrl: './advances.component.html',
   styleUrl: './advances.component.css'
 })

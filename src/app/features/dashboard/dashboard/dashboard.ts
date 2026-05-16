@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,15 +14,13 @@ import { HasPermissionDirective } from '../../../core/directives/hasPermission.d
 @Component({
   selector: 'app-dashboard',
   imports: [
-       CommonModule,
     RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatGridListModule,
     HasPermissionDirective
-
-  ],
+],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

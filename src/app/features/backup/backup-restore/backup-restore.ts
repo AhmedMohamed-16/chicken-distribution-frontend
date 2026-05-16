@@ -1,5 +1,5 @@
 import { Component, inject, signal, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { BackupService } from '../../../core/services/backup.service';
 
@@ -18,7 +18,7 @@ import { RestoreBackupResponse, RestoreStrategy } from '../../../core/models';
  */
 @Component({
   selector: 'app-backup-restore',
-  imports: [CommonModule, FormsModule, LoadingSpinner, ErrorMessage],
+  imports: [FormsModule, LoadingSpinner, ErrorMessage],
   templateUrl: './backup-restore.html',
   styleUrl: './backup-restore.css'
 })

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,15 +14,7 @@ import { FarmLoading } from '../../farm-loading/farm-loading/farm-loading';
 
 @Component({
   selector: 'app-daily-operation',
-  imports: [CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    RouterLink
-],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatDividerModule, MatProgressSpinnerModule, MatSnackBarModule, RouterLink],
   templateUrl: './daily-operation.html',
   styleUrl: './daily-operation.css',
 })

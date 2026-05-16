@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { interval, Subject } from 'rxjs';
 import { takeUntil, startWith, switchMap } from 'rxjs/operators';
 import { BackupService } from '../../../core/services/backup.service';
@@ -18,7 +18,7 @@ import { ReportUtilitiesService } from '../../../core/services/ReportUtilitiesSe
  */
 @Component({
   selector: 'app-backup-list',
-  imports: [CommonModule, LoadingSpinner , ErrorMessage ],
+  imports: [LoadingSpinner, ErrorMessage],
   templateUrl: './backup-list.html',
   styleUrl: './backup-list.css'
 })

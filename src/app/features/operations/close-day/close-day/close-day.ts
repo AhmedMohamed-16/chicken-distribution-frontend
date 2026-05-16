@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,17 +21,7 @@ import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
 @Component({
   selector: 'app-close-day',
-  imports: [CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatDividerModule,
-    MatChipsModule,
-    StatusArabicPipe,
-    RouterLink
-],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatTableModule, MatDividerModule, MatChipsModule, StatusArabicPipe, RouterLink],
   templateUrl: './close-day.html',
   styleUrl: './close-day.css',
 })

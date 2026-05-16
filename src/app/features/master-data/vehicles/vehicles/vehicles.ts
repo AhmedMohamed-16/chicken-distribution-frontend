@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,13 +18,7 @@ import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
 @Component({
   selector: 'app-vehicles',
-  imports: [CommonModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressSpinnerModule
-],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, MatCardModule, MatProgressSpinnerModule],
   templateUrl: './vehicles.html',
   styleUrl: './vehicles.css',
 })

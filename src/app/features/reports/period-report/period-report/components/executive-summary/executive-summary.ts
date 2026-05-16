@@ -1,6 +1,6 @@
 
 import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -10,11 +10,7 @@ import { ReportUtilitiesService } from '../../../../../../core/services/ReportUt
 
 @Component({
   selector: 'app-executive-summary',
-  imports: [CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule],
+  imports: [MatCardModule, MatIconModule, MatChipsModule, MatTooltipModule],
   templateUrl: './executive-summary.html',
   styleUrl: './executive-summary.css',
   changeDetection: ChangeDetectionStrategy.OnPush

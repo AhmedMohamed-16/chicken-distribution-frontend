@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { PeriodComparison as period} from '../../../../../../core/models';
@@ -7,7 +7,7 @@ import { ReportUtilitiesService } from '../../../../../../core/services/ReportUt
 
 @Component({
   selector: 'app-period-comparison',
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [MatCardModule, MatIconModule],
   templateUrl: './period-comparison.html',
   styleUrl: './period-comparison.css',
     changeDetection: ChangeDetectionStrategy.OnPush

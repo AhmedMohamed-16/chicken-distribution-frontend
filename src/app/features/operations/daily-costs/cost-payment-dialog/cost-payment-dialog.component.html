@@ -17,21 +17,23 @@
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>المبلغ المراد دفعه (جنيه)</mat-label>
         <input matInput type="number" formControlName="amount" step="0.01" min="0.01">
-        <mat-error
-          *ngIf="paymentForm.get('amount')?.hasError('required') || paymentForm.get('amount')?.hasError('min')">
-          المبلغ مطلوب ويجب أن يكون أكبر من 0
-        </mat-error>
+        @if (paymentForm.get('amount')?.hasError('required') || paymentForm.get('amount')?.hasError('min')) {
+          <mat-error
+            >
+            المبلغ مطلوب ويجب أن يكون أكبر من 0
+          </mat-error>
+        }
       </mat-form-field>
 
       <!-- Overpayment Warning -->
       @if (isOverpaying()) {
-      <div class="overpay-warning">
-        <mat-icon>warning_amber</mat-icon>
-        <span>
-          المبلغ المُدخل أكبر من المتبقي ({{ data.cost.remaining_amount | number:'1.2-2' }} ج).
-          سيُسجَّل الفرق كرصيد زائد للفئة.
-        </span>
-      </div>
+        <div class="overpay-warning">
+          <mat-icon>warning_amber</mat-icon>
+          <span>
+            المبلغ المُدخل أكبر من المتبقي ({{ data.cost.remaining_amount | number:'1.2-2' }} ج).
+            سيُسجَّل الفرق كرصيد زائد للفئة.
+          </span>
+        </div>
       }
 
       <!-- FIX: Use safe amount from form value with nullish coalescing -->
@@ -59,7 +61,11 @@
   <button mat-button (click)="onCancel()" [disabled]="submitting()">إلغاء</button>
   <button mat-raised-button color="primary" (click)="onSubmit()"
     [disabled]="paymentForm.invalid || submitting() || !paymentSource()">
-    <mat-spinner diameter="20" *ngIf="submitting()"></mat-spinner>
-    <span *ngIf="!submitting()">تأكيد الدفع</span>
+    @if (submitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    }
+    @if (!submitting()) {
+      <span>تأكيد الدفع</span>
+    }
   </button>
 </mat-dialog-actions>

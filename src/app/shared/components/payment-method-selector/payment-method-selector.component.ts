@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, inject, signal, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -10,11 +10,10 @@ import { Safe } from '../../../core/models';
   selector: 'app-payment-method-selector',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatSelectModule
-  ],
+],
   template: `
     <div [formGroup]="parentForm" class="payment-selector-container">
 

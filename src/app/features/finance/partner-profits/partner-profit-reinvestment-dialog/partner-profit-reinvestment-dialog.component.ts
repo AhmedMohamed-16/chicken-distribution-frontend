@@ -1,5 +1,5 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +22,6 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -33,7 +32,7 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule
-  ],
+],
   templateUrl: './partner-profit-reinvestment-dialog.component.html',
   styleUrls: ['./partner-profit-reinvestment-dialog.component.css']
 })

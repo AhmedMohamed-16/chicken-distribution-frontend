@@ -1,479 +1,469 @@
 <!-- <div class="container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>إغلاق اليوم وحساب الأرباح</mat-card-title>
-      <mat-card-subtitle>إنهاء العمليات اليومية وتوزيع الأرباح</mat-card-subtitle>
-    </mat-card-header>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>إغلاق اليوم وحساب الأرباح</mat-card-title>
+    <mat-card-subtitle>إنهاء العمليات اليومية وتوزيع الأرباح</mat-card-subtitle>
+  </mat-card-header>
 
-    <mat-card-content>
-      @if (loading()) {
+  <mat-card-content>
+    @if (loading()) {
       <div class="loading-spinner">
         <mat-spinner></mat-spinner>
       </div>
-      } @else {
+    } @else {
       @if (status() === 'CLOSED') {
-      <div class="profit-summary">
-        <h3>ملخص اليوم المالي</h3>
+        <div class="profit-summary">
+          <h3>ملخص اليوم المالي</h3>
 
-        <div class="summary-grid">
-          <div class="summary-item revenue">
-            <mat-icon>trending_up</mat-icon>
-            <div>
-              <p class="label">إجمالي الإيرادات</p>
-              <p class="value">{{ profitData()!.total_revenue | number:'1.2-2' }} ج</p>
+          <div class="summary-grid">
+            <div class="summary-item revenue">
+              <mat-icon>trending_up</mat-icon>
+              <div>
+                <p class="label">إجمالي الإيرادات</p>
+                <p class="value">{{ profitData()!.total_revenue | number:'1.2-2' }} ج</p>
+              </div>
+            </div>
+
+            <div class="summary-item expense">
+              <mat-icon>trending_down</mat-icon>
+              <div>
+                <p class="label">إجمالي المشتريات</p>
+                <p class="value">{{ profitData()!.total_purchases | number:'1.2-2' }} ج</p>
+              </div>
+            </div>
+
+            <div class="summary-item loss">
+              <mat-icon>warning</mat-icon>
+              <div>
+                <p class="label">الخسائر</p>
+                <p class="value">{{ profitData()!.total_losses | number:'1.2-2' }} ج</p>
+              </div>
+            </div>
+
+            <div class="summary-item cost">
+              <mat-icon>receipt</mat-icon>
+              <div>
+                <p class="label">التكاليف</p>
+                <p class="value">{{ profitData()!.total_costs | number:'1.2-2' }} ج</p>
+              </div>
             </div>
           </div>
 
-          <div class="summary-item expense">
-            <mat-icon>trending_down</mat-icon>
-            <div>
-              <p class="label">إجمالي المشتريات</p>
-              <p class="value">{{ profitData()!.total_purchases | number:'1.2-2' }} ج</p>
-            </div>
+          <mat-divider></mat-divider>
+
+          <div class="net-profit">
+            <h2>صافي الربح: {{ profitData()!.net_profit | number:'1.2-2' }} جنيه</h2>
           </div>
 
-          <div class="summary-item loss">
-            <mat-icon>warning</mat-icon>
-            <div>
-              <p class="label">الخسائر</p>
-              <p class="value">{{ profitData()!.total_losses | number:'1.2-2' }} ج</p>
-            </div>
-          </div>
+          <mat-divider></mat-divider>
 
-          <div class="summary-item cost">
-            <mat-icon>receipt</mat-icon>
-            <div>
-              <p class="label">التكاليف</p>
-              <p class="value">{{ profitData()!.total_costs | number:'1.2-2' }} ج</p>
-            </div>
-          </div>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <div class="net-profit">
-          <h2>صافي الربح: {{ profitData()!.net_profit | number:'1.2-2' }} جنيه</h2>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <h3>توزيع الأرباح على الشركاء</h3>
-
-        <table mat-table [dataSource]="profitData()!.partner_profits || []">
-          <ng-container matColumnDef="partner">
-            <th mat-header-cell *matHeaderCellDef>الشريك</th>
-            <td mat-cell *matCellDef="let profit">
-              {{ profit.partner?.name }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="base_share">
-            <th mat-header-cell *matHeaderCellDef>الحصة الأساسية</th>
-            <td mat-cell *matCellDef="let profit">
-              {{ profit.base_profit_share | number:'1.2-2' }} ج
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="vehicle_cost">
-            <th mat-header-cell *matHeaderCellDef>تكلفة المركبة</th>
-            <td mat-cell *matCellDef="let profit">
-              {{ profit.vehicle_cost_share | number:'1.2-2' }} ج
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="final_profit">
-            <th mat-header-cell *matHeaderCellDef>الربح النهائي</th>
-            <td mat-cell *matCellDef="let profit" class="final-profit">
-              <strong>{{ profit.final_profit | number:'1.2-2' }} ج</strong>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
-      </div>
-
-      <div class="button-group">
-        <button mat-raised-button color="primary" (click)="goToDashboard()">
-          العودة للرئيسية
-        </button>
-      </div>
-      } @else {
-      <div class="warning-box">
-        <mat-icon>info</mat-icon>
-        <p>لم يتم إغلاق اليوم بعد. اضغط على الزر أدناه لإغلاق اليوم وحساب الأرباح.</p>
-      </div>
-
-      <div class="button-group">
-        <button mat-raised-button color="warn" (click)="closeDay()">
-          <mat-icon>lock</mat-icon>
-          إغلاق اليوم وحساب الأرباح
-        </button>
-        <button mat-button (click)="cancel()">
-          إلغاء
-        </button>
-      </div>
-      }
-      }
-    </mat-card-content>
-  </mat-card>
-</div> -->
-
-<!-- <div class="close-day-container">
-  <h2>Close Daily Operation</h2>
-
-  <mat-card *ngIf="currentOperation">
-    <mat-card-header>
-      <mat-card-title>
-        Operation Date: {{ currentOperation.operation_date | date:'fullDate' }}
-      </mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-       <h3>Vehicle Operation Status</h3>
-      <table mat-table [dataSource]="vehicleOperations" class="status-table">
-        <ng-container matColumnDef="vehicle">
-          <th mat-header-cell *matHeaderCellDef>Vehicle</th>
-          <td mat-cell *matCellDef="let vo">
-            {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let vo">
-            <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
-              {{ vo.status | uppercase }}
-            </mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="sales">
-          <th mat-header-cell *matHeaderCellDef>Sales</th>
-          <td mat-cell *matCellDef="let vo">{{ vo.sales_count }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="costs">
-          <th mat-header-cell *matHeaderCellDef>Costs</th>
-          <td mat-cell *matCellDef="let vo">{{ vo.costs_count }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="revenue">
-          <th mat-header-cell *matHeaderCellDef>Revenue</th>
-          <td mat-cell *matCellDef="let vo">{{ vo.total_revenue | currency }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let vo">
-            <button mat-icon-button color="primary" *ngIf="vo.status !== 'completed'"
-              (click)="markVehicleComplete(vo.id)" matTooltip="Mark as complete">
-              <mat-icon>check_circle</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'"></tr>
-      </table>
-
-       <mat-card class="warning-card" *ngIf="!canCloseDay()">
-        <mat-card-content>
-          <mat-icon color="warn">warning</mat-icon>
-          <p><strong>Cannot close day:</strong></p>
-          <ul>
-            <li *ngFor="let warning of getValidationWarnings()">
-              {{ warning }}
-            </li>
-          </ul>
-        </mat-card-content>
-      </mat-card>
-
-       <div class="summary-section" *ngIf="canCloseDay()">
-        <h3>Daily Summary (All Vehicles)</h3>
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span class="label">Total Revenue:</span>
-            <span class="value">{{ getTotalRevenue() | currency }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Total Costs:</span>
-            <span class="value">{{ getTotalCosts() | currency }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Net Profit:</span>
-            <span class="value" [class.profit]="getNetProfit() > 0">
-              {{ getNetProfit() | currency }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-       <div class="actions">
-        <button mat-raised-button color="warn" (click)="closeDay()" [disabled]="!canCloseDay() || isClosing">
-          <mat-icon>lock</mat-icon>
-          Close Day
-        </button>
-        <button mat-button (click)="cancel()">Cancel</button>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-   <mat-card *ngIf="!currentOperation && !isLoading">
-    <mat-card-content>
-      <p>No active daily operation found.</p>
-      <button mat-raised-button color="primary" routerLink="/daily-operations/start">
-        Start New Operation
-      </button>
-    </mat-card-content>
-  </mat-card>
-</div> -->
-<div class="close-day-container">
-  <h2>إغلاق اليوم و الرحلات التوزيعية</h2>
-
-  <mat-card *ngIf="currentOperation()">
-    <mat-card-header>
-      <mat-card-title>
-        تاريخ العملية: {{formatDateTime( currentOperation()?.operation_date )}}
-      </mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-      <!-- جدول حالة المركبات -->
-      <h3>حالة تشغيل المركبات</h3>
-      <div class="status-table-wrapper">
-        <table mat-table [dataSource]="vehicleOperations" class="status-table">
-          <ng-container matColumnDef="vehicle">
-            <th mat-header-cell *matHeaderCellDef>المركبة</th>
-            <td mat-cell *matCellDef="let vo">
-              {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>الحالة</th>
-            <td mat-cell *matCellDef="let vo">
-              <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
-                {{ vo.status | statusArabic }}
-              </mat-chip>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="purchases">
-            <th mat-header-cell *matHeaderCellDef>المشتريات</th>
-            <td mat-cell *matCellDef="let vo">{{ formatNumber(vo.total_purchases) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="revenue">
-            <th mat-header-cell *matHeaderCellDef>الإيرادات</th>
-            <td mat-cell *matCellDef="let vo">{{ formatCurrency( vo.total_revenue ) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="costs">
-            <th mat-header-cell *matHeaderCellDef> تكاليف المركبه</th>
-            <td mat-cell *matCellDef="let vo">{{formatNumber( vo.total_costs) }}</td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
-            <td mat-cell *matCellDef="let vo">
-              <button mat-icon-button color="primary" *ngIf="vo.status !== 'COMPLETED' && !isDayClosed()"
-                (click)="markVehicleComplete(vo.id)" matTooltip="تحديد كمكتمل">
-                <mat-icon>check_circle</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'">
-          </tr>
-        </table>
-      </div>
-      <!-- تحذيرات التحقق -->
-      <mat-card class="warning-card" *ngIf="!canCloseDay()">
-        <mat-card-content>
-          <mat-icon color="warn">warning</mat-icon>
-          <p><strong>لا يمكن إغلاق اليوم و الرحلات التوزيعية:</strong></p>
-          <ul>
-            <li *ngFor="let warning of getValidationWarnings()">
-              {{ warning }}
-            </li>
-          </ul>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- الملخص -->
-      <!-- <div class="summary-section" *ngIf="canCloseDay()"> -->
-      <div class="summary-section" *ngIf="summary() && isDayClosed()">
-        <h3>ملخص رحلة التوزيع المالي</h3>
-
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span class="label">إجمالي الشراء:</span>
-            <span class="value">{{ formatCurrency(totalPurchases() ) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">إجمالي المبيعات:</span>
-            <span class="value">{{formatCurrency( totalRevenue() ) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">إجمالي التكاليف:</span>
-            <span class="value">{{ formatCurrency(totalCosts() ) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">خسائر النافق في البيع:</span>
-            <span class="value">{{ formatCurrency(saleLosses()) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">خسائر النافق علينا في النقل:</span>
-            <span class="value">{{ formatCurrency(transportOnlyLosses()) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">خسائر النافق علي المزارع في النقل:</span>
-            <span class="value">{{ formatCurrency(lossesWithFarm()) }}</span>
-          </div>
-        </div>
-
-        <!-- ── New Financial Details ────────────────────────────────────── -->
-        <mat-divider style="margin: 20px 0;"></mat-divider>
-
-        <div class="details-grid">
-          <!-- Discounts -->
-          <div class="detail-box">
-            <h4><mat-icon inline>minor_crash</mat-icon> الخصومات</h4>
-            <div class="detail-row">
-              <span>خصومات المبيعات:</span>
-              <span>{{ formatCurrency(salesDiscount()) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>خصومات الشراء:</span>
-              <span>{{ formatCurrency(purchaseDiscount()) }}</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="detail-row total">
-              <span>إجمالي الخصومات:</span>
-              <span>{{ formatCurrency(totalDiscount()) }}</span>
-            </div>
-          </div>
-
-          <!-- Debts Paid By Us -->
-          <div class="detail-box">
-            <h4><mat-icon inline>payments</mat-icon> مبالغ سددت عنا (ديون قلَّت علينا)</h4>
-            <div class="detail-row">
-              <span>عن مبيعات:</span>
-              <span>{{ formatCurrency(debtsPaid()?.from_sales) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>عن مشتريات:</span>
-              <span>{{ formatCurrency(debtsPaid()?.from_purchases) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>عن تكاليف:</span>
-              <span>{{ formatCurrency(debtsPaid()?.from_costs) }}</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="detail-row total">
-              <span>إجمالي المسدد:</span>
-              <span>{{ formatCurrency(debtsPaid()?.total) }}</span>
-            </div>
-          </div>
-
-          <!-- Debts Received By Us -->
-          <div class="detail-box">
-            <h4><mat-icon inline>account_balance_wallet</mat-icon> مبالغ استلمناها (ديون زادت علينا)</h4>
-            <div class="detail-row">
-              <span>من مبيعات:</span>
-              <span>{{ formatCurrency(debtsReceived()?.from_sales) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>من مشتريات:</span>
-              <span>{{ formatCurrency(debtsReceived()?.from_purchases) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>من تكاليف:</span>
-              <span>{{ formatCurrency(debtsReceived()?.from_costs) }}</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="detail-row total">
-              <span>إجمالي المستلم:</span>
-              <span>{{ formatCurrency(debtsReceived()?.total) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <mat-divider style="margin: 20px 0;"></mat-divider>
-
-        <div class="summary-item net-profit-box">
-          <span class="label large">صافي الربح النهائي:</span>
-          <span class="value large" [class.profit]="netProfit() > 0">
-            {{ formatCurrency(netProfit()) }}
-          </span>
-        </div>
-
-        <!-- ── Partner Distributions Table ──────────────────────────────── -->
-        <div class="partners-section">
           <h3>توزيع الأرباح على الشركاء</h3>
-          <p class="partners-note">
-            تكلفة المركبة تُوزَّع بالتساوي على جميع الشركاء — الملاّك يحصلون على خصم بنسبة ملكيتهم في المركبة،
-            وغير الملاّك يتحملون فرق الخصومات الممنوحة.
-          </p>
-          <table mat-table [dataSource]="partnerDistributions()" class="partner-table">
+
+          <table mat-table [dataSource]="profitData()!.partner_profits || []">
             <ng-container matColumnDef="partner">
               <th mat-header-cell *matHeaderCellDef>الشريك</th>
-              <td mat-cell *matCellDef="let dist">
-                {{ dist.partner?.name || dist.partner_name || 'شريك' }}
+              <td mat-cell *matCellDef="let profit">
+                {{ profit.partner?.name }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="base_share">
-              <th mat-header-cell *matHeaderCellDef>الحصة من الربح (قبل تكاليف المركبة)</th>
-              <td mat-cell *matCellDef="let dist">
-                {{ formatCurrency(dist.base_profit_share) }}
+              <th mat-header-cell *matHeaderCellDef>الحصة الأساسية</th>
+              <td mat-cell *matCellDef="let profit">
+                {{ profit.base_profit_share | number:'1.2-2' }} ج
               </td>
             </ng-container>
 
             <ng-container matColumnDef="vehicle_cost">
-              <th mat-header-cell *matHeaderCellDef>نصيبه من تكلفة المركبة</th>
-              <td mat-cell *matCellDef="let dist">
-                {{ formatCurrency(dist.vehicle_cost_share) }}
+              <th mat-header-cell *matHeaderCellDef>تكلفة المركبة</th>
+              <td mat-cell *matCellDef="let profit">
+                {{ profit.vehicle_cost_share | number:'1.2-2' }} ج
               </td>
             </ng-container>
 
             <ng-container matColumnDef="final_profit">
               <th mat-header-cell *matHeaderCellDef>الربح النهائي</th>
-              <td mat-cell *matCellDef="let dist" class="final-profit">
-                <strong>{{ formatCurrency(dist.final_profit) }}</strong>
+              <td mat-cell *matCellDef="let profit" class="final-profit">
+                <strong>{{ profit.final_profit | number:'1.2-2' }} ج</strong>
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="partnerColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: partnerColumns"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
           </table>
         </div>
-      </div>
 
-      <!-- زر الإغلاق -->
-      <div class="actions">
-        <button mat-raised-button color="warn" (click)="closeDay()"
-          [disabled]="isDayClosed() || !canCloseDay() || isClosing">
-          <mat-icon>lock</mat-icon>
-          إغلاق اليوم و الرحلات التوزيعية
-        </button>
-        <button mat-button (click)="cancel()">
-          <mat-icon>cancel</mat-icon>
-          إلغاء</button>
+        <div class="button-group">
+          <button mat-raised-button color="primary" (click)="goToDashboard()">
+            العودة للرئيسية
+          </button>
+        </div>
+      } @else {
+        <div class="warning-box">
+          <mat-icon>info</mat-icon>
+          <p>لم يتم إغلاق اليوم بعد. اضغط على الزر أدناه لإغلاق اليوم وحساب الأرباح.</p>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="warn" (click)="closeDay()">
+            <mat-icon>lock</mat-icon>
+            إغلاق اليوم وحساب الأرباح
+          </button>
+          <button mat-button (click)="cancel()">
+            إلغاء
+          </button>
+        </div>
+      }
+    }
+  </mat-card-content>
+</mat-card>
+</div> -->
+
+<!-- <div class="close-day-container">
+<h2>Close Daily Operation</h2>
+
+<mat-card *ngIf="currentOperation">
+  <mat-card-header>
+    <mat-card-title>
+      Operation Date: {{ currentOperation.operation_date | date:'fullDate' }}
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <h3>Vehicle Operation Status</h3>
+    <table mat-table [dataSource]="vehicleOperations" class="status-table">
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehicle</th>
+        <td mat-cell *matCellDef="let vo">
+          {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let vo">
+          <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
+            {{ vo.status | uppercase }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="sales">
+        <th mat-header-cell *matHeaderCellDef>Sales</th>
+        <td mat-cell *matCellDef="let vo">{{ vo.sales_count }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="costs">
+        <th mat-header-cell *matHeaderCellDef>Costs</th>
+        <td mat-cell *matCellDef="let vo">{{ vo.costs_count }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="revenue">
+        <th mat-header-cell *matHeaderCellDef>Revenue</th>
+        <td mat-cell *matCellDef="let vo">{{ vo.total_revenue | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let vo">
+          <button mat-icon-button color="primary" *ngIf="vo.status !== 'completed'"
+            (click)="markVehicleComplete(vo.id)" matTooltip="Mark as complete">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'"></tr>
+    </table>
+
+    <mat-card class="warning-card" *ngIf="!canCloseDay()">
+      <mat-card-content>
+        <mat-icon color="warn">warning</mat-icon>
+        <p><strong>Cannot close day:</strong></p>
+        <ul>
+          <li *ngFor="let warning of getValidationWarnings()">
+            {{ warning }}
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="summary-section" *ngIf="canCloseDay()">
+      <h3>Daily Summary (All Vehicles)</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="label">Total Revenue:</span>
+          <span class="value">{{ getTotalRevenue() | currency }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Total Costs:</span>
+          <span class="value">{{ getTotalCosts() | currency }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Net Profit:</span>
+          <span class="value" [class.profit]="getNetProfit() > 0">
+            {{ getNetProfit() | currency }}
+          </span>
+        </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+
+    <div class="actions">
+      <button mat-raised-button color="warn" (click)="closeDay()" [disabled]="!canCloseDay() || isClosing">
+        <mat-icon>lock</mat-icon>
+        Close Day
+      </button>
+      <button mat-button (click)="cancel()">Cancel</button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="!currentOperation && !isLoading">
+  <mat-card-content>
+    <p>No active daily operation found.</p>
+    <button mat-raised-button color="primary" routerLink="/daily-operations/start">
+      Start New Operation
+    </button>
+  </mat-card-content>
+</mat-card>
+</div> -->
+<div class="close-day-container">
+  <h2>إغلاق اليوم و الرحلات التوزيعية</h2>
+
+  @if (currentOperation()) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          تاريخ العملية: {{formatDateTime( currentOperation()?.operation_date )}}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- جدول حالة المركبات -->
+        <h3>حالة تشغيل المركبات</h3>
+        <div class="status-table-wrapper">
+          <table mat-table [dataSource]="vehicleOperations" class="status-table">
+            <ng-container matColumnDef="vehicle">
+              <th mat-header-cell *matHeaderCellDef>المركبة</th>
+              <td mat-cell *matCellDef="let vo">
+                {{ vo.vehicle_name }} ({{ vo.vehicle_plate }})
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>الحالة</th>
+              <td mat-cell *matCellDef="let vo">
+                <mat-chip [color]="vo.status === 'completed' ? 'primary' : 'warn'">
+                  {{ vo.status | statusArabic }}
+                </mat-chip>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="purchases">
+              <th mat-header-cell *matHeaderCellDef>المشتريات</th>
+              <td mat-cell *matCellDef="let vo">{{ formatNumber(vo.total_purchases) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="revenue">
+              <th mat-header-cell *matHeaderCellDef>الإيرادات</th>
+              <td mat-cell *matCellDef="let vo">{{ formatCurrency( vo.total_revenue ) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="costs">
+              <th mat-header-cell *matHeaderCellDef> تكاليف المركبه</th>
+              <td mat-cell *matCellDef="let vo">{{formatNumber( vo.total_costs) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+              <td mat-cell *matCellDef="let vo">
+                @if (vo.status !== 'COMPLETED' && !isDayClosed()) {
+                  <button mat-icon-button color="primary"
+                    (click)="markVehicleComplete(vo.id)" matTooltip="تحديد كمكتمل">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: vehicleColumns" [class.incomplete]="row.status !== 'completed'">
+            </tr>
+          </table>
+        </div>
+        <!-- تحذيرات التحقق -->
+        @if (!canCloseDay()) {
+          <mat-card class="warning-card">
+            <mat-card-content>
+              <mat-icon color="warn">warning</mat-icon>
+              <p><strong>لا يمكن إغلاق اليوم و الرحلات التوزيعية:</strong></p>
+              <ul>
+                @for (warning of getValidationWarnings(); track warning) {
+                  <li>
+                    {{ warning }}
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
+        <!-- الملخص -->
+        <!-- <div class="summary-section" *ngIf="canCloseDay()"> -->
+        @if (summary() && isDayClosed()) {
+          <div class="summary-section">
+            <h3>ملخص رحلة التوزيع المالي</h3>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span class="label">إجمالي الشراء:</span>
+                <span class="value">{{ formatCurrency(totalPurchases() ) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">إجمالي المبيعات:</span>
+                <span class="value">{{formatCurrency( totalRevenue() ) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">إجمالي التكاليف:</span>
+                <span class="value">{{ formatCurrency(totalCosts() ) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">خسائر النافق في البيع:</span>
+                <span class="value">{{ formatCurrency(saleLosses()) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">خسائر النافق علينا في النقل:</span>
+                <span class="value">{{ formatCurrency(transportOnlyLosses()) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">خسائر النافق علي المزارع في النقل:</span>
+                <span class="value">{{ formatCurrency(lossesWithFarm()) }}</span>
+              </div>
+            </div>
+            <!-- ── New Financial Details ────────────────────────────────────── -->
+            <mat-divider style="margin: 20px 0;"></mat-divider>
+            <div class="details-grid">
+              <!-- Discounts -->
+              <div class="detail-box">
+                <h4><mat-icon inline>minor_crash</mat-icon> الخصومات</h4>
+                <div class="detail-row">
+                  <span>خصومات المبيعات:</span>
+                  <span>{{ formatCurrency(salesDiscount()) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span>خصومات الشراء:</span>
+                  <span>{{ formatCurrency(purchaseDiscount()) }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="detail-row total">
+                  <span>إجمالي الخصومات:</span>
+                  <span>{{ formatCurrency(totalDiscount()) }}</span>
+                </div>
+              </div>
+              <!-- Debts Paid By Us -->
+              <div class="detail-box">
+                <h4><mat-icon inline>payments</mat-icon> مبالغ سددت عنا (ديون قلَّت علينا)</h4>
+                <div class="detail-row">
+                  <span>عن مبيعات:</span>
+                  <span>{{ formatCurrency(debtsPaid()?.from_sales) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span>عن مشتريات:</span>
+                  <span>{{ formatCurrency(debtsPaid()?.from_purchases) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span>عن تكاليف:</span>
+                  <span>{{ formatCurrency(debtsPaid()?.from_costs) }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="detail-row total">
+                  <span>إجمالي المسدد:</span>
+                  <span>{{ formatCurrency(debtsPaid()?.total) }}</span>
+                </div>
+              </div>
+              <!-- Debts Received By Us -->
+              <div class="detail-box">
+                <h4><mat-icon inline>account_balance_wallet</mat-icon> مبالغ استلمناها (ديون زادت علينا)</h4>
+                <div class="detail-row">
+                  <span>من مبيعات:</span>
+                  <span>{{ formatCurrency(debtsReceived()?.from_sales) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span>من مشتريات:</span>
+                  <span>{{ formatCurrency(debtsReceived()?.from_purchases) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span>من تكاليف:</span>
+                  <span>{{ formatCurrency(debtsReceived()?.from_costs) }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="detail-row total">
+                  <span>إجمالي المستلم:</span>
+                  <span>{{ formatCurrency(debtsReceived()?.total) }}</span>
+                </div>
+              </div>
+            </div>
+            <mat-divider style="margin: 20px 0;"></mat-divider>
+            <div class="summary-item net-profit-box">
+              <span class="label large">صافي الربح النهائي:</span>
+              <span class="value large" [class.profit]="netProfit() > 0">
+                {{ formatCurrency(netProfit()) }}
+              </span>
+            </div>
+            <!-- ── Partner Distributions Table ──────────────────────────────── -->
+            <div class="partners-section">
+              <h3>توزيع الأرباح على الشركاء</h3>
+              <p class="partners-note">
+                تكلفة المركبة تُوزَّع بالتساوي على جميع الشركاء — الملاّك يحصلون على خصم بنسبة ملكيتهم في المركبة،
+                وغير الملاّك يتحملون فرق الخصومات الممنوحة.
+              </p>
+              <table mat-table [dataSource]="partnerDistributions()" class="partner-table">
+                <ng-container matColumnDef="partner">
+                  <th mat-header-cell *matHeaderCellDef>الشريك</th>
+                  <td mat-cell *matCellDef="let dist">
+                    {{ dist.partner?.name || dist.partner_name || 'شريك' }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="base_share">
+                  <th mat-header-cell *matHeaderCellDef>الحصة من الربح (قبل تكاليف المركبة)</th>
+                  <td mat-cell *matCellDef="let dist">
+                    {{ formatCurrency(dist.base_profit_share) }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="vehicle_cost">
+                  <th mat-header-cell *matHeaderCellDef>نصيبه من تكلفة المركبة</th>
+                  <td mat-cell *matCellDef="let dist">
+                    {{ formatCurrency(dist.vehicle_cost_share) }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="final_profit">
+                  <th mat-header-cell *matHeaderCellDef>الربح النهائي</th>
+                  <td mat-cell *matCellDef="let dist" class="final-profit">
+                    <strong>{{ formatCurrency(dist.final_profit) }}</strong>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="partnerColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: partnerColumns"></tr>
+              </table>
+            </div>
+          </div>
+        }
+        <!-- زر الإغلاق -->
+        <div class="actions">
+          <button mat-raised-button color="warn" (click)="closeDay()"
+            [disabled]="isDayClosed() || !canCloseDay() || isClosing">
+            <mat-icon>lock</mat-icon>
+            إغلاق اليوم و الرحلات التوزيعية
+          </button>
+          <button mat-button (click)="cancel()">
+            <mat-icon>cancel</mat-icon>
+          إلغاء</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- لا توجد عملية نشطة -->
-  <mat-card *ngIf="!currentOperation() && !isLoading">
-    <mat-card-content>
-      <p>لم يتم العثور على رحلات توزيع نشطة.</p>
-      <button mat-raised-button color="primary" routerLink="/operations/start-day">
-        بدء رحله جديدة
-      </button>
-    </mat-card-content>
-  </mat-card>
+  @if (!currentOperation() && !isLoading) {
+    <mat-card>
+      <mat-card-content>
+        <p>لم يتم العثور على رحلات توزيع نشطة.</p>
+        <button mat-raised-button color="primary" routerLink="/operations/start-day">
+          بدء رحله جديدة
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
 </div>

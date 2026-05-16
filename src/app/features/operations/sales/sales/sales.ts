@@ -1838,7 +1838,7 @@
 
 
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -1872,7 +1872,6 @@ import { PaymentSourceSelection } from '../../../../models/custody.models';
 @Component({
   selector: 'app-sales',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -1884,10 +1883,10 @@ import { PaymentSourceSelection } from '../../../../models/custody.models';
     MatDividerModule,
     MatIconModule,
     MatSlideToggleModule,
-    MatDialogModule, 
+    MatDialogModule,
     PersonSelectorComponent,
     PaymentSourceSelectorComponent
-  ],
+],
   templateUrl: './sales.html',
   styleUrl: './sales.css',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -106,10 +106,10 @@
 
   <!-- Error Message -->
   @if (custodyService.error()) {
-  <div class="error-message">
-    <mat-icon>error</mat-icon>
-    <span>{{ custodyService.error() }}</span>
-  </div>
+    <div class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ custodyService.error() }}</span>
+    </div>
   }
 
   <mat-tab-group (selectedTabChange)="onTabChange($event)" class="custody-tabs" animationDuration="0ms">
@@ -121,9 +121,11 @@
       </ng-template>
       <ng-template matTabContent>
         <div class="table-card mat-elevation-z3">
-          <div class="loading-shade" *ngIf="isLoading()">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
+          @if (isLoading()) {
+            <div class="loading-shade">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
 
           <div class="table-responsive-wrapper">
             <table mat-table [dataSource]="activePageItems()" class="custody-table">
@@ -188,14 +190,14 @@
                       <mat-icon>visibility</mat-icon>
                     </button>
                     @if (isActionAllowed(custody.status) && custody.unaccounted_amount > 0) {
-                    <button mat-icon-button color="accent" matTooltip="تسجيل إرجاع"
-                      (click)="openReturnDialog(custody.id, custody.unaccounted_amount)">
-                      <mat-icon>reply</mat-icon>
-                    </button>
-                    <button mat-icon-button color="accent" matTooltip="تسجيل صرف"
-                      (click)="openSpendingDialog(custody.id, custody.unaccounted_amount)">
-                      <mat-icon>payments</mat-icon>
-                    </button>
+                      <button mat-icon-button color="accent" matTooltip="تسجيل إرجاع"
+                        (click)="openReturnDialog(custody.id, custody.unaccounted_amount)">
+                        <mat-icon>reply</mat-icon>
+                      </button>
+                      <button mat-icon-button color="accent" matTooltip="تسجيل صرف"
+                        (click)="openSpendingDialog(custody.id, custody.unaccounted_amount)">
+                        <mat-icon>payments</mat-icon>
+                      </button>
                     }
                     <button mat-icon-button color="warn"
                       [matTooltip]="custody.unaccounted_amount > 0 ? 'يجب إرجاع أو صرف المبلغ غير المحاسب أولاً' : 'تسوية وإغلاق'"
@@ -211,23 +213,27 @@
             </table>
           </div>
 
-          <div class="pagination-controls" *ngIf="activeTotalPages() > 1">
-            <button mat-button color="primary" (click)="previousActivePage()" [disabled]="activePage() === 1">
-              <mat-icon>chevron_left</mat-icon>
-              السابق
-            </button>
-            <span>صفحة {{ activePage() }} من {{ activeTotalPages() }}</span>
-            <button mat-button color="primary" (click)="nextActivePage()"
-              [disabled]="activePage() === activeTotalPages()">
-              التالي
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
+          @if (activeTotalPages() > 1) {
+            <div class="pagination-controls">
+              <button mat-button color="primary" (click)="previousActivePage()" [disabled]="activePage() === 1">
+                <mat-icon>chevron_left</mat-icon>
+                السابق
+              </button>
+              <span>صفحة {{ activePage() }} من {{ activeTotalPages() }}</span>
+              <button mat-button color="primary" (click)="nextActivePage()"
+                [disabled]="activePage() === activeTotalPages()">
+                التالي
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          }
 
-          <div class="empty-state" *ngIf="!isLoading() && activeCustodies().length === 0">
-            <mat-icon>check_circle</mat-icon>
-            <p>لا توجد عهد نشطة حالياً. كل العهد تم إغلاقها!</p>
-          </div>
+          @if (!isLoading() && activeCustodies().length === 0) {
+            <div class="empty-state">
+              <mat-icon>check_circle</mat-icon>
+              <p>لا توجد عهد نشطة حالياً. كل العهد تم إغلاقها!</p>
+            </div>
+          }
         </div>
       </ng-template>
     </mat-tab>
@@ -240,9 +246,11 @@
       </ng-template>
       <ng-template matTabContent>
         <div class="table-card mat-elevation-z3">
-          <div class="loading-shade" *ngIf="isLoading()">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
+          @if (isLoading()) {
+            <div class="loading-shade">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
 
           <div class="table-responsive-wrapper">
             <table mat-table [dataSource]="historyPageItems()" class="custody-table">
@@ -313,23 +321,27 @@
             </table>
           </div>
 
-          <div class="pagination-controls" *ngIf="historyTotalPages() > 1">
-            <button mat-button color="primary" (click)="previousHistoryPage()" [disabled]="historyPage() === 1">
-              <mat-icon>chevron_left</mat-icon>
-              السابق
-            </button>
-            <span>صفحة {{ historyPage() }} من {{ historyTotalPages() }}</span>
-            <button mat-button color="primary" (click)="nextHistoryPage()"
-              [disabled]="historyPage() === historyTotalPages()">
-              التالي
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
+          @if (historyTotalPages() > 1) {
+            <div class="pagination-controls">
+              <button mat-button color="primary" (click)="previousHistoryPage()" [disabled]="historyPage() === 1">
+                <mat-icon>chevron_left</mat-icon>
+                السابق
+              </button>
+              <span>صفحة {{ historyPage() }} من {{ historyTotalPages() }}</span>
+              <button mat-button color="primary" (click)="nextHistoryPage()"
+                [disabled]="historyPage() === historyTotalPages()">
+                التالي
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          }
 
-          <div class="empty-state" *ngIf="!isLoading() && historyCustodies().length === 0">
-            <mat-icon>history_toggle_off</mat-icon>
-            <p>سجل العهد فارغ</p>
-          </div>
+          @if (!isLoading() && historyCustodies().length === 0) {
+            <div class="empty-state">
+              <mat-icon>history_toggle_off</mat-icon>
+              <p>سجل العهد فارغ</p>
+            </div>
+          }
         </div>
       </ng-template>
     </mat-tab>

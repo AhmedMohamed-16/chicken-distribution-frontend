@@ -5,8 +5,12 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>الاسم بالكامل</mat-label>
       <input matInput formControlName="name" placeholder="أدخل اسم الموظف" required>
-      <mat-error *ngIf="form.get('name')?.hasError('required')">الاسم مطلوب</mat-error>
-      <mat-error *ngIf="form.get('name')?.hasError('minlength')">يجب أن يكون الاسم 3 أحرف على الأقل</mat-error>
+      @if (form.get('name')?.hasError('required')) {
+        <mat-error>الاسم مطلوب</mat-error>
+      }
+      @if (form.get('name')?.hasError('minlength')) {
+        <mat-error>يجب أن يكون الاسم 3 أحرف على الأقل</mat-error>
+      }
     </mat-form-field>
 
     <div class="row">
@@ -24,14 +28,18 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>الرقم القومي</mat-label>
       <input matInput formControlName="national_id" placeholder="أدخل 14 رقماً">
-      <mat-error *ngIf="form.get('national_id')?.hasError('pattern')">يجب إدخال 14 رقماً بشكل صحيح</mat-error>
+      @if (form.get('national_id')?.hasError('pattern')) {
+        <mat-error>يجب إدخال 14 رقماً بشكل صحيح</mat-error>
+      }
     </mat-form-field>
 
-    <div class="status-toggle" *ngIf="isEditMode">
-      <mat-slide-toggle formControlName="is_active">
-        حالة الموظف ({{ form.get('is_active')?.value ? 'نشط' : 'غير نشط' }})
-      </mat-slide-toggle>
-    </div>
+    @if (isEditMode) {
+      <div class="status-toggle">
+        <mat-slide-toggle formControlName="is_active">
+          حالة الموظف ({{ form.get('is_active')?.value ? 'نشط' : 'غير نشط' }})
+        </mat-slide-toggle>
+      </div>
+    }
   </form>
 </mat-dialog-content>
 

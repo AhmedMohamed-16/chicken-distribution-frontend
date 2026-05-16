@@ -1,5 +1,5 @@
 import { Component, inject, signal, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'; // Optional: for dialog usage
 import { Permission, User } from '../../../core/models';
@@ -12,7 +12,7 @@ import { PermissionService } from '../../../core/services/permission.service';
   templateUrl: './manage-permissions.html',
   styleUrl: './manage-permissions.css',
 
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 
 })

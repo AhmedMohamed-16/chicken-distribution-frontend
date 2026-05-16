@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -22,7 +22,6 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
 @Component({
   selector: 'app-start-day',
   imports: [
-        CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -35,8 +34,7 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     MatProgressSpinnerModule,
     MatChipsModule,
     MatIconModule
-
-  ],
+],
   templateUrl: './start-day.html',
   styleUrl: './start-day.css',
 })

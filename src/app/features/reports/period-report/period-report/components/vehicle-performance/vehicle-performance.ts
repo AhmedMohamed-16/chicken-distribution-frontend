@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,12 +11,7 @@ import { ReportUtilitiesService } from '../../../../../../core/services/ReportUt
 
 @Component({
   selector: 'app-vehicle-performance',
-  imports: [CommonModule,
-    MatCardModule,
-    MatTableModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule],
+  imports: [MatCardModule, MatTableModule, MatIconModule, MatChipsModule, MatTooltipModule],
   templateUrl: './vehicle-performance.html',
   styleUrl: './vehicle-performance.css',
     changeDetection: ChangeDetectionStrategy.OnPush

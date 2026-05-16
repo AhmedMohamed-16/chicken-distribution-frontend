@@ -209,7 +209,7 @@
 // }
 // debt-report.component.ts
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -231,7 +231,6 @@ import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction
   selector: 'app-debt-report',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatTabsModule,
     MatCardModule,
     MatButtonModule,
@@ -241,8 +240,8 @@ import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction
     MatProgressSpinnerModule,
     MatBadgeModule,
     MatDialogModule,
-    MatChipsModule, 
-  ],
+    MatChipsModule
+],
   templateUrl: './debt-report.html',
   styleUrls: ['./debt-report.scss']
 })

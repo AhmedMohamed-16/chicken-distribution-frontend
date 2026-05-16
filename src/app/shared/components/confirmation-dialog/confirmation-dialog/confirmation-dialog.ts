@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,12 +15,10 @@ export interface ConfirmationDialogData {
 @Component({
   selector: 'app-confirmation-dialog',
   imports: [
-        CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule
-
-  ],
+],
   templateUrl: './confirmation-dialog.html',
   styleUrl: './confirmation-dialog.css',
 })

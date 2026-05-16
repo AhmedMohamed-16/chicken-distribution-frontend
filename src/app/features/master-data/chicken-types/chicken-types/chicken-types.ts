@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,7 @@ import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
 
 @Component({
   selector: 'app-chicken-types',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatCardModule, MatProgressSpinnerModule],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, MatCardModule, MatProgressSpinnerModule],
   templateUrl: './chicken-types.html',
   styleUrl: './chicken-types.css',
 })

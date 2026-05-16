@@ -134,7 +134,7 @@
 //   }
 // }
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -156,7 +156,6 @@ import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
   selector: 'app-partners',
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
@@ -166,7 +165,7 @@ import { PERMISSIONS } from '../../../../core/constants/Permissions.constant';
     MatChipsModule,
     MatTooltipModule,
     MatDialogModule
-  ],
+],
   templateUrl: './partners.html',
   styleUrl: './partners.css',
 })

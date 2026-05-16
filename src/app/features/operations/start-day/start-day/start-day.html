@@ -1,17 +1,17 @@
 <!-- <div class="container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>بدء واستكمال يوم جديد</mat-card-title>
-      <mat-card-subtitle>ابدأ عمليات اليوم وحدد المركبة</mat-card-subtitle>
-    </mat-card-header>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>بدء واستكمال يوم جديد</mat-card-title>
+    <mat-card-subtitle>ابدأ عمليات اليوم وحدد المركبة</mat-card-subtitle>
+  </mat-card-header>
 
-    <mat-card-content>
-      @if (loading()) {
+  <mat-card-content>
+    @if (loading()) {
       <div class="loading-spinner">
         <mat-spinner></mat-spinner>
         <p>جاري التحميل...</p>
       </div>
-      } @else {
+    } @else {
       <form [formGroup]="startDayForm" (ngSubmit)="onSubmit()">
         <div class="form-row">
           <mat-form-field class="form-field" appearance="outline">
@@ -20,7 +20,7 @@
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
             @if (startDayForm.get('operation_date')?.invalid && startDayForm.get('operation_date')?.touched) {
-            <mat-error>التاريخ مطلوب</mat-error>
+              <mat-error>التاريخ مطلوب</mat-error>
             }
           </mat-form-field>
 
@@ -32,7 +32,7 @@
               </mat-option>
             </mat-select>
             @if (startDayForm.get('vehicle_id')?.invalid && startDayForm.get('vehicle_id')?.touched) {
-            <mat-error>المركبة مطلوبة</mat-error>
+              <mat-error>المركبة مطلوبة</mat-error>
             }
           </mat-form-field>
         </div>
@@ -40,19 +40,19 @@
         <div class="button-group">
           <button mat-raised-button color="primary" type="submit" [disabled]="startDayForm.invalid || submitting()">
             @if (submitting()) {
-            <mat-spinner diameter="20"></mat-spinner>
+              <mat-spinner diameter="20"></mat-spinner>
             } @else {
-            بدء و استكمال اليوم
+              بدء و استكمال اليوم
             }
           </button>
           <button mat-button type="button" (click)="cancel()">
-              إلغاء
+            إلغاء
           </button>
         </div>
       </form>
-      }
-    </mat-card-content>
-  </mat-card>
+    }
+  </mat-card-content>
+</mat-card>
 </div> -->
 <div class="start-day-container">
   <mat-card>
@@ -68,38 +68,48 @@
           <input matInput [matDatepicker]="picker" formControlName="operation_date">
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="startForm.get('operation_date')?.hasError('required')">
-            التاريخ مطلوب
-          </mat-error>
+          @if (startForm.get('operation_date')?.hasError('required')) {
+            <mat-error>
+              التاريخ مطلوب
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field class="full-width">
           <mat-label>المركبات المستخدمة</mat-label>
           <mat-select formControlName="vehicle_ids" multiple>
-            <mat-option *ngFor="let vehicle of vehicles()" [value]="vehicle.id">
-              <div class="vehicle-option">
-                <span class="vehicle-name">{{ vehicle.name }}</span>
-                <span class="vehicle-plate">{{ formatNumber(vehicle.plate_number) }}</span>
-              </div>
-            </mat-option>
+            @for (vehicle of vehicles(); track vehicle) {
+              <mat-option [value]="vehicle.id">
+                <div class="vehicle-option">
+                  <span class="vehicle-name">{{ vehicle.name }}</span>
+                  <span class="vehicle-plate">{{ formatNumber(vehicle.plate_number) }}</span>
+                </div>
+              </mat-option>
+            }
           </mat-select>
           <mat-hint>يمكنك اختيار أكثر من مركبة</mat-hint>
-          <mat-error *ngIf="startForm.get('vehicle_ids')?.hasError('required')">
-            يجب اختيار مركبة واحدة على الأقل
-          </mat-error>
+          @if (startForm.get('vehicle_ids')?.hasError('required')) {
+            <mat-error>
+              يجب اختيار مركبة واحدة على الأقل
+            </mat-error>
+          }
         </mat-form-field>
 
-        <div class="selected-vehicles" *ngIf="selectedVehicleIds().length > 0">
-          <h4>المركبات المختارة:</h4>
-          <mat-chip-set>
-            <mat-chip *ngFor="let vid of selectedVehicleIds()">
-              {{ getVehicleName(vid) }}
-              <button matChipRemove type="button" (click)="removeVehicle(vid)">
-                <mat-icon>cancel</mat-icon>
-              </button>
-            </mat-chip>
-          </mat-chip-set>
-        </div>
+        @if (selectedVehicleIds().length > 0) {
+          <div class="selected-vehicles">
+            <h4>المركبات المختارة:</h4>
+            <mat-chip-set>
+              @for (vid of selectedVehicleIds(); track vid) {
+                <mat-chip>
+                  {{ getVehicleName(vid) }}
+                  <button matChipRemove type="button" (click)="removeVehicle(vid)">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
 
         <div class="form-actions">
           <button
@@ -116,8 +126,12 @@
             type="submit"
             class="submit-btn"
             [disabled]="!startForm.valid || loading()">
-            <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
-            <span *ngIf="!loading()">بدء واستكمال رحله توزيع</span>
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            @if (!loading()) {
+              <span>بدء واستكمال رحله توزيع</span>
+            }
           </button>
         </div>
 

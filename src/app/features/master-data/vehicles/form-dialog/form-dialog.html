@@ -1,6 +1,6 @@
 <!-- ============================================================================
-   VEHICLE FORM DIALOG - FINAL RESPONSIVE HTML
-   ============================================================================ -->
+VEHICLE FORM DIALOG - FINAL RESPONSIVE HTML
+============================================================================ -->
 <h2 mat-dialog-title>
   {{ data ? 'تعديل مركبة' : 'إضافة مركبة' }}
 </h2>
@@ -35,7 +35,7 @@
 
     <div class="payment-source-section">
       <h3>طريقة الدفع</h3>
-      
+
       <mat-button-toggle-group formControlName="payment_source" aria-label="Payment Source" class="payment-source-toggle" color="primary">
         <mat-button-toggle value="safe">
           <mat-icon>account_balance</mat-icon>
@@ -49,39 +49,47 @@
 
       <div class="source-content">
         <!-- Safe Selection -->
-        <div *ngIf="paymentSource === 'safe'" class="safe-selector">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>اختر الخزنة</mat-label>
-            <mat-select formControlName="safe_id">
-              <mat-option *ngIf="loadingSafes()">
-                <mat-spinner diameter="20"></mat-spinner> جاري التحميل...
-              </mat-option>
-              <mat-option *ngFor="let safe of safes()" [value]="safe.id">
-                {{ safe.name }} (رصيد: {{ safe.current_balance | number:'1.2-2' }})
-              </mat-option>
-            </mat-select>
-            <mat-error>الخزنة مطلوبة</mat-error>
-          </mat-form-field>
-          <div class="info-text">
-            <mat-icon color="primary" class="info-icon">info</mat-icon>
-            سيتم خصم المبلغ من الخزنة وتقسيم نسبة الملكية بالتساوي على الشركاء
+        @if (paymentSource === 'safe') {
+          <div class="safe-selector">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>اختر الخزنة</mat-label>
+              <mat-select formControlName="safe_id">
+                @if (loadingSafes()) {
+                  <mat-option>
+                    <mat-spinner diameter="20"></mat-spinner> جاري التحميل...
+                  </mat-option>
+                }
+                @for (safe of safes(); track safe) {
+                  <mat-option [value]="safe.id">
+                    {{ safe.name }} (رصيد: {{ safe.current_balance | number:'1.2-2' }})
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-error>الخزنة مطلوبة</mat-error>
+            </mat-form-field>
+            <div class="info-text">
+              <mat-icon color="primary" class="info-icon">info</mat-icon>
+              سيتم خصم المبلغ من الخزنة وتقسيم نسبة الملكية بالتساوي على الشركاء
+            </div>
           </div>
-        </div>
+        }
 
         <!-- Partners Selection Info -->
-        <div *ngIf="paymentSource === 'partners'" class="partners-info">
-          <div class="info-text">
-            <mat-icon color="primary" class="info-icon">info</mat-icon>
-            سيتعين عليك تحديد نسب المساهمة لكل شريك يدوياً.
+        @if (paymentSource === 'partners') {
+          <div class="partners-info">
+            <div class="info-text">
+              <mat-icon color="primary" class="info-icon">info</mat-icon>
+              سيتعين عليك تحديد نسب المساهمة لكل شريك يدوياً.
+            </div>
+            <button mat-stroked-button color="primary" type="button"
+              [disabled]="form.get('name')?.invalid || form.get('purchase_price')?.invalid"
+              (click)="onGoToPartners()"
+              matTooltip="حفظ والانتقال لصفحة الشركاء لضبط النسب">
+              <mat-icon>settings</mat-icon>
+              حفظ وضبط نسب الشركاء
+            </button>
           </div>
-          <button mat-stroked-button color="primary" type="button" 
-                  [disabled]="form.get('name')?.invalid || form.get('purchase_price')?.invalid"
-                  (click)="onGoToPartners()"
-                  matTooltip="حفظ والانتقال لصفحة الشركاء لضبط النسب">
-            <mat-icon>settings</mat-icon>
-            حفظ وضبط نسب الشركاء
-          </button>
-        </div>
+        }
       </div>
     </div>
   </form>

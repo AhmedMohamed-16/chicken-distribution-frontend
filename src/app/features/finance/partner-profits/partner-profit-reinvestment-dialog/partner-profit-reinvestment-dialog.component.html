@@ -48,87 +48,95 @@
           type="number"
           formControlName="amount"
           min="0.01"
-        />
+          />
 
-        <mat-hint>
-          الحد الأقصى:
-          {{ formatCurrency(data.partner.current_balance) }}
-        </mat-hint>
+          <mat-hint>
+            الحد الأقصى:
+            {{ formatCurrency(data.partner.current_balance) }}
+          </mat-hint>
 
-        <mat-error *ngIf="reinvestForm.get('amount')?.hasError('required')">
-          المبلغ مطلوب
-        </mat-error>
+          @if (reinvestForm.get('amount')?.hasError('required')) {
+            <mat-error>
+              المبلغ مطلوب
+            </mat-error>
+          }
 
-        <mat-error *ngIf="reinvestForm.get('amount')?.hasError('max')">
-          المبلغ يتجاوز الحد الأقصى
-        </mat-error>
+          @if (reinvestForm.get('amount')?.hasError('max')) {
+            <mat-error>
+              المبلغ يتجاوز الحد الأقصى
+            </mat-error>
+          }
 
-        <mat-error *ngIf="reinvestForm.get('amount')?.hasError('min')">
-          المبلغ يجب أن يكون أكبر من صفر
-        </mat-error>
-      </mat-form-field>
+          @if (reinvestForm.get('amount')?.hasError('min')) {
+            <mat-error>
+              المبلغ يجب أن يكون أكبر من صفر
+            </mat-error>
+          }
+        </mat-form-field>
 
-      <!-- Date -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>تاريخ إعادة الاستثمار</mat-label>
+        <!-- Date -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>تاريخ إعادة الاستثمار</mat-label>
 
-        <input
-          matInput
-          [matDatepicker]="picker"
-          formControlName="reinvest_date"
-        />
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="reinvest_date"
+            />
 
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="picker">
-        </mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker">
+            </mat-datepicker-toggle>
 
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Notes -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ملاحظات (اختياري)</mat-label>
+
+          <textarea
+            matInput
+            formControlName="notes"
+            rows="4"
+            maxlength="500">
+          </textarea>
+
+          <mat-hint>
+            ملاحظات إضافية حول عملية إعادة الاستثمار
+          </mat-hint>
+        </mat-form-field>
+      </form>
+
+      <div class="dialog-actions">
+        <button
+          mat-button
+          type="button"
+          class="secondary-btn"
+          (click)="cancel()"
+          matTooltip="إلغاء العملية">
+          إلغاء
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          class="primary-btn"
+          (click)="submit()"
+          [disabled]="reinvestForm.invalid || submitting()">
+
+          @if (submitting()) {
+            <mat-icon>
+              hourglass_empty
+            </mat-icon>
+          }
+
+          <span>
+            تأكيد إعادة الاستثمار
+          </span>
+        </button>
+      </div>
     </div>
-
-    <!-- Notes -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>ملاحظات (اختياري)</mat-label>
-
-      <textarea
-        matInput
-        formControlName="notes"
-        rows="4"
-        maxlength="500">
-      </textarea>
-
-      <mat-hint>
-        ملاحظات إضافية حول عملية إعادة الاستثمار
-      </mat-hint>
-    </mat-form-field>
-  </form>
-
-  <div class="dialog-actions">
-    <button
-      mat-button
-      type="button"
-      class="secondary-btn"
-      (click)="cancel()"
-      matTooltip="إلغاء العملية">
-      إلغاء
-    </button>
-
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      class="primary-btn"
-      (click)="submit()"
-      [disabled]="reinvestForm.invalid || submitting()">
-
-      <mat-icon *ngIf="submitting()">
-        hourglass_empty
-      </mat-icon>
-
-      <span>
-        تأكيد إعادة الاستثمار
-      </span>
-    </button>
-  </div>
-</div>

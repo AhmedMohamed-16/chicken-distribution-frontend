@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -26,11 +26,19 @@ import { firstValueFrom } from 'rxjs';
   selector: 'app-salaries',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatTableModule, MatCardModule,
-    MatButtonModule, MatIconModule, MatSelectModule, MatInputModule,
-    MatFormFieldModule, MatDialogModule, MatSnackBarModule, MatProgressSpinnerModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
     MatTooltipModule
-  ],
+],
   templateUrl: './salaries.component.html',
   styleUrl: './salaries.component.css'
 })

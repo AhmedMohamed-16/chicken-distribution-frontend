@@ -1,7 +1,7 @@
 
 // src/app/features/users/user-details/user-details.component.ts
 import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { Permission, User } from '../../../core/models'; 
 import { UserService } from '../../../core/services/user.service';
@@ -13,7 +13,7 @@ import { ReportUtilitiesService } from '../../../core/services/ReportUtilitiesSe
    templateUrl: './user-details.html',
   styleUrl: './user-details.css',
 
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
 
 })

@@ -49,7 +49,7 @@
 // }
 // form-dialog.component.ts
 import { Component, Inject, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -65,14 +65,13 @@ import { CostCategory } from '../../../../core/models';
 @Component({
   selector: 'app-form-dialog',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCheckboxModule,
-  ],
+    MatCheckboxModule
+],
   templateUrl: './form-dialog.html',
   styleUrl: './form-dialog.css',
 })

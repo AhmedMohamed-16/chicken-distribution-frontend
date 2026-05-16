@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -38,7 +38,6 @@ interface FiltersState {
   selector: 'app-custody-list',
   standalone: true,
   imports: [
-    CommonModule,
     MatTabsModule,
     MatTableModule,
     MatCardModule,
@@ -54,7 +53,7 @@ interface FiltersState {
     MatInputModule,
     ReactiveFormsModule,
     CustodyStatusBadgeComponent
-  ],
+],
   templateUrl: './custody-list.component.html',
   styleUrl: './custody-list.component.css'
 })

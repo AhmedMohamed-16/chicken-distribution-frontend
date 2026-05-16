@@ -1,7 +1,7 @@
 <div class="partner-profits-container">
 
   <!-- ======================================================
-       HEADER
+  HEADER
   ======================================================= -->
   <section class="page-header">
 
@@ -31,7 +31,7 @@
   </section>
 
   <!-- ======================================================
-       SUMMARY
+  SUMMARY
   ======================================================= -->
   <mat-card class="summary-card">
     <mat-card-content>
@@ -90,164 +90,139 @@
   </mat-card>
 
   <!-- ======================================================
-       TABLE CARD
+  TABLE CARD
   ======================================================= -->
   <section class="table-card mat-elevation-z2">
 
     <!-- Loading Overlay -->
-    <div class="loading-shade" *ngIf="isLoading()">
-      <mat-spinner diameter="42"></mat-spinner>
-    </div>
+    @if (isLoading()) {
+      <div class="loading-shade">
+        <mat-spinner diameter="42"></mat-spinner>
+      </div>
+    }
 
     <!-- ======================================================
-         TABLE
+    TABLE
     ======================================================= -->
     <div
       class="table-scroll-x"
       aria-label="جدول أرصدة الشركاء">
 
-      <table
-        mat-table
-        [dataSource]="partnerBalances()"
-        class="partner-table"
-        *ngIf="!isLoading() && partnerBalances().length">
-
-        <!-- Partner -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>
-            الشريك
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-            <div class="partner-cell">
-              <span class="partner-name">
-                {{ row.partner?.name || '-' }}
+      @if (!isLoading() && partnerBalances().length) {
+        <table
+          mat-table
+          [dataSource]="partnerBalances()"
+          class="partner-table"
+          >
+          <!-- Partner -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>
+              الشريك
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <div class="partner-cell">
+                <span class="partner-name">
+                  {{ row.partner?.name || '-' }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+          <!-- Percentage -->
+          <ng-container matColumnDef="percent">
+            <th mat-header-cell *matHeaderCellDef>
+              نسبة الاستثمار
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <span class="percentage-badge">
+                {{ row.partner?.investment_percentage | number:'1.0-2' }}%
               </span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Percentage -->
-        <ng-container matColumnDef="percent">
-          <th mat-header-cell *matHeaderCellDef>
-            نسبة الاستثمار
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-            <span class="percentage-badge">
-              {{ row.partner?.investment_percentage | number:'1.0-2' }}%
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Accumulated Profit -->
-        <ng-container matColumnDef="accumulated_profit">
-          <th mat-header-cell *matHeaderCellDef>
-            الأرباح المتراكمة
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-            <span class="amount-text positive">
-              {{ formatCurrency(row.accumulated_profit) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Withdrawn -->
-        <ng-container matColumnDef="withdrawn">
-          <th mat-header-cell *matHeaderCellDef>
-            المسحوبة
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-            <span class="amount-text warning">
-              {{ formatCurrency(row.total_withdrawn) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Reinvested -->
-        <ng-container matColumnDef="reinvested">
-          <th mat-header-cell *matHeaderCellDef>
-            معاد استثماره
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-            <span class="amount-text info">
-              {{ formatCurrency(row.total_reinvested) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Current Balance -->
-        <ng-container matColumnDef="current_balance">
-          <th mat-header-cell *matHeaderCellDef>
-            الصافي
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-
-            <span
-              class="net-balance"
-              [style.color]="getNetBalanceColor(row.current_balance)">
-
-              {{ formatCurrency(row.current_balance) }}
-            </span>
-
-          </td>
-        </ng-container>
-
-        <!-- Actions -->
-        <ng-container matColumnDef="actions">
-
-          <th mat-header-cell *matHeaderCellDef>
-            الإجراءات
-          </th>
-
-          <td mat-cell *matCellDef="let row">
-
-            <div class="actions-group">
-
-              <button
-                mat-icon-button
-                type="button"
-                class="action-btn reinvest-btn"
-                matTooltip="إعادة استثمار"
-                (click)="openReinvestmentDialog(row)">
-
-                <mat-icon>trending_up</mat-icon>
-              </button>
-
-              <button
-                mat-icon-button
-                type="button"
-                color="accent"
-                class="action-btn"
-                matTooltip="سحب"
-                (click)="openWithdrawalDialog(row)">
-
-                <mat-icon>account_balance_wallet</mat-icon>
-              </button>
-
-              <button
-                mat-icon-button
-                type="button"
-                color="primary"
-                class="action-btn"
-                matTooltip="سجل المعاملات"
-                (click)="openTransactionsHistory(row)">
-
-                <mat-icon>history</mat-icon>
-              </button>
-
-            </div>
-
-          </td>
-        </ng-container>
-
-        <!-- Header -->
-        <tr
-          mat-header-row
+            </td>
+          </ng-container>
+          <!-- Accumulated Profit -->
+          <ng-container matColumnDef="accumulated_profit">
+            <th mat-header-cell *matHeaderCellDef>
+              الأرباح المتراكمة
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <span class="amount-text positive">
+                {{ formatCurrency(row.accumulated_profit) }}
+              </span>
+            </td>
+          </ng-container>
+          <!-- Withdrawn -->
+          <ng-container matColumnDef="withdrawn">
+            <th mat-header-cell *matHeaderCellDef>
+              المسحوبة
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <span class="amount-text warning">
+                {{ formatCurrency(row.total_withdrawn) }}
+              </span>
+            </td>
+          </ng-container>
+          <!-- Reinvested -->
+          <ng-container matColumnDef="reinvested">
+            <th mat-header-cell *matHeaderCellDef>
+              معاد استثماره
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <span class="amount-text info">
+                {{ formatCurrency(row.total_reinvested) }}
+              </span>
+            </td>
+          </ng-container>
+          <!-- Current Balance -->
+          <ng-container matColumnDef="current_balance">
+            <th mat-header-cell *matHeaderCellDef>
+              الصافي
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <span
+                class="net-balance"
+                [style.color]="getNetBalanceColor(row.current_balance)">
+                {{ formatCurrency(row.current_balance) }}
+              </span>
+            </td>
+          </ng-container>
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>
+              الإجراءات
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <div class="actions-group">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="action-btn reinvest-btn"
+                  matTooltip="إعادة استثمار"
+                  (click)="openReinvestmentDialog(row)">
+                  <mat-icon>trending_up</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  color="accent"
+                  class="action-btn"
+                  matTooltip="سحب"
+                  (click)="openWithdrawalDialog(row)">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  color="primary"
+                  class="action-btn"
+                  matTooltip="سجل المعاملات"
+                  (click)="openTransactionsHistory(row)">
+                  <mat-icon>history</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <!-- Header -->
+          <tr
+            mat-header-row
           *matHeaderRowDef="[
             'name',
             'percent',
@@ -257,11 +232,10 @@
             'current_balance',
             'actions'
           ]; sticky: true">
-        </tr>
-
-        <!-- Row -->
-        <tr
-          mat-row
+          </tr>
+          <!-- Row -->
+          <tr
+            mat-row
           *matRowDef="let row; columns: [
             'name',
             'percent',
@@ -271,67 +245,66 @@
             'current_balance',
             'actions'
           ]">
-        </tr>
-
-      </table>
+          </tr>
+        </table>
+      }
     </div>
 
     <!-- ======================================================
-         EMPTY STATE
+    EMPTY STATE
     ======================================================= -->
-    <div
-      class="empty-state"
-      *ngIf="!isLoading() && !partnerBalances().length">
-
-      <mat-icon>
-        info
-      </mat-icon>
-
-      <h3>
-        لا توجد بيانات متاحة
-      </h3>
-
-      <p>
-        لم يتم العثور على بيانات أرباح أو معاملات للشركاء حالياً
-      </p>
-    </div>
-
-    <!-- ======================================================
-         LOAD MORE
-    ======================================================= -->
-    <div
-      class="load-more-container"
-      *ngIf="hasMore() && !isLoading()">
-
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        class="load-more-btn"
-        (click)="loadMore()">
-
-        <mat-icon *ngIf="!loadingMore()">
-          expand_more
+    @if (!isLoading() && !partnerBalances().length) {
+      <div
+        class="empty-state"
+        >
+        <mat-icon>
+          info
         </mat-icon>
+        <h3>
+          لا توجد بيانات متاحة
+        </h3>
+        <p>
+          لم يتم العثور على بيانات أرباح أو معاملات للشركاء حالياً
+        </p>
+      </div>
+    }
 
-        <mat-spinner
-          *ngIf="loadingMore()"
-          diameter="20">
-        </mat-spinner>
+    <!-- ======================================================
+    LOAD MORE
+    ======================================================= -->
+    @if (hasMore() && !isLoading()) {
+      <div
+        class="load-more-container"
+        >
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="load-more-btn"
+          (click)="loadMore()">
+          @if (!loadingMore()) {
+            <mat-icon>
+              expand_more
+            </mat-icon>
+          }
+          @if (loadingMore()) {
+            <mat-spinner
+              diameter="20">
+            </mat-spinner>
+          }
+          <span>
+            عرض المزيد
+          </span>
+        </button>
+      </div>
+    }
 
-        <span>
-          عرض المزيد
-        </span>
-
-      </button>
-    </div>
-
-    <div
-      *ngIf="loadingMore()"
-      class="loading-more-wrap">
-
-      <mat-spinner diameter="30"></mat-spinner>
-    </div>
+    @if (loadingMore()) {
+      <div
+        class="loading-more-wrap">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
+    }
 
   </section>
 </div>

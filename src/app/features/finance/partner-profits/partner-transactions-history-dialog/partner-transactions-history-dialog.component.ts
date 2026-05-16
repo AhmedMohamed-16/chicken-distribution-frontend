@@ -36,9 +36,9 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
         </div>
       }
     </div>
-
+    
     <mat-divider></mat-divider>
-
+    
     @if (isLoading()) {
       <div class="spinner-wrap">
         <mat-spinner diameter="44"></mat-spinner>
@@ -52,36 +52,40 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
     } @else {
       <div class="table-container">
         <table mat-table [dataSource]="transactions()" class="transactions-table">
-
+    
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>التاريخ</th>
             <td mat-cell *matCellDef="let item">{{ formatDate(item.date) }}</td>
           </ng-container>
-
-        <ng-container matColumnDef="type">
-  <th mat-header-cell *matHeaderCellDef>النوع</th>
-  <td mat-cell *matCellDef="let item">
-    <!-- Changed from mat-chip-list to mat-chip-set -->
-    <mat-chip-set>
-      <mat-chip>
-        {{ item.type === 'REINVESTMENT' ? 'استثمار' : 'سحب' }}
-      </mat-chip>
-    </mat-chip-set>
-  </td>
-</ng-container>
-
+    
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>النوع</th>
+            <td mat-cell *matCellDef="let item">
+              <!-- Changed from mat-chip-list to mat-chip-set -->
+              <mat-chip-set>
+                <mat-chip>
+                  {{ item.type === 'REINVESTMENT' ? 'استثمار' : 'سحب' }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+    
           <ng-container matColumnDef="amount">
             <th mat-header-cell *matHeaderCellDef>المبلغ</th>
             <td mat-cell *matCellDef="let item">
               <span [style.color]="item.amount >= 0 ? '#2e7d32' : '#d32f2f'"
-                    [style.font-weight]="'700'">
+                [style.font-weight]="'700'">
                 {{ formatCurrency(Math.abs(item.amount)) }}
-                <small *ngIf="item.amount >= 0">(+)</small>
-                <small *ngIf="item.amount < 0">(-)</small>
+                @if (item.amount >= 0) {
+                  <small>(+)</small>
+                }
+                @if (item.amount < 0) {
+                  <small>(-)</small>
+                }
               </span>
             </td>
           </ng-container>
-
+    
           <ng-container matColumnDef="notes">
             <th mat-header-cell *matHeaderCellDef>ملاحظات</th>
             <td mat-cell *matCellDef="let item">
@@ -90,28 +94,32 @@ import { ReportUtilitiesService } from '../../../../core/services/ReportUtilitie
               </span>
             </td>
           </ng-container>
-
+    
           <tr mat-header-row *matHeaderRowDef="columns" class="sticky-header"></tr>
           <tr mat-row *matRowDef="let row; columns: columns;" class="data-row"></tr>
         </table>
       </div>
-
+    
       @if (hasMore()) {
         <div class="load-more-container">
           <button mat-stroked-button (click)="loadMore()" [disabled]="loadingMore()">
-            <mat-icon *ngIf="!loadingMore()">expand_more</mat-icon>
-            <mat-spinner *ngIf="loadingMore()" diameter="18"></mat-spinner>
+            @if (!loadingMore()) {
+              <mat-icon>expand_more</mat-icon>
+            }
+            @if (loadingMore()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            }
             عرض المزيد
           </button>
         </div>
       }
     }
-
+    
     <mat-divider></mat-divider>
     <div class="dialog-actions">
       <button mat-button mat-dialog-close color="primary">إغلاق</button>
     </div>
-  `,
+    `,
   styles: [`
     .dialog-header {
       padding: 24px 20px 16px;

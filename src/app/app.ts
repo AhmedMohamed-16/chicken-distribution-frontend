@@ -17,11 +17,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { HasPermissionDirective } from './core/directives/hasPermission.directive';
 import { PERMISSIONS } from './core/constants/Permissions.constant';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatTableModule, MatSidenavModule, MatMenuModule, MatToolbarModule, MatListModule, MatExpansionModule, MatDividerModule, MatIconModule, RouterLink, RouterLinkActive, HasPermissionDirective, CommonModule],
+  imports: [RouterOutlet, MatTableModule, MatSidenavModule, MatMenuModule, MatToolbarModule, MatListModule, MatExpansionModule, MatDividerModule, MatIconModule, RouterLink, RouterLinkActive, HasPermissionDirective],
      providers: [provideNativeDateAdapter(),
     { provide: MAT_DATE_LOCALE, useValue: 'ar-EG' },
     { provide: LOCALE_ID, useValue: 'ar-EG' }

@@ -406,7 +406,7 @@
 // src/app/features/daily-operations/farm-loading/farm-loading.component.ts
 // src/app/features/daily-operations/farm-loading/farm-loading.component.ts
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -440,7 +440,6 @@ import { PaymentSourceSelection } from '../../../../models/custody.models';
 @Component({
   selector: 'app-farm-loading',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -454,7 +453,7 @@ import { PaymentSourceSelection } from '../../../../models/custody.models';
     MatSlideToggleModule,
     PersonSelectorComponent,
     PaymentSourceSelectorComponent
-  ],
+],
   templateUrl: './farm-loading.html',
   styleUrl: './farm-loading.css',
   changeDetection: ChangeDetectionStrategy.OnPush

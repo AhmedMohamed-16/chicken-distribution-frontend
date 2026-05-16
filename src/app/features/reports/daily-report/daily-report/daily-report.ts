@@ -967,7 +967,7 @@
 // }
 // }
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -998,7 +998,6 @@ import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction
 @Component({
   selector: 'app-daily-report',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -1016,8 +1015,8 @@ import { BalanceDirectionPipe } from '../../../../shared/pipes/balance-direction
     MatExpansionModule,
     MatTooltipModule,
     MatDividerModule,
-    BalanceDirectionPipe  // Added - shared pipe for balance type display
-  ],
+    BalanceDirectionPipe
+],
   templateUrl: './daily-report.html',
   styleUrls: ['./daily-report.css'],
 })

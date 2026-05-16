@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -13,7 +13,6 @@ import { SafeDashboard } from '../../../../core/models';
   selector: 'app-safe-transfer-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -21,7 +20,7 @@ import { SafeDashboard } from '../../../../core/models';
     MatButtonModule,
     MatSelectModule,
     MatDatepickerModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>تحويل بين الخزن</h2>
     <mat-dialog-content>
@@ -34,7 +33,7 @@ import { SafeDashboard } from '../../../../core/models';
             }
           </mat-select>
         </mat-form-field>
-
+    
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>إلى خزنة</mat-label>
           <mat-select formControlName="to_safe_id">
@@ -42,17 +41,23 @@ import { SafeDashboard } from '../../../../core/models';
               <mat-option [value]="safe.id">{{ safe.name }}</mat-option>
             }
           </mat-select>
-          <mat-error *ngIf="form.get('to_safe_id')?.hasError('sameSafe')">لا يمكن التحويل لنفس الخزنة</mat-error>
+          @if (form.get('to_safe_id')?.hasError('sameSafe')) {
+            <mat-error>لا يمكن التحويل لنفس الخزنة</mat-error>
+          }
         </mat-form-field>
-
+    
         <div class="row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>المبلغ</mat-label>
             <input matInput type="number" formControlName="amount" placeholder="0.00">
-            <mat-error *ngIf="form.get('amount')?.hasError('required')">المبلغ مطلوب</mat-error>
-            <mat-error *ngIf="form.get('amount')?.hasError('min')">المبلغ يجب أن يكون أكبر من 0</mat-error>
+            @if (form.get('amount')?.hasError('required')) {
+              <mat-error>المبلغ مطلوب</mat-error>
+            }
+            @if (form.get('amount')?.hasError('min')) {
+              <mat-error>المبلغ يجب أن يكون أكبر من 0</mat-error>
+            }
           </mat-form-field>
-
+    
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>التاريخ</mat-label>
             <input matInput [matDatepicker]="picker" formControlName="date">
@@ -60,7 +65,7 @@ import { SafeDashboard } from '../../../../core/models';
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
         </div>
-
+    
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ملاحظات</mat-label>
           <textarea matInput formControlName="notes" placeholder="ملاحظات حول التحويل"></textarea>
@@ -73,7 +78,7 @@ import { SafeDashboard } from '../../../../core/models';
         تأكيد التحويل
       </button>
     </mat-dialog-actions>
-  `,
+    `,
   styles: [`
     .transfer-form { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; }
     .full-width { width: 100%; }

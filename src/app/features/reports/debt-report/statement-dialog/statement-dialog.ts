@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,12 +27,11 @@ import { AccountStatementComponent } from '../../../../shared/components/account
   selector: 'app-statement-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
     AccountStatementComponent
-  ],
+],
   template: `
     <div class="dialog-header d-flex justify-content-between align-items-center p-3">
       <h2 mat-dialog-title class="m-0">كشف حساب تفصيلي</h2>

@@ -5,10 +5,12 @@
       <p class="subtitle">تتبع سلف الموظفين والشركاء والمدفوعات والمبالغ المتبقية</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button color="primary" (click)="openCreateDialog()" *ngIf="canManage()">
-        <mat-icon>add_circle</mat-icon>
-        منح سلفة جديدة
-      </button>
+      @if (canManage()) {
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add_circle</mat-icon>
+          منح سلفة جديدة
+        </button>
+      }
     </div>
   </div>
 
@@ -36,9 +38,11 @@
       </ng-template>
       <ng-template matTabContent>
         <div class="table-card mat-elevation-z3">
-          <div class="loading-shade" *ngIf="isLoading()">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
+          @if (isLoading()) {
+            <div class="loading-shade">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
 
           <div class="table-responsive">
             <table mat-table [dataSource]="pendingPageItems()" class="advances-table">
@@ -85,10 +89,12 @@
                     <button mat-icon-button color="primary" matTooltip="عرض التفاصيل" (click)="openDetailsDialog(adv)">
                       <mat-icon>visibility</mat-icon>
                     </button>
-                    <button mat-icon-button color="accent" matTooltip="تسجيل إرجاع"
-                      *ngIf="canManage() && adv.status !== 'RETURNED'" (click)="openReturnDialog(adv)">
-                      <mat-icon>reply</mat-icon>
-                    </button>
+                    @if (canManage() && adv.status !== 'RETURNED') {
+                      <button mat-icon-button color="accent" matTooltip="تسجيل إرجاع"
+                        (click)="openReturnDialog(adv)">
+                        <mat-icon>reply</mat-icon>
+                      </button>
+                    }
                   </div>
                 </td>
               </ng-container>
@@ -98,23 +104,27 @@
             </table>
           </div>
 
-          <div class="pagination-controls" *ngIf="pendingTotalPages() > 1">
-            <button mat-button color="primary" (click)="previousPendingPage()" [disabled]="pendingPage() === 1">
-              <mat-icon>chevron_left</mat-icon>
-              السابق
-            </button>
-            <span>صفحة {{ pendingPage() }} من {{ pendingTotalPages() }}</span>
-            <button mat-button color="primary" (click)="nextPendingPage()"
-              [disabled]="pendingPage() === pendingTotalPages()">
-              التالي
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
+          @if (pendingTotalPages() > 1) {
+            <div class="pagination-controls">
+              <button mat-button color="primary" (click)="previousPendingPage()" [disabled]="pendingPage() === 1">
+                <mat-icon>chevron_left</mat-icon>
+                السابق
+              </button>
+              <span>صفحة {{ pendingPage() }} من {{ pendingTotalPages() }}</span>
+              <button mat-button color="primary" (click)="nextPendingPage()"
+                [disabled]="pendingPage() === pendingTotalPages()">
+                التالي
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          }
 
-          <div class="empty-state" *ngIf="!isLoading() && pendingAdvances().length === 0">
-            <mat-icon>check_circle</mat-icon>
-            <p>لا توجد سلف نشطة حالياً. كل السلف تم إرجاعها!</p>
-          </div>
+          @if (!isLoading() && pendingAdvances().length === 0) {
+            <div class="empty-state">
+              <mat-icon>check_circle</mat-icon>
+              <p>لا توجد سلف نشطة حالياً. كل السلف تم إرجاعها!</p>
+            </div>
+          }
         </div>
       </ng-template>
     </mat-tab>
@@ -127,9 +137,11 @@
       </ng-template>
       <ng-template matTabContent>
         <div class="table-card mat-elevation-z3">
-          <div class="loading-shade" *ngIf="isLoading()">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
+          @if (isLoading()) {
+            <div class="loading-shade">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
 
           <div class="table-responsive">
             <table mat-table [dataSource]="historyPageItems()" class="advances-table">
@@ -178,27 +190,31 @@
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns"
-                [class.returned-row]="row.status === 'RETURNED'"></tr>
+              [class.returned-row]="row.status === 'RETURNED'"></tr>
             </table>
           </div>
 
-          <div class="pagination-controls" *ngIf="historyTotalPages() > 1">
-            <button mat-button color="primary" (click)="previousHistoryPage()" [disabled]="historyPage() === 1">
-              <mat-icon>chevron_left</mat-icon>
-              السابق
-            </button>
-            <span>صفحة {{ historyPage() }} من {{ historyTotalPages() }}</span>
-            <button mat-button color="primary" (click)="nextHistoryPage()"
-              [disabled]="historyPage() === historyTotalPages()">
-              التالي
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
+          @if (historyTotalPages() > 1) {
+            <div class="pagination-controls">
+              <button mat-button color="primary" (click)="previousHistoryPage()" [disabled]="historyPage() === 1">
+                <mat-icon>chevron_left</mat-icon>
+                السابق
+              </button>
+              <span>صفحة {{ historyPage() }} من {{ historyTotalPages() }}</span>
+              <button mat-button color="primary" (click)="nextHistoryPage()"
+                [disabled]="historyPage() === historyTotalPages()">
+                التالي
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          }
 
-          <div class="empty-state" *ngIf="!isLoading() && advances().length === 0">
-            <mat-icon>history_toggle_off</mat-icon>
-            <p>سجل السلف فارغ</p>
-          </div>
+          @if (!isLoading() && advances().length === 0) {
+            <div class="empty-state">
+              <mat-icon>history_toggle_off</mat-icon>
+              <p>سجل السلف فارغ</p>
+            </div>
+          }
         </div>
       </ng-template>
     </mat-tab>

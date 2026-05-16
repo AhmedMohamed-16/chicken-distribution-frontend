@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute } from '@angular/router';
 import { AccountStatementComponent } from '../../../shared/components/account-statement/account-statement.component';
 
 @Component({
   selector: 'app-statement-page',
   standalone: true,
-  imports: [CommonModule, AccountStatementComponent],
+  imports: [AccountStatementComponent],
   template: `
     <div class="statement-page">
   <div class="statement-page__container">

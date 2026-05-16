@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { BackupList } from './backup-list/backup-list';
 import { BackupCreate } from './backup-create/backup-create';
@@ -13,12 +13,7 @@ import { ReportUtilitiesService } from '../../core/services/ReportUtilitiesServi
 
 @Component({
   selector: 'app-backup',
-  imports: [    CommonModule,
-    BackupList,
-    BackupCreate,
-    BackupRestore,
-    MonthlyBackupPrompt
-],
+  imports: [BackupList, BackupCreate, BackupRestore, MonthlyBackupPrompt],
   templateUrl: './backup.html',
   styleUrl: './backup.css',
 })

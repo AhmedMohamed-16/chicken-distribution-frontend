@@ -1,5 +1,5 @@
 import { Component, inject, signal, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BackupService } from '../../../core/services/backup.service';
 import { CreateBackupResponse } from '../../../core/models';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner/loading-spinner';
@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
  */
 @Component({
   selector: 'app-backup-create',
-  imports: [CommonModule, LoadingSpinner, ErrorMessage],
+  imports: [LoadingSpinner, ErrorMessage],
   templateUrl: './backup-create.html',
   styleUrl: './backup-create.css'
 })

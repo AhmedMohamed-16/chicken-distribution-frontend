@@ -501,7 +501,7 @@
 // Updated Period Report Component
 // ========================================
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -535,7 +535,6 @@ import { CostBreakdown } from './components/cost-breakdown/cost-breakdown';
   selector: 'app-period-report',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -557,7 +556,7 @@ import { CostBreakdown } from './components/cost-breakdown/cost-breakdown';
     DebtPosition,
     AlertsPanel,
     PeriodComparison
-  ],
+],
   templateUrl: './period-report.html',
   styleUrl: './period-report.css',
   changeDetection: ChangeDetectionStrategy.OnPush
