@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://chicken-distribution.onrender.com/api'
+  apiUrl: 'https://chicken-distribution-backend.onrender.com/'
 };
