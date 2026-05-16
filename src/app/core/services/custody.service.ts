@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 import {
   CreateCustodyRequest,

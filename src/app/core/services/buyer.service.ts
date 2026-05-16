@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { environment } from "../../../environments/environment";
+import { environment } from "../../../environments/environment.prod";
 import { Observable } from "rxjs";
 import { Buyer, PaginatedResponse, PaginationParams } from "../models";
 
@@ -56,7 +56,7 @@ export class BuyerService {
     if (params?.startDate) httpParams = httpParams.set('startDate', params.startDate);
     if (params?.endDate) httpParams = httpParams.set('endDate', params.endDate);
     if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
-    
+
     return this.http.get(`${this.apiUrl}/${id}/debt-history`, { params: httpParams });
   }
 }

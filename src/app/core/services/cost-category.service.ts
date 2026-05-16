@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { environment } from "../../../environments/environment";
+import { environment } from "../../../environments/environment.prod";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { CostCategory, PaginatedResponse, PaginationParams, CostLedgerEntry, CostSummary } from "../models";
@@ -96,7 +96,7 @@ export class CostCategoryService {
   // ==========================================
   // COST BALANCES & LEDGER ENDPOINTS
   // ==========================================
-  
+
   getCategoryBalances(): Observable<{success: boolean; data: {all: CostCategory[], payables: CostCategory[], receivables: CostCategory[]}}> {
     return this.http.get<{success: boolean; data: {all: CostCategory[], payables: CostCategory[], receivables: CostCategory[]}}>(`${environment.apiUrl}/cost-balances`);
   }

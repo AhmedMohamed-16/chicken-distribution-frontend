@@ -15,7 +15,7 @@ import {
   FarmLoadingResponse,
   VehicleOperation
 } from '../models';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
@@ -194,7 +194,7 @@ export class OperationService {
   getVehicleOperationStatusColor(status: 'ACTIVE' | 'COMPLETED'): string {
     return status === 'ACTIVE' ? 'text-blue-600' : 'text-green-600';
   }
-  
+
   getUnpaidCostsForOperation(operationId: number): Observable<ApiResponse<DailyCost[]>> {
   return this.http.get<ApiResponse<DailyCost[]>>(
     `${this.apiUrl}/${operationId}/unpaid-costs`

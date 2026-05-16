@@ -945,7 +945,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse, Buyer, Farm, PaginatedResponse, PaginationParams } from '../models';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
@@ -1299,10 +1299,10 @@ exports.recordFarmLoading = async (req, res) => {
         payment_method,
         safe_id
       }, { transaction: dbTransaction });
-      
 
 
-       await logTransaction({ 
+
+       await logTransaction({
         transaction_type,
         direction,
         amount: old_balance_paid,
@@ -1454,13 +1454,13 @@ exports.recordFarmLoading = async (req, res) => {
       //   payment_direction   = 'FROM_FARM';
       //   payment_description = `الدفع أثناء تحميل المعاملة رقم ${sequence_number}`;
 
-        
+
       // } else {
         // We owe farm → we pay them during this loading
         payment_direction   = 'TO_FARM';
         payment_description = `الدفع للمزرعة أثناء تحميل المعاملة رقم ${sequence_number}`;
 
-      // } 
+      // }
       debtPayment = await FarmDebtPayment.create({
         farm_id,
         daily_operation_id: id,
@@ -1521,7 +1521,7 @@ exports.recordFarmLoading = async (req, res) => {
 
     console.log("\ntrans\n", farmTransaction);
 
-    if (paid_amount > 0) {  
+    if (paid_amount > 0) {
       // ── LOG FINANCIAL TRANSACTION ──────────────────────────────────────────
       await logTransaction({
         transaction_type: 'PURCHASE',
@@ -1534,7 +1534,7 @@ exports.recordFarmLoading = async (req, res) => {
         performed_by_user_id: req.user ? req.user.id : null,
         paid_by_person_type: person_type,
         paid_by_person_id: paid_by_person_id,
-        payment_method, 
+        payment_method,
       }, dbTransaction);
 
       // ── UPDATE SAFE BALANCE ────────────────────────────────────────────────
@@ -1558,15 +1558,15 @@ exports.recordFarmLoading = async (req, res) => {
     //   Δ = debt_payment_impact - used_credit - final_remaining_amount + surplus
     //
     // BUG 7 FIX: + surplus was missing entirely in original code.
-  
-    
+
+
     let total_balance_change =
-    //  debt_payment_impact 
+    //  debt_payment_impact
       - used_credit
       - final_remaining_amount
       + surplus;
-      
-   
+
+
     console.log('\n── recordFarmLoading balance breakdown ──');
     console.log('previous_balance:     ', previous_balance);
     console.log('paid_amount:          ', paid_amount);
@@ -1715,7 +1715,7 @@ const Farm = sequelize.define('Farm', {
       fields: ['current_balance']
     }
   ],
-  
+
   // ✅ COMPUTED GETTERS
   getterMethods: {
     /**
@@ -1728,7 +1728,7 @@ const Farm = sequelize.define('Farm', {
       if (balance < 0) return 'PAYABLE';
       return 'SETTLED';
     },
-    
+
     /**
      * Check if farm owes us money
      * @returns {boolean}
@@ -1736,7 +1736,7 @@ const Farm = sequelize.define('Farm', {
     isDebtor() {
       return parseFloat(this.getDataValue('current_balance')) > 0;
     },
-    
+
     /**
      * Check if we owe farm money
      * @returns {boolean}
@@ -1744,7 +1744,7 @@ const Farm = sequelize.define('Farm', {
     isCreditor() {
       return parseFloat(this.getDataValue('current_balance')) < 0;
     },
-    
+
     /**
      * Get absolute value of balance (always positive)
      * @returns {number}
@@ -1752,7 +1752,7 @@ const Farm = sequelize.define('Farm', {
     absoluteBalance() {
       return Math.abs(parseFloat(this.getDataValue('current_balance')) || 0);
     },
-    
+
     /**
      * Get human-readable balance description
      * @returns {string}
@@ -1782,16 +1782,16 @@ const Farm = sequelize.define('Farm', {
 Farm.prototype.updateBalance = async function(balanceChange, transaction = null) {
   const previousBalance = parseFloat(this.current_balance) || 0;
   const newBalance = previousBalance + balanceChange;
-  
+
   await this.update({
-    current_balance: newBalance 
+    current_balance: newBalance
   }, { transaction });
-  
+
   // Detect direction change
   const previousType = previousBalance > 0 ? 'RECEIVABLE' : (previousBalance < 0 ? 'PAYABLE' : 'SETTLED');
   const newType = newBalance > 0 ? 'RECEIVABLE' : (newBalance < 0 ? 'PAYABLE' : 'SETTLED');
   const directionChanged = previousType !== newType && previousType !== 'SETTLED' && newType !== 'SETTLED';
-  
+
   return {
     farm_id: this.id,
     farm_name: this.name,
@@ -1802,7 +1802,7 @@ Farm.prototype.updateBalance = async function(balanceChange, transaction = null)
     previous_type: previousType,
     new_type: newType,
     absolute_balance: Math.abs(newBalance),
-    display_balance: newBalance > 0 
+    display_balance: newBalance > 0
       ? `${newBalance.toFixed(2)} (لينا عليهم)جنيه `
       : newBalance < 0
         ? `${Math.abs(newBalance).toFixed(2)} (ليهم علينا)جنيه `
@@ -1865,23 +1865,23 @@ Farm.getPayables = async function() {
 Farm.getNetPosition = async function() {
   const result = await this.findAll({
     attributes: [
-      [sequelize.fn('SUM', 
+      [sequelize.fn('SUM',
         sequelize.literal('CASE WHEN current_balance > 0 THEN current_balance ELSE 0 END')
       ), 'total_receivables'],
-      [sequelize.fn('SUM', 
+      [sequelize.fn('SUM',
         sequelize.literal('CASE WHEN current_balance < 0 THEN ABS(current_balance) ELSE 0 END')
       ), 'total_payables'],
       [sequelize.fn('SUM', sequelize.col('current_balance')), 'net_position'],
-      [sequelize.fn('COUNT', 
+      [sequelize.fn('COUNT',
         sequelize.literal('CASE WHEN current_balance > 0 THEN 1 END')
       ), 'receivables_count'],
-      [sequelize.fn('COUNT', 
+      [sequelize.fn('COUNT',
         sequelize.literal('CASE WHEN current_balance < 0 THEN 1 END')
       ), 'payables_count']
     ],
     raw: true
   });
-  
+
   const data = result[0];
   return {
     total_receivables: parseFloat(data.total_receivables) || 0,
@@ -1889,7 +1889,7 @@ Farm.getNetPosition = async function() {
     net_position: parseFloat(data.net_position) || 0,
     receivables_count: parseInt(data.receivables_count) || 0,
     payables_count: parseInt(data.payables_count) || 0,
-    position_type: data.net_position > 0 ? 'NET_RECEIVABLE' : 
+    position_type: data.net_position > 0 ? 'NET_RECEIVABLE' :
                    data.net_position < 0 ? 'NET_PAYABLE' : 'BALANCED'
   };
 };
@@ -1988,7 +1988,7 @@ underscored: true,
       fields: ['daily_operation_id']
     }
   ],
-  
+
   // ✅ COMPUTED GETTERS
   getterMethods: {
     /**
@@ -2001,7 +2001,7 @@ underscored: true,
       const amt = parseFloat(this.getDataValue('amount')) || 0;
       return this.getDataValue('payment_direction') === 'FROM_FARM' ? amt : -amt;
     },
-    
+
     /**
      * Get balance impact (how this payment affects farm's balance)
      * FROM_FARM: Negative impact (reduces their debt to us)
@@ -2012,7 +2012,7 @@ underscored: true,
       const amt = parseFloat(this.getDataValue('amount')) || 0;
       return this.getDataValue('payment_direction') === 'FROM_FARM' ? -amt : amt;
     },
-    
+
     /**
      * Get human-readable description
      * @returns {string}
@@ -2020,7 +2020,7 @@ underscored: true,
     displayDescription() {
       const amt = parseFloat(this.getDataValue('amount')) || 0;
       const dir = this.getDataValue('payment_direction');
-      
+
       if (dir === 'FROM_FARM') {
         return `Received ${amt.toFixed(2)} EGP from farm`;
       } else {
@@ -2042,19 +2042,19 @@ underscored: true,
 // FarmDebtPayment.prototype.processPayment = async function(transaction = null) {
 //   const Farm = require('./Farm');
 //   const farm = await Farm.findByPk(this.farm_id, { transaction });
-  
+
 //   if (!farm) {
 //     throw new Error(`Farm with ID ${this.farm_id} not found`);
 //   }
-  
+
 //   // Calculate balance change
 //   // FROM_FARM: Farm pays us → reduces their debt (negative change)
 //   // TO_FARM: We pay farm → increases their debt (positive change)
 //   const balanceChange = this.balanceImpact;
-  
+
 //   // Update farm balance
 //   const balanceInfo = await farm.updateBalance(balanceChange, transaction);
-  
+
 //   return {
 //     payment: this.toJSON(),
 //     balance_info: balanceInfo
@@ -2073,15 +2073,15 @@ underscored: true,
  */
 FarmDebtPayment.getPaymentHistory = async function(farmId, options = {}) {
   const { limit = 50, offset = 0, startDate = null, endDate = null } = options;
-  
+
   const where = { farm_id: farmId };
-  
+
   if (startDate || endDate) {
     where.payment_date = {};
     if (startDate) where.payment_date[sequelize.Sequelize.Op.gte] = startDate;
     if (endDate) where.payment_date[sequelize.Sequelize.Op.lte] = endDate;
   }
-  
+
   return await this.findAll({
     where,
     include: [
@@ -2111,36 +2111,36 @@ FarmDebtPayment.getPaymentHistory = async function(farmId, options = {}) {
  */
 FarmDebtPayment.getPaymentSummary = async function(farmId, dateRange = {}) {
   const { startDate = null, endDate = null } = dateRange;
-  
+
   const where = { farm_id: farmId };
-  
+
   if (startDate || endDate) {
     where.payment_date = {};
     if (startDate) where.payment_date[sequelize.Sequelize.Op.gte] = startDate;
     if (endDate) where.payment_date[sequelize.Sequelize.Op.lte] = endDate;
   }
-  
+
   const result = await this.findAll({
     where,
     attributes: [
-      [sequelize.fn('SUM', 
+      [sequelize.fn('SUM',
         sequelize.literal("CASE WHEN payment_direction = 'FROM_FARM' THEN amount ELSE 0 END")
       ), 'total_received'],
-      [sequelize.fn('SUM', 
+      [sequelize.fn('SUM',
         sequelize.literal("CASE WHEN payment_direction = 'TO_FARM' THEN amount ELSE 0 END")
       ), 'total_paid'],
-      [sequelize.fn('COUNT', 
+      [sequelize.fn('COUNT',
         sequelize.literal("CASE WHEN payment_direction = 'FROM_FARM' THEN 1 END")
       ), 'received_count'],
-      [sequelize.fn('COUNT', 
+      [sequelize.fn('COUNT',
         sequelize.literal("CASE WHEN payment_direction = 'TO_FARM' THEN 1 END")
       ), 'paid_count']
     ],
     raw: true
   });
-  
+
   const data = result[0];
-  
+
   return {
     total_received: parseFloat(data.total_received) || 0,
     total_paid: parseFloat(data.total_paid) || 0,
@@ -2245,7 +2245,7 @@ const FarmTransaction = sequelize.define('FarmTransaction', {
   references: {
     model: 'vehicle_operations',
     key: 'id'
-  }, 
+  },
 },  used_credit: {
     type: DataTypes.DECIMAL(12, 2),
     defaultValue: 0,
@@ -2308,20 +2308,20 @@ const FinancialTransaction = sequelize.define('FinancialTransaction', {
   },
   transaction_type: {
     type: DataTypes.ENUM(
-      'SALE', 
+      'SALE',
       'PAID_DEPT',
-      'PURCHASE', 
-      'RECEIVE_DEPT', 
-      'COST', 
-      'LOSS', 
+      'PURCHASE',
+      'RECEIVE_DEPT',
+      'COST',
+      'LOSS',
       'EXPENSE',
-      'ADVANCE', 
-      'ADVANCE_RETURN', 
-      'SALARY', 
-      'CUSTODY', 
-      'CUSTODY_RETURN', 
-      'SAFE_TRANSFER', 
-      'PARTNER_WITHDRAWAL', 
+      'ADVANCE',
+      'ADVANCE_RETURN',
+      'SALARY',
+      'CUSTODY',
+      'CUSTODY_RETURN',
+      'SAFE_TRANSFER',
+      'PARTNER_WITHDRAWAL',
       'OTHER'
     ),
     allowNull: false
@@ -2400,9 +2400,9 @@ FinancialTransaction.getDailySummary = async function (date) {
   const dateStr = formatToDateString(date);
   const startOfDay = `${dateStr} 00:00:00`;
   const endOfDay = `${dateStr} 23:59:59.999999`;
-  
+
   const results = await this.findAll({
-    where: { 
+    where: {
       created_at: {
         [Op.between]: [startOfDay, endOfDay]
       }
@@ -2427,7 +2427,7 @@ FinancialTransaction.getDailySummary = async function (date) {
   results.forEach(row => {
     const amount = parseFloat(row.total_amount || 0);
     summary[row.direction][row.transaction_type] = amount;
-    
+
     if (row.direction === 'IN') {
       summary.total_in += amount;
     } else {

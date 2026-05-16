@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { AccountStatementComponent } from '../../../shared/components/account-statement/account-statement.component';
 
 interface Entity {

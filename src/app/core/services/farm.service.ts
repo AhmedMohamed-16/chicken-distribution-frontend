@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse, Buyer, CostCategory, Farm, PaginatedResponse, PaginationParams } from '../models';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +63,7 @@ export class FarmService {
     if (params?.startDate) httpParams = httpParams.set('startDate', params.startDate);
     if (params?.endDate) httpParams = httpParams.set('endDate', params.endDate);
     if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
-    
+
     return this.http.get(`${this.apiUrl}/${id}/debt-history`, { params: httpParams });
   }
 

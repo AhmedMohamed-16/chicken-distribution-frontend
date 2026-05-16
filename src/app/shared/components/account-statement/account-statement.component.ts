@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { AuthService } from '../../../core/services/auth.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
